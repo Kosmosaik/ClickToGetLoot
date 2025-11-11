@@ -160,6 +160,7 @@ function renderInventory() {
 
     // <summary> shows the compact line (Name [Rarity] xQty)
     const summary = document.createElement("summary");
+    const qRange = summarizeQualityRange(stack.items); 
     summary.textContent = `${name} [${rarity}] x${stack.qty}`;
     details.appendChild(summary);
 
