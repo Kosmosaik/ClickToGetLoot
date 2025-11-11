@@ -51,6 +51,9 @@ button {
 }
 
 #inventory-panel {
+  position: fixed;
+  top: 50%;
+  left: 100%;
   display: none;
   background: #111;
   border: 1px solid #333;
