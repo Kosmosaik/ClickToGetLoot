@@ -1,6 +1,6 @@
 // scripts/game.js
 // Adds: Quality RNG, random stat rolls (scaled by quality), and stacking by item name.
-console.log("game.js loaded v0.18 - Added quality range in inventory");
+console.log("game.js loaded v0.19 - Trying quality range and tooltip + colored rarity");
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
 const progressContainer = document.getElementById("progress-container");
@@ -49,6 +49,27 @@ function qualityMultiplier(q) {
 }
 
 function randFloat(min, max) { return Math.random() * (max - min) + min; }
+
+// Map rarity -> CSS class suffix
+function rarityClass(rarity = "") {
+  switch ((rarity || "").toLowerCase()) {
+    case "abundant": return "r-abundant";
+    case "common": return "r-common";
+    case "uncommon": return "r-uncommon";
+    case "rare": return "r-rare";
+    case "exotic": return "r-exotic";
+    default: return "r-common";
+  }
+}
+
+function span(text, className = "", titleText = "") {
+  const s = document.createElement("span");
+  s.textContent = text;
+  if (className) s.className = className;
+  if (titleText) s.title = titleText; // native tooltip
+  return s;
+}
+
 
 // Roll stats from statRanges and scale by quality multiplier.
 // Integers if both endpoints are integers; decimals kept to 2 places otherwise.
@@ -145,6 +166,26 @@ function summarizeQualityRange(items = []) {
   return `[${minQ} - ${maxQ}]`;
 }
 
+// Map rarity -> CSS class suffix
+function rarityClass(rarity = "") {
+  switch ((rarity || "").toLowerCase()) {
+    case "abundant": return "r-abundant";
+    case "common": return "r-common";
+    case "uncommon": return "r-uncommon";
+    case "rare": return "r-rare";
+    case "exotic": return "r-exotic";
+    default: return "r-common";
+  }
+}
+
+function span(text, className = "", titleText = "") {
+  const s = document.createElement("span");
+  s.textContent = text;
+  if (className) s.className = className;
+  if (titleText) s.title = titleText; // native tooltip
+  return s;
+}
+
 function renderInventory() {
   inventoryList.innerHTML = "";
   const names = Object.keys(inventory).sort();
@@ -160,9 +201,20 @@ function renderInventory() {
 
     // <summary> shows the compact line (Name [Rarity] xQty)
     const summary = document.createElement("summary");
-    const rarity = stack.items[0]?.rarity || "";
-    const qRange = summarizeQualityRange(stack.items); // <-- this
-    summary.textContent = `${name} [${rarity}] x${stack.qty}${qRange ? " " + qRange : ""}`;
+    
+    // Tooltip for the whole stack: use the first item’s description (they share it)
+    const first = stack.items[0] || {};
+    summary.title = `${name}\n${first.description || ""}`.trim();
+    
+    // Build: <name> <rarity-span> xQty <qRange>
+    summary.appendChild(document.createTextNode(`${name} `));
+    const rarSpan = span(`[${rarity}]`, `rarity ${rarityClass(rarity)}`);
+    summary.appendChild(rarSpan);
+    
+    summary.appendChild(document.createTextNode(` x${stack.qty} `));
+    const qRange = summarizeQualityRange(stack.items); // you already added this
+    if (qRange) summary.appendChild(document.createTextNode(qRange));
+    
     details.appendChild(summary);
 
     // Variants container (indented list)
@@ -183,12 +235,31 @@ function renderInventory() {
 function makeVariantLine(inst, idx) {
   const div = document.createElement("div");
   div.className = "meta";
+
   const statStr = formatStats(inst.stats);
-  div.textContent =
-    `• [${inst.rarity}] Q:${inst.quality}` +
-    (statStr ? ` { ${statStr} }` : "");
+
+  // Tooltip: full info on hover
+  div.title = [
+    inst.name,
+    inst.description,
+    `Quality: ${inst.quality}`,
+    statStr ? `Stats: ${statStr}` : ""
+  ].filter(Boolean).join("\n");
+
+  // Build: "• " + [rarity colored] + " Q:XX { stats }"
+  const bullet = document.createTextNode("• ");
+  const rar = span(`[${inst.rarity}]`, `rarity ${rarityClass(inst.rarity)}`);
+  const qualityTxt = document.createTextNode(` Q:${inst.quality}`);
+  const statsTxt = statStr ? document.createTextNode(` { ${statStr} }`) : null;
+
+  div.appendChild(bullet);
+  div.appendChild(rar);
+  div.appendChild(qualityTxt);
+  if (statsTxt) div.appendChild(statsTxt);
+
   return div;
 }
+
 
 function formatStats(stats = {}) {
   const keys = Object.keys(stats);
