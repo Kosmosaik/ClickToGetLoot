@@ -36,6 +36,27 @@ const ItemCatalog = [
     description: "A fragrant herb used to create basic healing potions.",
     rarity: "Common",
     usage: "Restores 10 HP when brewed or eaten raw.",
+  },
+  {
+    name: "Basic Fishing Rod",
+    category: "Tool",
+    description: "A basic fishing rod used to fish.",
+    rarity: "Uncommon",
+    usage: "Fishing",
+  },
+  {
+    name: "Birch Wood",
+    category: "Wood",
+    description: "A wood type used in crafting, carpentry etc",
+    rarity: "Common",
+    usage: "Make planks, carpentry",
+  },
+  {
+    name: "Small Stone",
+    category: "Resource",
+    description: "Small stone used in primitive crafting.",
+    rarity: "Abundant",
+    usage: "Craft primitive items",
   }
 ];
 
