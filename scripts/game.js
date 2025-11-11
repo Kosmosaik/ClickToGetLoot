@@ -1,6 +1,6 @@
 // scripts/game.js
 // Adds: Quality RNG, random stat rolls (scaled by quality), and stacking by item name.
-console.log("game.js loaded v2");
+console.log("game.js loaded v0.14");
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
 const progressContainer = document.getElementById("progress-container");
