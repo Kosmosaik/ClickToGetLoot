@@ -83,3 +83,10 @@ button {
   opacity: 0.8;
   font-size: 0.9rem;
 }
+
+/* Optional: nicer expanders */
+.inventory-stack { margin: 6px 0; }
+.inventory-stack > summary { cursor: pointer; }
+.stack-variants { margin-left: 12px; padding-left: 8px; border-left: 1px solid #333; }
+.meta { opacity: 0.9; font-size: 0.95rem; }
+
