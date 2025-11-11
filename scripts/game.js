@@ -13,6 +13,28 @@ let inventoryUnlocked = false;
 // Inventory is a map by item name: { qty: number, items: [instances...] }
 const inventory = Object.create(null);
 
+// --- Quality ranking helpers for summarizing stack ranges
+function qualityStep(q) {
+  // convert "E7" -> numeric step 0..62 where higher = better
+  const tier = q[0];
+  const sub = parseInt(q.slice(1), 10); // 9..1
+  const tierIdx = TIER_ORDER.indexOf(tier); // 0..6
+  return tierIdx * 9 + (10 - sub); // 0 (F9) .. 62 (S1)
+}
+
+function summarizeQualityRange(items) {
+  if (!items?.length) return "";
+  let minQ = items[0].quality, maxQ = items[0].quality;
+  let minStep = qualityStep(minQ), maxStep = minStep;
+
+  for (let i = 1; i < items.length; i++) {
+    const s = qualityStep(items[i].quality);
+    if (s < minStep) { minStep = s; minQ = items[i].quality; }
+    if (s > maxStep) { maxStep = s; maxQ = items[i].quality; }
+  }
+  return `[${minQ} - ${maxQ}]`;
+}
+
 // ---- Helpers: RNG + Quality
 const TIER_ORDER = ["F","E","D","C","B","A","S"];
 const TIER_WEIGHTS = { F: 9, E: 7, D: 5, C: 3, B: 2, A: 1, S: 0.6 };
