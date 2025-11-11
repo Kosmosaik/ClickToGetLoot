@@ -74,7 +74,7 @@ function startLoot() {
   lootButton.disabled = true;
   progressContainer.style.display = "block";
   let time = 0;
-  const duration = 3; // seconds
+  const duration = 1; // seconds
 
   const interval = setInterval(() => {
     time += 0.1;
