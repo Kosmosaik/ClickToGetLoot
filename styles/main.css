@@ -5,6 +5,13 @@ body {
   font-family: monospace;
 }
 
+/* make form controls inherit the page font */
+button, input, select, textarea {
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* Left panel of text buttons */
 #ui-panel {
   position: fixed;
@@ -24,7 +31,7 @@ button {
 }
 
 /* Center loot button */
-#loot-button { font-family: monospace !important; }
+#loot-button {
   position: fixed;
   top: 50%;
   left: 50%;
