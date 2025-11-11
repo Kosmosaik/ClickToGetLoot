@@ -1,6 +1,5 @@
 // scripts/items.js
-// Keep your rarity-weighted random, but add optional stat ranges per item.
-// Items WITHOUT statRanges will still get a quality, just no rolled stats.
+// Keep rarity-weighted random; some items have optional statRanges.
 
 const ItemCatalog = [
   {
@@ -9,11 +8,9 @@ const ItemCatalog = [
     description: "A dull old dagger, but still sharp enough to draw blood.",
     rarity: "Common",
     usage: "Basic melee weapon.",
-    // Optional: define stat ranges for RNG
     statRanges: {
-      // [min, max]
-      damage: [3, 6],           // integers
-      attackSpeed: [1.0, 1.3],  // decimals OK
+      damage: [3, 6],
+      attackSpeed: [1.0, 1.3],
     },
   },
   {
@@ -60,15 +57,13 @@ const ItemCatalog = [
   }
 ];
 
-// ---- Rarity-weighted random (as you liked)
-function getRandomItem() {
-// Keep your weights as-is
+// Rarity weights (use only buckets that actually exist)
 const RARITY_WEIGHTS = {
   Abundant: 40,
-  Common: 30,
+  Common:   30,
   Uncommon: 20,
-  Rare: 8,
-  Exotic: 2,
+  Rare:      8,
+  Exotic:    2,
 };
 
 function getRandomItem() {
@@ -83,7 +78,7 @@ function getRandomItem() {
     .filter(([r]) => pools[r]?.length)
     .map(([r, w]) => ({ rarity: r, weight: w }));
 
-  // Fallback: if somehow no pairs, pick any item
+  // Fallback: any item
   if (!pairs.length) {
     return ItemCatalog[Math.floor(Math.random() * ItemCatalog.length)];
   }
@@ -96,8 +91,7 @@ function getRandomItem() {
     if ((roll -= p.weight) <= 0) { chosen = p.rarity; break; }
   }
 
-  // Pick a random item from that rarity’s pool
+  // Pick random item from that rarity pool
   const pool = pools[chosen];
   return pool[Math.floor(Math.random() * pool.length)];
 }
-
