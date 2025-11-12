@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.27 - Changed text sizes and coloring.");
+console.log("game.js loaded v0.28 - Added feature unlock animation.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -176,6 +176,15 @@ function startLoot() {
       if (!inventoryUnlocked) {
         inventoryUnlocked = true;
         inventoryButton.style.display = "block";
+
+      // trigger the attention effect
+      inventoryButton.classList.add("inventory-unlock");
+
+      // remove the class after the animation so it can be retriggered later if needed
+      setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 1500);
+
+      // optional: focus it for keyboard users (helps discovery)
+      // setTimeout(() => inventoryButton.focus(), 200);
       }
     }
   }, 100);
