@@ -54,7 +54,8 @@ const ItemCatalog = [
     description: "Small stone used in primitive crafting.",
     rarity: "Common",
     usage: "Craft primitive items",
-  }
+  },
+  {
     name: "Mythic Fragment",
     category: "Material",
     description: "Super rare thingy McDingy",
