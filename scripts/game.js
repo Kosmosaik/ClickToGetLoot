@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.26 - Improved item handling, tooltip and visibility + button");
+console.log("game.js loaded v0.26 - Improved item handling, tooltip and visibility + button + bump");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -247,9 +247,15 @@ function renderInventory() {
     // tooltip for the stack
     const first = stack.items[0] || {};
     Tooltip.bind(summary, () => {
-      const desc = first.description || "";
+      const lines = [
+        `<strong>${name}</strong>`,
+        `<span>${rarity}</span>`,                       // (optional) show rarity line under name
+        first.description || "",
+      ];
+    
       const qRange = summarizeQualityRange(stack.items);
-      return [name, desc, qRange ? `Quality Range: ${qRange}` : ""]
+      if (qRange) lines.push(`Quality Range: ${qRange}`);
+    
       return lines.filter(Boolean).join("<br>");
     });
 
@@ -287,37 +293,45 @@ function makeQualityGroupLine(rarity, quality, items) {
   const count = items.length;
   const countTxt = document.createTextNode(count > 1 ? ` x${count}` : "");
 
-  // stats summary
+  // If all rolled stats are identical, print them; else say varied
   const same = statsAllSame(items);
   const statsPretty = same ? formatStatsReadable(items[0].stats) : "";
-  const afterStats = same ? document.createTextNode(` - ${statsPretty}`) : document.createTextNode(count > 1 ? " - (varied stats)" : "");
+  const tail = same
+    ? (statsPretty ? document.createTextNode(` - ${statsPretty}`) : null)
+    : document.createTextNode(count > 1 ? " - (varied stats)" : "");
 
-  // assemble
   div.appendChild(rarSpan);
   div.appendChild(dash1);
   div.appendChild(qtxt);
   div.appendChild(countTxt);
-  if (statsPretty || count > 1) div.appendChild(afterStats);
+  if (tail) div.appendChild(tail);
 
-  // Tooltip (use first item for name/desc)
+  // Tooltip (this is Step 3)
   const first = items[0];
   Tooltip.bind(div, () => {
     const lines = [
       `<strong>${first.name}</strong>`,
-      `<span>${rarity}</span>`,
+      `<span>${rarity}</span>`,                   // rarity directly under name
       first.description || "",
       `Quality: ${quality}`,
     ];
+
+    // One blank line before stats (if there are stats)
     const statLines = same
-      ? Object.entries(first.stats || {}).map(([k,v]) => `<span>${STAT_LABELS[k] ?? k}: ${fmt(v)}</span>`)
+      ? Object.entries(first.stats || {}).map(([k, v]) =>
+          `<span>${STAT_LABELS[k] ?? k}: ${fmt(v)}</span>`
+        )
       : [];
-    if (statLines.length) lines.push(""); // blank line above stats
-    lines.push(...statLines);
-    return lines.filter(l => l !== null && l !== undefined).join("<br>");
+
+    if (statLines.length) lines.push("");         // <-- exactly one blank line
+    lines.push(...statLines);                     // Damage, Attack Speed on consecutive lines
+
+    return lines.filter(Boolean).join("<br>");
   });
 
   return div;
 }
+
 
 // Variant line
 function makeVariantLine(inst, idx) {
