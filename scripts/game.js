@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.28 - Added feature unlock animation.");
+console.log("game.js loaded v0.29 - Changed animation coloring etc");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
