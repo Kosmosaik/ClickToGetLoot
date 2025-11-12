@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.30 - Changed inventory list info text. Added item category text. Separated stat items with same quality but different stats. Added throw-button to remove items. Changed quality drop weights.");
+console.log("game.js loaded v0.30 - Changed inventory list info text. Added item category text. Separated stat items with same quality but different stats. Added throw-button to remove items. Changed quality drop weights. + typo in items");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
