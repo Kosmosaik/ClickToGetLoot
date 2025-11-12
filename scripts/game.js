@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.25 - Improved tooltip readability and design + bop");
+console.log("game.js loaded v0.26 - Improved item handling, tooltip and visibility");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -210,6 +210,27 @@ function summarizeQualityRange(items = []) {
   return `[${minQ} - ${maxQ}]`;
 }
 
+function groupByQuality(items = []) {
+  const g = {};
+  for (const it of items) (g[it.quality] ||= []).push(it);
+  // sort qualities from worst → best for stable UI
+  const keys = Object.keys(g).sort((a,b) => qualityStep(a) - qualityStep(b));
+  return keys.map(k => [k, g[k]]);
+}
+
+function statsEqual(a = {}, b = {}) {
+  const ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka) if (a[k] !== b[k]) return false;
+  return true;
+}
+
+function statsAllSame(arr) {
+  if (arr.length <= 1) return true;
+  for (let i = 1; i < arr.length; i++) if (!statsEqual(arr[0].stats, arr[i].stats)) return false;
+  return true;
+}
+
 function renderInventory() {
   inventoryList.innerHTML = "";
   const names = Object.keys(inventory).sort();
@@ -229,8 +250,7 @@ function renderInventory() {
       const desc = first.description || "";
       const qRange = summarizeQualityRange(stack.items);
       return [name, desc, qRange ? `Quality Range: ${qRange}` : ""]
-        .filter(Boolean)
-        .join("\n");
+      return lines.filter(Boolean).join("<br>");
     });
 
     // Build: <name> <rarity-span> xQty <qRange>
@@ -246,13 +266,57 @@ function renderInventory() {
 
     const variantsWrap = document.createElement("div");
     variantsWrap.className = "stack-variants";
-    stack.items.forEach((inst, idx) => {
-      variantsWrap.appendChild(makeVariantLine(inst, idx));
+    const groups = groupByQuality(stack.items);
+    groups.forEach(([q, arr]) => {
+      variantsWrap.appendChild(makeQualityGroupLine(rarity, q, arr));
     });
     details.appendChild(variantsWrap);
 
     inventoryList.appendChild(details);
   });
+}
+
+function makeQualityGroupLine(rarity, quality, items) {
+  const div = document.createElement("div");
+  div.className = "meta";
+
+  const rarSpan = span(`[${rarity}]`, `rarity ${rarityClass(rarity)}`);
+  const dash1 = document.createTextNode(" - ");
+  const qtxt  = document.createTextNode(quality);
+
+  const count = items.length;
+  const countTxt = document.createTextNode(count > 1 ? ` x${count}` : "");
+
+  // stats summary
+  const same = statsAllSame(items);
+  const statsPretty = same ? formatStatsReadable(items[0].stats) : "";
+  const afterStats = same ? document.createTextNode(` - ${statsPretty}`) : document.createTextNode(count > 1 ? " - (varied stats)" : "");
+
+  // assemble
+  div.appendChild(rarSpan);
+  div.appendChild(dash1);
+  div.appendChild(qtxt);
+  div.appendChild(countTxt);
+  if (statsPretty || count > 1) div.appendChild(afterStats);
+
+  // Tooltip (use first item for name/desc)
+  const first = items[0];
+  Tooltip.bind(div, () => {
+    const lines = [
+      `<strong>${first.name}</strong>`,
+      `<span>${rarity}</span>`,
+      first.description || "",
+      `Quality: ${quality}`,
+    ];
+    const statLines = same
+      ? Object.entries(first.stats || {}).map(([k,v]) => `<span>${STAT_LABELS[k] ?? k}: ${fmt(v)}</span>`)
+      : [];
+    if (statLines.length) lines.push(""); // blank line above stats
+    lines.push(...statLines);
+    return lines.filter(l => l !== null && l !== undefined).join("<br>");
+  });
+
+  return div;
 }
 
 // Variant line
