@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.30 - Changed inventory list info text. Added item category text. Separated stat items with same quality but different stats. Added throw-button to remove items. Changed quality drop weights. + typo in items");
+console.log("game.js loaded v0.31 - Changed hover tooltip text positions. Added rarity color to tooltip.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -282,14 +282,23 @@ function renderInventory() {
     // tooltip for the stack
     const first = stack.items[0] || {};
     Tooltip.bind(summary, () => {
+      // Desired layout (no blank between name/rarity; quality line directly below rarity;
+      // one blank line before description)
       const lines = [
         `<strong>${name}</strong>`,
-        `<span>${rarity}</span>`,
-        first.description || "",
+        `<span class="rarity ${rarityClass(rarity)}">${rarity}</span>`,
       ];
       const qRange = summarizeQualityRange(stack.items);
       if (qRange) lines.push(`Quality Range: ${qRange}`);
-      return lines.filter(Boolean).join("<br>");
+      // blank line before description
+      if (first.description) {
+        lines.push("");
+        lines.push(first.description);
+      }
+      // join while preserving intentional blank lines
+      return lines
+        .filter(v => v !== undefined && v !== null)
+        .join("<br>");
     });
 
     // Build: <name> <rarity-span> xQty <qRange>
@@ -339,14 +348,20 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
   div.appendChild(qualNode);
   if (count > 1) div.appendChild(countNode);
 
-  // Tooltip (with line break between Quality and first stat; no blank between stats)
+  // Tooltip (Name, Rarity (colored), Quality; blank; Description; blank; then stats stacked)
   Tooltip.bind(div, () => {
     const lines = [
       `<strong>${itemName}</strong>`,
-      `<span>${rarity}</span>`,
-      rep.description || "",
+      `<span class="rarity ${rarityClass(rarity)}">${rarity}</span>`,
       `Quality: ${quality}`,
     ];
+
+    // blank line before description
+    if (rep.description) {
+      lines.push("");
+      lines.push(rep.description);
+    }
+
     const stats = rep.stats || {};
     const statKeys = Object.keys(stats);
     if (statKeys.length) {
@@ -356,7 +371,11 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
         lines.push(`<span>${label}: ${fmt(stats[k])}</span>`);
       });
     }
-    return lines.filter(Boolean).join("<br>");
+
+    // join while preserving intentional blank lines
+    return lines
+      .filter(v => v !== undefined && v !== null)
+      .join("<br>");
   });
 
   // Trash button (removes ONE item from this identical group)
@@ -373,4 +392,3 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
 
   return div;
 }
-
