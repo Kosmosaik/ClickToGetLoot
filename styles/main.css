@@ -165,14 +165,14 @@ button {
 /* Unlock attention effect for text-only buttons */
 .inventory-unlock {
   position: relative;
-  animation: invGlow 2.4s ease-out 0s 1;
-  text-shadow: 0 0 0.35rem rgba(168, 85, 247, 0.9);
+  animation: invGlow 2.8s ease-out 0s 1;
+  text-shadow: 0 0 0.35rem rgba(246,244,110, 0.9);
 }
 
 @keyframes invGlow {
   0%   { text-shadow: 0 0 0rem rgba(246,244,110,0.0); transform: translateY(0); }
-  25%  { text-shadow: 0 0 0.6rem rgba(246,244,110,0.9); transform: translateY(-1px); }
-  60%  { text-shadow: 0 0 0.25rem rgba(246,244,110,0.6); transform: translateY(0); }
+  25%  { text-shadow: 0 0 0.6rem rgba(246,244,110,0.95); transform: translateY(-5px); }
+  60%  { text-shadow: 0 0 0.25rem rgba(246,244,110,0.65); transform: translateY(0); }
   100% { text-shadow: 0 0 0rem rgba(246,244,110,0.0); }
 }
 
@@ -181,10 +181,10 @@ button {
   content: "";
   position: absolute;
   inset: -6px -10px;               /* a little larger than the text */
-  border: 2px solid rgba(246,244,110,0.8);
+  border: 3px solid rgba(246,244,110,0.8);
   border-radius: 12px;
   pointer-events: none;
-  animation: invPing 2.4s ease-out 0s 1;
+  animation: invPing 2.8s ease-out 0s 1;
 }
 
 @keyframes invPing {
