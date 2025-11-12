@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.29 - Changed animation coloring etc");
+console.log("game.js loaded v0.29 - Changed animation coloring etc + blup");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -181,7 +181,7 @@ function startLoot() {
       inventoryButton.classList.add("inventory-unlock");
 
       // remove the class after the animation so it can be retriggered later if needed
-      setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 1500);
+      setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 3000);
 
       // optional: focus it for keyboard users (helps discovery)
       // setTimeout(() => inventoryButton.focus(), 200);
