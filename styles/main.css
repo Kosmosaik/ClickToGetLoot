@@ -165,15 +165,15 @@ button {
 /* Unlock attention effect for text-only buttons */
 .inventory-unlock {
   position: relative;
-  animation: invGlow 1.4s ease-out 0s 1;
+  animation: invGlow 2.4s ease-out 0s 1;
   text-shadow: 0 0 0.35rem rgba(168, 85, 247, 0.9);
 }
 
 @keyframes invGlow {
-  0%   { text-shadow: 0 0 0rem rgba(168,85,247,0.0); transform: translateY(0); }
-  25%  { text-shadow: 0 0 0.6rem rgba(168,85,247,0.9); transform: translateY(-1px); }
-  60%  { text-shadow: 0 0 0.25rem rgba(168,85,247,0.6); transform: translateY(0); }
-  100% { text-shadow: 0 0 0rem rgba(168,85,247,0.0); }
+  0%   { text-shadow: 0 0 0rem rgba(246,244,110,0.0); transform: translateY(0); }
+  25%  { text-shadow: 0 0 0.6rem rgba(246,244,110,0.9); transform: translateY(-1px); }
+  60%  { text-shadow: 0 0 0.25rem rgba(246,244,110,0.6); transform: translateY(0); }
+  100% { text-shadow: 0 0 0rem rgba(246,244,110,0.0); }
 }
 
 /* optional: a subtle expanding ring behind the text */
@@ -181,10 +181,10 @@ button {
   content: "";
   position: absolute;
   inset: -6px -10px;               /* a little larger than the text */
-  border: 1px solid rgba(168,85,247,0.6);
+  border: 2px solid rgba(246,244,110,0.8);
   border-radius: 12px;
   pointer-events: none;
-  animation: invPing 1.4s ease-out 0s 1;
+  animation: invPing 2.4s ease-out 0s 1;
 }
 
 @keyframes invPing {
