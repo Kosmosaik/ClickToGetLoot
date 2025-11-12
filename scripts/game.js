@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.30 - Changed inventory list info text. Added item category text. Separated stat items with same quality but different stats. Added throw-button to remove items.");
+console.log("game.js loaded v0.30 - Changed inventory list info text. Added item category text. Separated stat items with same quality but different stats. Added throw-button to remove items. Changed quality drop weights.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -13,7 +13,7 @@ const inventory = Object.create(null);
 
 // ---- RNG + Quality
 const TIER_ORDER = ["F","E","D","C","B","A","S"];
-const TIER_WEIGHTS = { F: 9, E: 7, D: 5, C: 3, B: 2, A: 1, S: 0.6 };
+const TIER_WEIGHTS = { F: 100, E: 80, D: 60, C: 40, B: 20, A: 10, S: 1 };
 
 function sublevelWeight(n) { return (n === 9) ? 10 : (10 - n); }
 
@@ -226,20 +226,6 @@ function statsEqual(a = {}, b = {}) {
   return true;
 }
 
-function statsAllSame(arr) {
-  if (arr.length <= 1) return true;
-  for (let i = 1; i < arr.length; i++) if (!statsEqual(arr[0].stats, arr[i].stats)) return false;
-  return true;
-}
-
-// Compare two stats objects for exact equality
-function statsEqual(a = {}, b = {}) {
-  const ka = Object.keys(a), kb = Object.keys(b);
-  if (ka.length !== kb.length) return false;
-  for (const k of ka) if (a[k] !== b[k]) return false;
-  return true;
-}
-
 // Stable signature for stats (for grouping)
 function statsSignature(stats = {}) {
   const keys = Object.keys(stats).sort();
@@ -329,50 +315,6 @@ function renderInventory() {
   });
 }
 
-// Variant line
-function makeVariantLine(inst, idx) {
-  const div = document.createElement("div");
-  div.className = "meta";
-
-  // Build: [Common] - F6 - Damage: 3 , Attack Speed: 0.83
-  const rar = span(`[${inst.rarity}]`, `rarity ${rarityClass(inst.rarity)}`);
-  const dash1 = document.createTextNode(" - ");
-  const qtxt  = document.createTextNode(inst.quality);
-  const dash2 = document.createTextNode(" - ");
-
-  const statsPretty = formatStatsReadable(inst.stats);
-  const statsNode = statsPretty ? document.createTextNode(statsPretty) : document.createTextNode("");
-
-  // assemble
-  div.appendChild(rar);
-  div.appendChild(dash1);
-  div.appendChild(qtxt);
-  if (statsPretty) {
-    div.appendChild(dash2);
-    div.appendChild(statsNode);
-  }
-
-  // Custom tooltip with full info (same style as stack)
-  Tooltip.bind(div, () => {
-    const lines = [];
-    lines.push(`<strong>${inst.name}</strong>`);
-    if (inst.description) lines.push(inst.description);
-    lines.push(`<span>Quality: ${inst.quality}</span>`);
-  
-    // split each stat to its own line
-    const statLines = Object.entries(inst.stats || {})
-      .map(([k,v]) => {
-        const label = STAT_LABELS[k] ?? k;
-        return `<span>${label}: ${fmt(v)}</span>`;
-      });
-    lines.push(...statLines);
-  
-    // join lines with <br>
-    return lines.join("<br>");
-  });
-
-  return div;
-}
 
 function makeIdenticalGroupLine(itemName, rarity, group) {
   const div = document.createElement("div");
