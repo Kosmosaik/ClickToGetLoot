@@ -180,6 +180,56 @@ button {
   cursor: pointer;
 }
 
+/* Sort bar above inventory list */
+.inventory-sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  color: #9aa5b1;
+}
+
+.inventory-sort-bar > span:first-child {
+  opacity: 0.9;
+}
+
+.inventory-sort-bar .sort-btn {
+  background: transparent;
+  border: 0;
+  padding: 0 4px;
+  cursor: pointer;
+  color: #a8b3c2;
+  font-size: 0.75rem;
+}
+
+.inventory-sort-bar .sort-btn.active {
+  color: #e0e4e8;
+  text-decoration: underline;
+}
+
+/* Make summary rows column-ish */
+.inventory-stack > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer; /* keep your old behavior */
+}
+
+.inventory-stack > summary .inv-name {
+  flex: 1;
+}
+
+.inventory-stack > summary .inv-qty {
+  width: 50px;
+  text-align: right;
+}
+
+.inventory-stack > summary .inv-qrange {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
 /* Floating tooltip */
 #tooltip {
   position: fixed;
