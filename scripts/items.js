@@ -6,7 +6,7 @@ const ItemCatalog = [
     name: "Rusty Dagger",
     category: "Weapon",
     description: "A dull old dagger, but still sharp enough to draw blood.",
-    rarity: "Abundant",
+    rarity: "Common",
     usage: "Basic melee weapon.",
     statRanges: {
     damage: [3, 6],
@@ -32,20 +32,6 @@ const ItemCatalog = [
     usage: "Used for alchemy or crafting slime-based tools.",
   },
   {
-    name: "Iron Ore",
-    category: "Resource",
-    description: "A chunk of iron ore ready to be smelted.",
-    rarity: "Common",
-    usage: "Refine into ingots at a forge.",
-  },
-  {
-    name: "Healing Herb",
-    category: "Material",
-    description: "A fragrant herb used to create basic healing potions.",
-    rarity: "Common",
-    usage: "Restores 10 HP when brewed or eaten raw.",
-  },
-  {
     name: "Basic Fishing Rod",
     category: "Tool",
     description: "A basic fishing rod used to fish.",
@@ -53,8 +39,15 @@ const ItemCatalog = [
     usage: "Fishing",
   },
   {
+    name: "Primitive Pickaxe",
+    category: "Tool",
+    description: "A basic pickaxe used to mine basic ores",
+    rarity: "Rare",
+    usage: "Mining",
+  },
+  {
     name: "Birch Wood",
-    category: "Wood",
+    category: "Resource",
     description: "A wood type used in crafting, carpentry etc",
     rarity: "Common",
     usage: "Make planks, carpentry",
@@ -63,8 +56,22 @@ const ItemCatalog = [
     name: "Small Stone",
     category: "Resource",
     description: "Small stone used in primitive crafting.",
-    rarity: "Common",
+    rarity: "Abundant",
     usage: "Craft primitive items",
+  },
+  {
+    name: "Wooden Branch",
+    category: "Resource",
+    description: "Wooden branch used in primitive crafting, campfires etc.",
+    rarity: "Abundant",
+    usage: "Craft primitive items",
+  },
+  {
+    name: "Iron Ore",
+    category: "Resource",
+    description: "A chunk of iron ore ready to be smelted.",
+    rarity: "Common",
+    usage: "Refine into ingots at a forge.",
   },
   {
     name: "Mythic Fragment",
@@ -72,14 +79,21 @@ const ItemCatalog = [
     description: "Super rare thingy McDingy",
     rarity: "Exotic",
     usage: "eh oh",
+  },
+  {
+    name: "Healing Herb",
+    category: "Material",
+    description: "A fragrant herb used to create basic healing potions.",
+    rarity: "Common",
+    usage: "Restores 10 HP when brewed or eaten raw.",
   }
 ];
 
 // Rarity weights (use only buckets that actually exist)
 const RARITY_WEIGHTS = {
-  Abundant: 100,
-  Common:   35,
-  Uncommon: 16,
+  Abundant: 90,
+  Common:   40,
+  Uncommon: 18,
   Rare:      6,
   Exotic:    1,
 };
