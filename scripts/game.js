@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.37 - Added inventory columns and sort options.");
+console.log("game.js loaded v0.37b - Added inventory columns and sort options.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
