@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.33c - Improved tooltip spacing");
+console.log("game.js loaded v0.33d - Improved tooltip spacing");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
