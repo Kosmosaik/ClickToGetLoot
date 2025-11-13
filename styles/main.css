@@ -147,6 +147,14 @@ button {
 /* Optional: subtle hover hint (keeps text-only style) */
 .inventory-stack > summary:hover { text-decoration: underline; }
 
+.inventory-category-header {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: #9aa5b1;
+}
+
 /* Floating tooltip */
 #tooltip {
   position: fixed;
