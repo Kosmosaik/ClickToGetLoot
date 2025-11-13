@@ -178,6 +178,13 @@ button {
   opacity: 0.9;
 }
 
+#tooltip .rarity {
+  display: inline;     /* IMPORTANT — prevents block spacing */
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2;
+}
+
 #tooltip.show {
   opacity: 1;
   transform: translateY(0);
