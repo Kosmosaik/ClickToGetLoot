@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.36 - Changed loot rate table.");
+console.log("game.js loaded v0.37 - Added inventory columns and sort options.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -10,6 +10,44 @@ const inventoryButton = document.getElementById("inventory-btn");
 
 let inventoryUnlocked = false;
 const inventory = Object.create(null);
+
+// Sorting state for inventory
+let inventorySort = {
+  key: "name",   // "name" | "rarity" | "qty"
+  dir: "asc",    // "asc" | "desc"
+};
+
+// Rarity sort order
+const RARITY_ORDER = ["Abundant", "Common", "Uncommon", "Rare", "Exotic"];
+function raritySortValue(r) {
+  const idx = RARITY_ORDER.indexOf(r);
+  return idx === -1 ? RARITY_ORDER.length : idx;
+}
+
+function compareStacks(A, B) {
+  const { key, dir } = inventorySort;
+  const mul = dir === "asc" ? 1 : -1;
+
+  if (key === "name") {
+    return A.name.localeCompare(B.name) * mul;
+  }
+
+  if (key === "qty") {
+    const diff = A.stack.qty - B.stack.qty;
+    if (diff !== 0) return diff * mul;
+    return A.name.localeCompare(B.name) * mul;
+  }
+
+  if (key === "rarity") {
+    const ra = A.stack.items[0]?.rarity || "";
+    const rb = B.stack.items[0]?.rarity || "";
+    const diff = raritySortValue(ra) - raritySortValue(rb);
+    if (diff !== 0) return diff * mul;
+    return A.name.localeCompare(B.name) * mul;
+  }
+
+  return A.name.localeCompare(B.name) * mul;
+}
 
 // Remember which stacks are expanded in the UI (persists across re-renders)
 const openStacks = new Set();
@@ -302,6 +340,44 @@ function renderInventory() {
   const names = Object.keys(inventory);
   if (!names.length) return;
 
+    // ---- Sort bar ----
+  const sortBar = document.createElement("div");
+  sortBar.className = "inventory-sort-bar";
+
+  const sortLabel = document.createElement("span");
+  sortLabel.textContent = "Sort by:";
+  sortBar.appendChild(sortLabel);
+
+  function makeSortButton(key, label) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "sort-btn";
+    if (inventorySort.key === key) {
+      btn.classList.add("active");
+      btn.textContent = `${label} ${inventorySort.dir === "asc" ? "▲" : "▼"}`;
+    } else {
+      btn.textContent = label;
+    }
+    btn.addEventListener("click", () => {
+      if (inventorySort.key === key) {
+        // toggle direction
+        inventorySort.dir = (inventorySort.dir === "asc") ? "desc" : "asc";
+      } else {
+        inventorySort.key = key;
+        inventorySort.dir = (key === "qty") ? "desc" : "asc";
+      }
+      renderInventory();
+    });
+    return btn;
+  }
+
+  sortBar.appendChild(makeSortButton("name", "Name"));
+  sortBar.appendChild(makeSortButton("rarity", "Rarity"));
+  sortBar.appendChild(makeSortButton("qty", "Quantity"));
+
+  inventoryList.appendChild(sortBar);
+
+
   // --- Group stacks by category (from first item in each stack)
   const categoryMap = Object.create(null);
 
@@ -363,7 +439,7 @@ function renderInventory() {
     });
 
     // Sort items within category by name
-    group.sort((a, b) => a.name.localeCompare(b.name));
+    group.sort((a, b) => compareStacks(a, b));
 
     // ---- Render each stack ----
     group.forEach(({ name, stack }) => {
@@ -415,14 +491,23 @@ function renderInventory() {
           .join("<br>");
       });
 
-      // Build: <name> [rarity] xQty [qRange]
-      summary.appendChild(document.createTextNode(`${name} `));
-      const rarSpan = span(`[${rarity}]`, `rarity ${rarityClass(rarity)}`);
-      summary.appendChild(rarSpan);
-      summary.appendChild(document.createTextNode(` x${stack.qty}`));
+      // Column-ish layout: Name (colored by rarity) | Qty | Quality range
+      const nameSpan = span(name, `rarity ${rarityClass(rarity)}`);
+      nameSpan.classList.add("inv-name");
+      summary.appendChild(nameSpan);
+
+      const qtySpan = document.createElement("span");
+      qtySpan.className = "inv-qty";
+      qtySpan.textContent = `x${stack.qty}`;
+      summary.appendChild(qtySpan);
 
       const qRange = summarizeQualityRange(stack.items);
-      if (qRange) summary.appendChild(document.createTextNode(` ${qRange}`));
+      if (qRange) {
+        const qSpan = document.createElement("span");
+        qSpan.className = "inv-qrange";
+        qSpan.textContent = qRange;
+        summary.appendChild(qSpan);
+      }
 
       details.appendChild(summary);
 
