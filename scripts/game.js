@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.34c - Added categorization to inventory oink");
+console.log("game.js loaded v0.34d - Added categorization to inventory.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
