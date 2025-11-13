@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.34e - Added categorization to inventory + category header label.");
+console.log("game.js loaded v0.34f - Added categorization to inventory + category header label. + fix");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
