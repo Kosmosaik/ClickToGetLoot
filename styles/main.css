@@ -304,28 +304,35 @@ button {
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   background: #111;
   border-top: 1px solid #333;
   padding: 8px 16px;
+
   font-family: monospace;
   font-size: 1rem;
   color: #e0e4e8;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 9900; /* above UI elements */
+
+  z-index: 9900;
 }
 
 #game-header .game-version {
   opacity: 0.75;
   font-size: 0.85rem;
-  white-space: nowrap;   /* <-- DO NOT wrap or cut */
-  flex-shrink: 0;        /* <-- NEVER shrink */
+  white-space: normal;
+  flex: 0 1 auto;        /* allow shrinking instead of overflowing */
+  text-align: right;
 }
 
 #game-header .game-title {
-  flex-shrink: 0;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  /* allow it to shrink a bit if needed */
+  flex: 0 1 auto;
 }
 
 #game-header .game-version {
