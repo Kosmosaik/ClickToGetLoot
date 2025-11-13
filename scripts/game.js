@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.32 - Changed loot drop rate.");
+console.log("game.js loaded v0.32b - Changed loot drop rate.");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
