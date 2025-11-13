@@ -148,11 +148,23 @@ button {
 .inventory-stack > summary:hover { text-decoration: underline; }
 
 .inventory-category-header {
-  margin-top: 8px;
-  margin-bottom: 4px;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
   color: #9aa5b1;
+  opacity: 0.9;
+}
+
+.inventory-category-header::before,
+.inventory-category-header::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #333);
 }
 
 /* Floating tooltip */
