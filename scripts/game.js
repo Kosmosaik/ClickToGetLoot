@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log("game.js loaded v0.34b - Added categorization to inventory");
+console.log("game.js loaded v0.34c - Added categorization to inventory");
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
@@ -319,7 +319,7 @@ function renderInventory() {
     // ---- Category header line ----
     const header = document.createElement("div");
     header.className = "inventory-category-header";
-    header.textContent = `---------- ${categoryHeaderLabel(cat)} ----------`;
+    header.textContent = categoryHeaderLabel(cat);
     inventoryList.appendChild(header);
 
     // Sort items inside this category by name
