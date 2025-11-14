@@ -1,152 +1,24 @@
 // scripts/game.js
-console.log("game.js loaded v0.38b - Added bottom text field for title and version");
+console.log(`game.js loaded v${GAME_CONFIG.version} - Core gameplay wiring`);
 
 const lootButton = document.getElementById("loot-button");
 const progressBar = document.getElementById("progress");
 const progressContainer = document.getElementById("progress-container");
 const inventoryPanel = document.getElementById("inventory-panel");
-const inventoryList = document.getElementById("inventory-list");
 const inventoryButton = document.getElementById("inventory-btn");
 
 let inventoryUnlocked = false;
-const inventory = Object.create(null);
 
-// Sorting state for inventory
-let inventorySort = {
-  key: "name",   // "name" | "rarity" | "qty"
-  dir: "asc",    // "asc" | "desc"
-};
-
-// Rarity sort order
-const RARITY_ORDER = ["Abundant", "Common", "Uncommon", "Rare", "Exotic"];
-function raritySortValue(r) {
-  const idx = RARITY_ORDER.indexOf(r);
-  return idx === -1 ? RARITY_ORDER.length : idx;
-}
-
-function compareStacks(A, B) {
-  const { key, dir } = inventorySort;
-  const mul = dir === "asc" ? 1 : -1;
-
-  if (key === "name") {
-    return A.name.localeCompare(B.name) * mul;
-  }
-
-  if (key === "qty") {
-    const diff = A.stack.qty - B.stack.qty;
-    if (diff !== 0) return diff * mul;
-    return A.name.localeCompare(B.name) * mul;
-  }
-
-  if (key === "rarity") {
-    const ra = A.stack.items[0]?.rarity || "";
-    const rb = B.stack.items[0]?.rarity || "";
-    const diff = raritySortValue(ra) - raritySortValue(rb);
-    if (diff !== 0) return diff * mul;
-    return A.name.localeCompare(B.name) * mul;
-  }
-
-  return A.name.localeCompare(B.name) * mul;
-}
-
-// Remember which stacks are expanded in the UI (persists across re-renders)
-const openStacks = new Set();
-// Remember which categories are collapsed
-const collapsedCategories = new Set();
-
-// ---- RNG + Quality (global monotonic system)
-const TIER_ORDER = ["F","E","D","C","B","A","S"];
-const EXP_BASE = 0.94;   // steeper curve = smaller number (0.92–0.97)
-
-const QUALITY_BUCKETS = [];
-(function initQualityBuckets() {
-  let rank = 0; // 0 = F9 (worst), 62 = S1 (best)
-
-  for (const tier of TIER_ORDER) {
-    for (let sub = 9; sub >= 1; sub--) {
-      const weight = Math.pow(EXP_BASE, rank);
-      QUALITY_BUCKETS.push({
-        code: `${tier}${sub}`,
-        weight,
-        tier,
-        sub,
-      });
-      rank++;
-    }
-  }
-})();
-
-function pickWeighted(list) {
-  const total = list.reduce((s, p) => s + p.weight, 0);
-  let r = Math.random() * total;
-  for (const p of list) {
-    if ((r -= p.weight) <= 0) return p;
-  }
-  return list[list.length - 1];
-}
-
-function rollQuality() {
-  const q = pickWeighted(QUALITY_BUCKETS);
-  return q.code; // e.g. "F7", "B3", "S1"
-}
-
-function fmt(v) {
-  return (typeof v === "number" && !Number.isInteger(v)) ? v.toFixed(2) : v;
-}
-
-const STAT_LABELS = {
-  damage: "Damage",
-  attackSpeed: "Attack Speed",
-  block: "Block",
-  staminaUse: "Stamina Use",
-};
-
-function formatStatsReadable(stats = {}) {
-  if (!stats || typeof stats !== "object") return "";
-  const keys = Object.keys(stats);
-  if (!keys.length) return "";
-  return keys
-    .map(k => `${STAT_LABELS[k] ?? k}: ${fmt(stats[k])}`)
-    .join(" , ");
-}
-
-function qualityMultiplier(q) {
-  const tier = q[0];
-  const sub = parseInt(q.slice(1), 10);
-  const tierIdx = TIER_ORDER.indexOf(tier);
-  const totalSteps = TIER_ORDER.length * 9;
-  const step = tierIdx * 9 + (10 - sub);
-  const t = step / (totalSteps - 1);
-  const min = 0.75, max = 1.8;
-  return min + (max - min) * t;
-}
-
-function randFloat(min, max) { return Math.random() * (max - min) + min; }
-
-// Rarity → CSS class
-function rarityClass(rarity = "") {
-  switch ((rarity || "").toLowerCase()) {
-    case "abundant": return "r-abundant";
-    case "common": return "r-common";
-    case "uncommon": return "r-uncommon";
-    case "rare": return "r-rare";
-    case "exotic": return "r-exotic";
-    default: return "r-common";
-  }
-}
-function span(text, className = "", titleText = "") {
-  const s = document.createElement("span");
-  s.textContent = text;
-  if (className) s.className = className;
-  if (titleText) s.title = titleText;
-  return s;
+// Simple RNG helper for stats
+function randFloat(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 // Roll stats (no clamp; can exceed max if your multiplier pushes it)
 function rollStats(statRanges, mult) {
   const out = {};
   for (const [key, range] of Object.entries(statRanges)) {
-    const [a,b] = range;
+    const [a, b] = range;
     const base = randFloat(a, b) * mult;
     const intEndpoints = Number.isInteger(a) && Number.isInteger(b);
     out[key] = intEndpoints ? Math.round(base) : parseFloat(base.toFixed(2));
@@ -154,67 +26,34 @@ function rollStats(statRanges, mult) {
   return out;
 }
 
-// --- Tooltip system (custom, styled)
-const Tooltip = (() => {
-  const el = document.createElement("div");
-  el.id = "tooltip";
-  document.body.appendChild(el);
-
-  let visible = false;
-  function show(html, x, y) {
-    el.innerHTML = html; // allow HTML + line breaks
-    el.style.left = (x + 12) + "px";
-    el.style.top  = (y + 12) + "px";
-    el.classList.add("show");
-    visible = true;
-  }
-  
-  function move(x, y) {
-    if (!visible) return;
-    el.style.left = (x + 12) + "px";
-    el.style.top  = (y + 12) + "px";
-  }
-  
-  function hide() {
-    el.classList.remove("show");
-    visible = false;
-  }
-
-  window.addEventListener("mousemove", e => move(e.clientX, e.clientY));
-  return {
-    bind(elm, textOrFn) {
-      const getText = (typeof textOrFn === "function") ? textOrFn : () => textOrFn;
-      elm.addEventListener("mouseenter", e => show(getText(), e.clientX, e.clientY));
-      elm.addEventListener("mousemove",  e => move(e.clientX, e.clientY));
-      elm.addEventListener("mouseleave", hide);
-    }
-  };
-})();
-
 // UI events
 lootButton.addEventListener("click", startLoot);
 inventoryButton.addEventListener("click", () => {
-  inventoryPanel.style.display = (inventoryPanel.style.display === "block") ? "none" : "block";
+  inventoryPanel.style.display =
+    (inventoryPanel.style.display === "block") ? "none" : "block";
 });
 
 // Loot flow
 function startLoot() {
   lootButton.disabled = true;
   progressContainer.style.display = "block";
+
   let time = 0;
-  const duration = 1; // seconds
+  const duration = GAME_CONFIG.loot.progressDuration;
+  const tick = GAME_CONFIG.loot.progressTick;
 
   const interval = setInterval(() => {
-    time += 0.1;
+    time += tick;
     progressBar.style.width = `${(time / duration) * 100}%`;
+
     if (time >= duration) {
       clearInterval(interval);
       progressBar.style.width = "0%";
       progressContainer.style.display = "none";
       lootButton.disabled = false;
 
-      const template = getRandomItem();        // from items.js
-      const quality = rollQuality();
+      const template = getRandomItem(); // from items.js
+      const quality = rollQuality();    // from quality.js
       const mult = qualityMultiplier(quality);
       const stats = template.statRanges ? rollStats(template.statRanges, mult) : {};
 
@@ -228,370 +67,16 @@ function startLoot() {
         stats,
       };
 
-      addToInventory(instance);
+      addToInventory(instance); // from inventory.js
 
       if (!inventoryUnlocked) {
         inventoryUnlocked = true;
         inventoryButton.style.display = "block";
 
-      // trigger the attention effect
-      inventoryButton.classList.add("inventory-unlock");
-
-      // remove the class after the animation so it can be retriggered later if needed
-      setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 3000);
-
-      // optional: focus it for keyboard users (helps discovery)
-      setTimeout(() => inventoryButton.focus(), 200);
+        inventoryButton.classList.add("inventory-unlock");
+        setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 3000);
+        setTimeout(() => inventoryButton.focus(), 200);
       }
     }
-  }, 100);
-}
-
-// Inventory
-function addToInventory(inst) {
-  if (!inventory[inst.name]) {
-    inventory[inst.name] = { qty: 0, items: [] };
-  }
-  inventory[inst.name].qty += 1;
-  inventory[inst.name].items.push(inst);
-  renderInventory();
-}
-
-// Quality range helpers
-function qualityStep(q) {
-  const tier = q[0];
-  const sub = parseInt(q.slice(1), 10);
-  const tierIdx = TIER_ORDER.indexOf(tier);
-  return tierIdx * 9 + (10 - sub); // 0..62
-}
-function summarizeQualityRange(items = []) {
-  if (!items.length) return "";
-  let minQ = items[0].quality, maxQ = items[0].quality;
-  let minS = qualityStep(minQ), maxS = minS;
-  for (let i = 1; i < items.length; i++) {
-    const s = qualityStep(items[i].quality);
-    if (s < minS) { minS = s; minQ = items[i].quality; }
-    if (s > maxS) { maxS = s; maxQ = items[i].quality; }
-  }
-  return `[${minQ} - ${maxQ}]`;
-}
-
-function statsEqual(a = {}, b = {}) {
-  const ka = Object.keys(a), kb = Object.keys(b);
-  if (ka.length !== kb.length) return false;
-  for (const k of ka) if (a[k] !== b[k]) return false;
-  return true;
-}
-
-// Stable signature for stats (for grouping)
-function statsSignature(stats = {}) {
-  const keys = Object.keys(stats).sort();
-  return keys.map(k => `${k}:${stats[k]}`).join("|"); // e.g., "attackSpeed:1.1|damage:5"
-}
-
-// Group items by identical (quality + stats)
-function groupByIdentical(items = []) {
-  const map = new Map();
-  for (const it of items) {
-    const sig = `${it.quality}__${statsSignature(it.stats)}`;
-    if (!map.has(sig)) map.set(sig, { quality: it.quality, items: [] });
-    map.get(sig).items.push(it);
-  }
-  // sort groups by quality (worst → best), then by count desc
-  const arr = Array.from(map.values());
-  arr.sort((A, B) => {
-    const q = qualityStep(A.quality) - qualityStep(B.quality);
-    if (q !== 0) return q;
-    return B.items.length - A.items.length;
-  });
-  return arr;
-}
-
-function categoryHeaderLabel(category = "Other") {
-  const map = {
-    "Wood": "WOOD",
-    "Material": "MATERIALS",
-    "Crafting Component": "CRAFTING COMPONENTS",
-    "Resource": "RESOURCES",
-    "Weapon": "WEAPONS",
-    "Tool": "TOOLS",
-  };
-
-  return map[category] || category.toUpperCase();
-}
-
-function removeOneFromGroup(itemName, quality, stats) {
-  const stack = inventory[itemName];
-  if (!stack) return;
-
-  // find an index of an item with same quality AND same stats
-  const idx = stack.items.findIndex(it => it.quality === quality && statsEqual(it.stats, stats));
-  if (idx !== -1) {
-    stack.items.splice(idx, 1);
-    stack.qty -= 1;
-    if (stack.items.length === 0) {
-      delete inventory[itemName];
-    }
-    renderInventory();
-  }
-}
-
-function categoryHeaderLabel(category = "Other") {
-  // You can customize this map however you like
-  const map = {
-    "Material": "MATERIALS",
-    "Crafting Component": "CRAFTING COMPONENTS",
-    "Resource": "RESOURCES",
-    "Weapon": "WEAPONS",
-    "Tool": "TOOLS",
-    "Wood": "WOOD",
-  };
-  return map[category] || (category || "OTHER").toUpperCase();
-}
-
-function renderInventory() {
-  inventoryList.innerHTML = "";
-  const names = Object.keys(inventory);
-  if (!names.length) return;
-
-    // ---- Sort bar ----
-  const sortBar = document.createElement("div");
-  sortBar.className = "inventory-sort-bar";
-
-  const sortLabel = document.createElement("span");
-  sortLabel.textContent = "Sort by:";
-  sortBar.appendChild(sortLabel);
-
-  function makeSortButton(key, label) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "sort-btn";
-    if (inventorySort.key === key) {
-      btn.classList.add("active");
-      btn.textContent = `${label} ${inventorySort.dir === "asc" ? "▲" : "▼"}`;
-    } else {
-      btn.textContent = label;
-    }
-    btn.addEventListener("click", () => {
-      if (inventorySort.key === key) {
-        // toggle direction
-        inventorySort.dir = (inventorySort.dir === "asc") ? "desc" : "asc";
-      } else {
-        inventorySort.key = key;
-        inventorySort.dir = (key === "qty") ? "desc" : "asc";
-      }
-      renderInventory();
-    });
-    return btn;
-  }
-
-  sortBar.appendChild(makeSortButton("name", "Name"));
-  sortBar.appendChild(makeSortButton("rarity", "Rarity"));
-  sortBar.appendChild(makeSortButton("qty", "Quantity"));
-
-  inventoryList.appendChild(sortBar);
-
-
-  // --- Group stacks by category (from first item in each stack)
-  const categoryMap = Object.create(null);
-
-  names.forEach(name => {
-    const stack = inventory[name];
-    const first = stack.items[0] || {};
-    const category = first.category || "Other";
-    if (!categoryMap[category]) categoryMap[category] = [];
-    categoryMap[category].push({ name, stack });
-  });
-
-  // Optional: preferred category order
-  const CATEGORY_ORDER = [
-    "Material",
-    "Crafting Component",
-    "Resource",
-    "Weapon",
-    "Tool",
-    "Wood",
-    "Other"
-  ];
-
-  const categoryKeys = Object.keys(categoryMap).sort((a, b) => {
-    const ia = CATEGORY_ORDER.indexOf(a);
-    const ib = CATEGORY_ORDER.indexOf(b);
-    if (ia === -1 && ib === -1) return a.localeCompare(b);
-    if (ia === -1) return 1;
-    if (ib === -1) return -1;
-    return ia - ib;
-  });
-
-  categoryKeys.forEach(cat => {
-    const group = categoryMap[cat];
-    const isCollapsed = collapsedCategories.has(cat);
-
-    // ---- Category header ----
-    const header = document.createElement("div");
-    header.className = "inventory-category-header";
-    header.dataset.category = cat;
-    header.textContent = `${isCollapsed ? "▶" : "▼"} ${categoryHeaderLabel(cat)}`;
-    inventoryList.appendChild(header);
-
-    // Clicking the header collapses/expands this category
-    header.addEventListener("click", () => {
-      const nowCollapsed = !collapsedCategories.has(cat);
-      if (nowCollapsed) {
-        collapsedCategories.add(cat);
-      } else {
-        collapsedCategories.delete(cat);
-      }
-      header.textContent = `${nowCollapsed ? "▶" : "▼"} ${categoryHeaderLabel(cat)}`;
-
-      // Show/hide all following stacks until next category header
-      let node = header.nextElementSibling;
-      while (node && !node.classList.contains("inventory-category-header")) {
-        node.style.display = nowCollapsed ? "none" : "";
-        node = node.nextElementSibling;
-      }
-    });
-
-    // Sort items within category according to current sort
-    group.sort((a, b) => compareStacks(a, b));
-
-    // ---- Render each stack ----
-    group.forEach(({ name, stack }) => {
-      const rarity = stack.items[0]?.rarity || "";
-
-      const details = document.createElement("details");
-      details.className = "inventory-stack";
-      details.dataset.category = cat;
-      details.dataset.name = name;
-
-      const key = `${cat}::${name}`;
-      // Restore open/closed state from last time
-      if (openStacks.has(key)) {
-        details.open = true;
-      }
-
-      // Track future user toggles so state survives re-renders
-      details.addEventListener("toggle", () => {
-        if (details.open) {
-          openStacks.add(key);
-        } else {
-          openStacks.delete(key);
-        }
-      });
-
-      // Respect collapsed category state on initial render
-      if (isCollapsed) {
-        details.style.display = "none";
-      }
-
-      const summary = document.createElement("summary");
-
-      // Tooltip for the stack
-      const first = stack.items[0] || {};
-      Tooltip.bind(summary, () => {
-        const lines = [
-          `<strong>${name}</strong>`,
-          `<span class="rarity ${rarityClass(rarity)}">${rarity}</span>`,
-        ];
-        const qRange = summarizeQualityRange(stack.items);
-        if (qRange) lines.push(`Quality Range: ${qRange}`);
-        // blank line before description
-        if (first.description) {
-          lines.push("");
-          lines.push(first.description);
-        }
-        return lines
-          .filter(v => v !== undefined && v !== null)
-          .join("<br>");
-      });
-
-      // Column-ish layout: Name (colored by rarity) | Qty | Quality range
-      const nameSpan = span(name, `rarity ${rarityClass(rarity)}`);
-      nameSpan.classList.add("inv-name");
-      summary.appendChild(nameSpan);
-
-      const qtySpan = document.createElement("span");
-      qtySpan.className = "inv-qty";
-      qtySpan.textContent = `x${stack.qty}`;
-      summary.appendChild(qtySpan);
-
-      const qRange = summarizeQualityRange(stack.items);
-      if (qRange) {
-        const qSpan = document.createElement("span");
-        qSpan.className = "inv-qrange";
-        qSpan.textContent = qRange;
-        summary.appendChild(qSpan);
-      }
-
-      details.appendChild(summary);
-
-      const variantsWrap = document.createElement("div");
-      variantsWrap.className = "stack-variants";
-      const groups = groupByIdentical(stack.items);
-      groups.forEach(g => {
-        variantsWrap.appendChild(makeIdenticalGroupLine(name, rarity, g));
-      });
-      details.appendChild(variantsWrap);
-
-      inventoryList.appendChild(details);
-    });
-  });
-}
-
-function makeIdenticalGroupLine(itemName, rarity, group) {
-  const div = document.createElement("div");
-  div.className = "meta";
-
-  const count = group.items.length;
-  const rep = group.items[0]; // representative instance
-  const quality = group.quality;
-
-  // Row text: [Rarity] - Name - Quality xN
-  const rarSpan = span(`[${rarity}]`, `rarity ${rarityClass(rarity)}`);
-  const t1 = document.createTextNode(" - ");
-  const nameNode = document.createTextNode(itemName);
-  const t2 = document.createTextNode(" - ");
-  const qualNode = document.createTextNode(quality);
-  const countNode = document.createTextNode(count > 1 ? ` x${count}` : "");
-
-  div.appendChild(rarSpan);
-  div.appendChild(t1);
-  div.appendChild(nameNode);
-  div.appendChild(t2);
-  div.appendChild(qualNode);
-  if (count > 1) div.appendChild(countNode);
-
-  // Tooltip (Name, Rarity (colored), Quality; blank; Description; blank; then stats stacked)
-  Tooltip.bind(div, () => {
-    const header =
-      `<strong>${itemName}</strong><br>` +
-      `<span class="rarity ${rarityClass(rarity)}" style="display:inline">${rarity}</span><br>` +
-      `Quality: ${quality}`;
-
-    const desc = rep.description ? `<br><br>${rep.description}` : "";
-
-    const statsObj = rep.stats || {};
-    const statKeys = Object.keys(statsObj);
-    const stats = statKeys.length
-      ? `<br><br>${statKeys
-          .map(k => `${STAT_LABELS[k] ?? k}: ${fmt(statsObj[k])}`)
-          .join("<br>")}`
-      : "";
-
-    return header + desc + stats;
-  });
-
-  // Trash button (removes ONE item from this identical group)
-  const trashBtn = document.createElement("button");
-  trashBtn.className = "trash-btn";
-  trashBtn.textContent = "Trash";
-  trashBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // don’t toggle <details>
-    removeOneFromGroup(itemName, quality, rep.stats);
-  });
-  // a little space before the button
-  div.appendChild(document.createTextNode(" "));
-  div.appendChild(trashBtn);
-
-  return div;
+  }, tick * 1000);
 }
