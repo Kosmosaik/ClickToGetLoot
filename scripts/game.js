@@ -58,7 +58,9 @@ const collapsedCategories = new Set();
 const TIER_ORDER = ["F","E","D","C","B","A","S"];
 const TIER_WEIGHTS = { F: 120, E: 70, D: 40, C: 25, B: 10, A: 5, S: 1 };
 
-function sublevelWeight(n) { return (n === 9) ? 10 : (10 - n); }
+function sublevelWeight(n) {
+  return n; // 9 is common, 1 is rare
+}
 
 function pickWeighted(pairs) {
   const total = pairs.reduce((s,p)=>s+p.weight,0);
