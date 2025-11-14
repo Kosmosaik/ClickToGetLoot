@@ -334,8 +334,3 @@ button {
   /* allow it to shrink a bit if needed */
   flex: 0 1 auto;
 }
-
-#game-header .game-version {
-  opacity: 0.75;
-  font-size: 0.85rem;
-}
