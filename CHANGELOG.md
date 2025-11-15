@@ -1,3 +1,36 @@
+## v0.0.50 — Character System & Save Slots
+
+### Added
+- **Complete Character Creation System**
+  - Players can create unique characters with custom or randomly generated names.
+  - Classic stat system implemented: STR, DEX, INT, VIT.
+  - Stats start at a base value of 5 with 20 distributable points.
+  - Supports manual point allocation and fully random stat distribution.
+
+- **Multi-Character Save Slot System**
+  - Characters are saved locally on the device using `localStorage`.
+  - Each save slot contains character name, stats, inventory, and feature unlock states.
+  - Added load and delete functionality for managing multiple characters.
+  - Auto-save triggers after every loot action to ensure persistence.
+
+- **New Game Flow with Multiple Screens**
+  - **Start Screen**: Choose to create a new character or load an existing one.
+  - **Character Creation Screen**: Enter name, adjust stats, randomize, and finalize character.
+  - **Game Screen**: Displays loot button, inventory, and character summary.
+
+- **Character Summary Bar**
+  - Shows current character name and stat overview (STR/DEX/INT/VIT) during gameplay.
+
+- **Feature Unlock Persistence**
+  - Inventory unlock state is now saved per character.
+  - Ensures the UI behaves consistently when loading existing characters.
+
+- **Menu Bar Framework for Future Features**
+  - Inventory button moved into a top menu bar.
+  - Supports seamless future additions such as Equipment, Crafting, Skills, etc.
+
+---
+
 ## v0.0.40b — Tooltip Behavior Fix
 ### Fixed
 - Tooltip remaining on screen after trashing an item.
