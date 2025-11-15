@@ -556,12 +556,16 @@ section[hidden] {
   font-size: 0.85rem;
   color: #e0e4e8;
 
-  text-align: center;
+  /* NEW - align content */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
   z-index: 9900;
 }
 
 #game-header .game-header-text {
-  white-space: nowrap;   /* keep it on one line */
+  white-space: nowrap;
 }
 
 #patch-notes-btn {
