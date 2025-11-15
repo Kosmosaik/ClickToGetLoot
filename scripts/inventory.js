@@ -344,17 +344,20 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
   const rep = group.items[0];
   const quality = group.quality;
 
-  // Row text: Name (colored by rarity) - Quality xN - DMG / AS (if stats exist)
+  // Name (colored by rarity)
   const nameSpan = span(itemName, `rarity ${rarityClass(rarity)}`);
   div.appendChild(nameSpan);
 
-  // Quality + count
-  const qcText = document.createTextNode(
-    ` - ${quality}${count > 1 ? ` x${count}` : ""}`
-  );
-  div.appendChild(qcText);
+  // Quality in brackets: [F8]
+  const qualitySpan = document.createTextNode(` [${quality}]`);
+  div.appendChild(qualitySpan);
 
-  // Stats (if present): DMG: X | AS: Y
+  // Quantity xN (optional)
+  if (count > 1) {
+    div.appendChild(document.createTextNode(` x${count}`));
+  }
+
+  // Stats: DMG: X | AS: Y
   const statsObj = rep.stats || {};
   if (
     typeof statsObj.damage === "number" &&
@@ -363,12 +366,12 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
     const dmg = fmt(statsObj.damage);
     const as = fmt(statsObj.attackSpeed);
     const statsText = document.createTextNode(
-      ` - DMG: ${dmg} | AS: ${as}`
+      `   DMG: ${dmg} | AS: ${as}`
     );
     div.appendChild(statsText);
   }
 
-  // Tooltip (Name, Rarity (colored), Quality; blank; Description; blank; then stats stacked)
+  // Tooltip stays the same
   Tooltip.bind(div, () => {
     const header =
       `<strong>${itemName}</strong><br>` +
@@ -376,7 +379,6 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
       `Quality: ${quality}`;
 
     const desc = rep.description ? `<br><br>${rep.description}` : "";
-
     const statsObj = rep.stats || {};
     const statKeys = Object.keys(statsObj);
     const stats = statKeys.length
@@ -402,3 +404,4 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
 
   return div;
 }
+
