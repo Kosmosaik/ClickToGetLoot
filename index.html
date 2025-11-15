@@ -7,27 +7,119 @@
 </head>
 <body>
 <div id="game-header">
-  <span class="game-header-text">ClickToGetLoot — v0.0.40c - Inventory display improvements + css.</span>
+  <span class="game-header-text">
+    ClickToGetLoot — v0.0.50 — Character System & Save Slots.
+  </span>
+  <button id="patch-notes-btn" type="button">Patch Notes</button>
 </div>
-  <div id="ui-panel">
+
+  <!-- START SCREEN -->
+  <section id="screen-start">
+    <div class="panel">
+      <h1>ClickToGetLoot</h1>
+      <p>Loot-clicker RPG prototype</p>
+      <button id="btn-new-game">Create New Character</button>
+
+      <div id="save-list"></div>
+    </div>
+  </section>
+
+  <!-- CHARACTER CREATION SCREEN -->
+  <section id="screen-character" hidden>
+    <div class="panel">
+      <h2>Create Character</h2>
+
+      <!-- Name -->
+      <div class="char-row">
+        <label for="char-name">Name</label>
+        <input id="char-name" type="text" autocomplete="off">
+        <button id="btn-reroll-name" type="button">Random Name</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="char-stats">
+        <p>Distribute your stat points.</p>
+        <div class="stat-row">
+          <span class="stat-label">STR</span>
+          <span id="stat-str-value">5</span>
+          <button id="btn-str-plus" type="button">+</button>
+          <button id="btn-str-minus" type="button">-</button>
+        </div>
+
+        <div class="stat-row">
+          <span class="stat-label">DEX</span>
+          <span id="stat-dex-value">5</span>
+          <button id="btn-dex-plus" type="button">+</button>
+          <button id="btn-dex-minus" type="button">-</button>
+        </div>
+
+        <div class="stat-row">
+          <span class="stat-label">INT</span>
+          <span id="stat-int-value">5</span>
+          <button id="btn-int-plus" type="button">+</button>
+          <button id="btn-int-minus" type="button">-</button>
+        </div>
+
+        <div class="stat-row">
+          <span class="stat-label">VIT</span>
+          <span id="stat-vit-value">5</span>
+          <button id="btn-vit-plus" type="button">+</button>
+          <button id="btn-vit-minus" type="button">-</button>
+        </div>
+
+
+        <p>Points left: <span id="points-left">20</span></p>
+        <button id="btn-random-stats" type="button">Randomize Stats</button>
+      </div>
+
+      <div class="char-actions">
+        <button id="btn-create-character" type="button">Create Character</button>
+        <button id="btn-back-to-start" type="button">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN GAME SCREEN -->
+  <section id="screen-game" hidden>
+    <!-- Character summary -->
+    <div id="character-summary">
+      <span id="char-summary-name"></span>
+      <span id="char-summary-stats"></span>
+    </div>
+
+  <div id="menu-bar">
     <button id="inventory-btn" style="display:none;">Inventory</button>
+    <!-- Future feature buttons will be appended here -->
   </div>
 
-  <button id="loot-button">Loot!</button>
-  <div id="progress-container">
-    <div id="progress"></div>
-  </div>
+    <button id="loot-button">Loot!</button>
+    <div id="progress-container">
+      <div id="progress"></div>
+    </div>
 
-  <div id="inventory-panel">
-    <h3>Inventory</h3>
-    <div id="inventory-list"></div>
-  </div>
+    <div id="inventory-panel">
+      <h3>Inventory</h3>
+      <div id="inventory-list"></div>
+    </div>
+  </section>
 
-<script src="scripts/config.js"></script>
-<script src="scripts/items.js"></script>
-<script src="scripts/quality.js"></script>
-<script src="scripts/ui.js"></script>
-<script src="scripts/inventory.js"></script>
-<script src="scripts/game.js"></script>
+  <script src="scripts/config.js"></script>
+
+  <!-- Patch Notes Modal -->
+<div id="patch-notes-panel" hidden>
+  <div class="patch-notes-backdrop">
+    <div class="patch-notes-dialog">
+      <h3 id="patch-notes-title">Patch Notes</h3>
+      <pre id="patch-notes-content">Loading patch notes…</pre>
+      <button id="patch-notes-close" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+  <script src="scripts/items.js"></script>
+  <script src="scripts/quality.js"></script>
+  <script src="scripts/ui.js"></script>
+  <script src="scripts/inventory.js"></script>
+  <script src="scripts/game.js"></script>
 </body>
 </html>
