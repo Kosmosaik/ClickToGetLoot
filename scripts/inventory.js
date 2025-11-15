@@ -344,20 +344,29 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
   const rep = group.items[0];
   const quality = group.quality;
 
-  // Row text: [Rarity] - Name - Quality xN
-  const rarSpan = span(`[${rarity}]`, `rarity ${rarityClass(rarity)}`);
-  const t1 = document.createTextNode(" - ");
-  const nameNode = document.createTextNode(itemName);
-  const t2 = document.createTextNode(" - ");
-  const qualNode = document.createTextNode(quality);
-  const countNode = document.createTextNode(count > 1 ? ` x${count}` : "");
+  // Row text: Name (colored by rarity) - Quality xN - DMG / AS (if stats exist)
+  const nameSpan = span(itemName, `rarity ${rarityClass(rarity)}`);
+  div.appendChild(nameSpan);
 
-  div.appendChild(rarSpan);
-  div.appendChild(t1);
-  div.appendChild(nameNode);
-  div.appendChild(t2);
-  div.appendChild(qualNode);
-  if (count > 1) div.appendChild(countNode);
+  // Quality + count
+  const qcText = document.createTextNode(
+    ` - ${quality}${count > 1 ? ` x${count}` : ""}`
+  );
+  div.appendChild(qcText);
+
+  // Stats (if present): DMG: X | AS: Y
+  const statsObj = rep.stats || {};
+  if (
+    typeof statsObj.damage === "number" &&
+    typeof statsObj.attackSpeed === "number"
+  ) {
+    const dmg = fmt(statsObj.damage);
+    const as = fmt(statsObj.attackSpeed);
+    const statsText = document.createTextNode(
+      ` - DMG: ${dmg} | AS: ${as}`
+    );
+    div.appendChild(statsText);
+  }
 
   // Tooltip (Name, Rarity (colored), Quality; blank; Description; blank; then stats stacked)
   Tooltip.bind(div, () => {
@@ -385,7 +394,7 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
   trashBtn.textContent = "Trash";
   trashBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    Tooltip.hide(); // <- new line
+    Tooltip.hide();
     removeOneFromGroup(itemName, quality, rep.stats);
   });
   div.appendChild(document.createTextNode(" "));
