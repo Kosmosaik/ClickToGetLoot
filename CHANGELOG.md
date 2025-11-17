@@ -1,4 +1,4 @@
-## v0.0.52c (WIP) – Equipment core module
+## v0.0.53 (WIP) – Equipment core module
 
 ### Added
 - New `equipment.js` module to manage equipped items and their bonuses.
