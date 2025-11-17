@@ -1,3 +1,24 @@
+## v0.0.52c (WIP) – Equipment core module
+
+### Added
+- New `equipment.js` module to manage equipped items and their bonuses.
+- Defined equipment slots for v0.1:
+  - `weapon`, `chest`, `legs`, `feet`, `trinket`.
+- Added helpers:
+  - `equipItemToSlot(slot, item)` – equips a (copied) item into a slot and returns the previously equipped item.
+  - `unequipSlot(slot)` – clears a slot and returns the unequipped item.
+  - `getEquippedSnapshot()` / `loadEquippedFromSnapshot(snapshot)` – serialize and restore equipped items for saving/loading.
+  - `summarizeEquipmentForCharacter()` – aggregates attribute and stat bonuses
+    and detects the weapon's attack type for the character calculations.
+
+### Notes
+- Attribute bonuses (STR/DEX/INT/VIT), HP bonuses, and direct melee/ranged attack
+  bonuses are supported in the data model but currently default to 0 until we
+  add items that provide these stats.
+- Crit chance and Loot Find bonuses will be drawn from item `stats` values
+  (e.g. `stats.critChance`, `stats.lootFind`) when we extend weapon items.
+
+
 ## v0.0.52b (WIP) – Character math module
 
 ### Added
