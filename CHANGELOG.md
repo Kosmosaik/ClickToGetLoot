@@ -1,3 +1,9 @@
+## v0.0.52 - Cleanup
+### Fixed
+- Removed duplicate code blocks for patch notes.
+
+---
+
 ## v0.0.51 — Quality tweaks & Polish
 
 ### Added
