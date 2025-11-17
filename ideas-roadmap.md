@@ -30,8 +30,8 @@ FEATURE: Equipment view
   @ Add stats from equipment
 
   Core Combat Stats
-  [ ] : Weapon Damage
-  [ ] : Attack Speed
+  [X] : Weapon Damage
+  [X] : Attack Speed
   [ ] : DPS (derived)
   [ ] : Critical Chance
   [ ] : Critical Damage Multiplier
