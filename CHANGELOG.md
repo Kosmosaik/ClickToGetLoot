@@ -1,3 +1,32 @@
+## v0.0.52b (WIP) – Character math module
+
+### Added
+- New `character.js` module to centralize all character calculations:
+  - Extracts base attributes from the current character.
+  - Combines base attributes with bonus attributes from equipment/buffs.
+  - Computes derived stats:
+    - Max HP
+    - Melee Attack and Ranged Attack
+    - Crit Chance (%)
+    - Loot Find (%)
+    - Active Attack, which switches between:
+      - `Attack (Melee)` when wielding a melee weapon
+      - `Attack (Ranged)` when wielding a ranged weapon
+      - `Unarmed Attack` when no weapon is equipped
+- Added `buildCharacterComputedState(character, equipmentSummary)` as the
+  main helper to get:
+  - Base attributes
+  - Attribute totals + bonuses
+  - All derived stats in one object.
+
+### Notes
+- All values remain full-precision floats; rounding/formatting to two decimals
+  will be handled in the UI layer later.
+- Equipment bonuses are wired via a generic `equipmentSummary` object, which
+  will be implemented in the upcoming `equipment.js` module.
+
+---
+
 ## v0.0.52 (WIP) – Character config groundwork
 
 ### Added
