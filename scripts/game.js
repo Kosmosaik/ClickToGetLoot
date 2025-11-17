@@ -1,5 +1,5 @@
 // scripts/game.js
-console.log(`game.js loaded v${GAME_CONFIG.version} - Core gameplay wiring`);
+console.log(`game.js loaded v${GAME_CONFIG.version}`);
 
 // ----- Screen elements -----
 const screenStart = document.getElementById("screen-start");
@@ -434,27 +434,6 @@ if (btnCreateCharacter) {
     saveCurrentGame();
     updateCharacterSummary();
     setScreen("game");
-  });
-}
-
-if (patchNotesBtn && patchNotesPanel) {
-  patchNotesBtn.addEventListener("click", () => {
-    patchNotesPanel.hidden = false;
-  });
-}
-
-if (patchNotesClose && patchNotesPanel) {
-  patchNotesClose.addEventListener("click", () => {
-    patchNotesPanel.hidden = true;
-  });
-}
-
-// Optional: click outside dialog to close
-if (patchNotesPanel) {
-  patchNotesPanel.addEventListener("click", (e) => {
-    if (e.target.classList.contains("patch-notes-backdrop")) {
-      patchNotesPanel.hidden = true;
-    }
   });
 }
 
