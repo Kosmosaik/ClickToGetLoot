@@ -111,7 +111,6 @@ if (patchNotesPanel) {
   });
 }
 
-
 // ----- Character model / creation state -----
 const BASE_STAT = 5;
 const EXTRA_POINTS = 20;

@@ -230,6 +230,17 @@ button {
   opacity: 0.8;
 }
 
+/* Align Trash button to the right in expanded inventory rows */
+.inventory-stack .meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inventory-stack .meta .trash-btn {
+  margin-left: auto;
+}
+
 /* Floating tooltip */
 #tooltip {
   position: fixed;
@@ -298,29 +309,6 @@ button {
   0%   { opacity: 0; transform: scale(0.85); }
   20%  { opacity: 1; transform: scale(1.0); }
   100% { opacity: 0; transform: scale(1.15); }
-}
-
-#game-header {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  box-sizing: border-box;
-
-  background: #111;
-  border-top: 1px solid #333;
-  padding: 6px 12px;
-
-  font-family: monospace;
-  font-size: 0.85rem;
-  color: #e0e4e8;
-
-  text-align: center;
-  z-index: 9900;
-}
-
-#game-header .game-header-text {
-  white-space: nowrap;   /* keep it on one line */
 }
 
 /* === Shared panels for non-game screens === */
@@ -554,12 +542,30 @@ section[hidden] {
 
 /* === Header layout === */
 #game-header {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+
+  background: #111;
+  border-top: 1px solid #333;
+  padding: 6px 12px;
+
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #e0e4e8;
+
+  /* NEW - align content */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 0.8rem;
-  border-bottom: 1px solid #2a2a2a;
-  background: #111;
+
+  z-index: 9900;
+}
+
+#game-header .game-header-text {
+  white-space: nowrap;
 }
 
 #patch-notes-btn {
@@ -595,21 +601,24 @@ section[hidden] {
   background: #141414;
   border: 1px solid #2a2a2a;
   border-radius: 8px;
-  padding: 1.25rem 1.5rem;
+  padding: 1.0rem 1.25rem;
   max-width: 520px;
-  width: 100%;
+  width: calc(100% - 2rem);
+  max-height: 80vh;          /* keep inside the viewport */
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.65);
   font-size: 0.9rem;
-}
-
-.patch-notes-dialog h3 {
-  margin-top: 0;
-  margin-bottom: 0.75rem;
+  overflow: auto;            /* scroll if content is long */
 }
 
 .patch-notes-dialog ul {
   margin: 0 0 1rem 1.1rem;
   padding: 0;
+  list-style-position: inside; /* keep bullets inside the box */
+}
+
+.patch-notes-dialog h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 
 .patch-notes-dialog button {

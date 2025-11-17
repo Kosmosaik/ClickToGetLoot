@@ -1,3 +1,12 @@
+## v0.0.51 — Quality tweaks & Polish
+
+### Added
+- Reworked the item quality system. Quality now ranges from **F0** (worst) to **S9** (best),
+  replacing the old F9 → S1 format so that higher numbers always represent better quality within a tier.
+- Updated all quality-based calculations and sorting to use the new F0–S9 ladder, keeping stat multipliers smoothly scaled from low to high quality.
+
+---
+
 ## v0.0.50 — Character System & Save Slots
 
 ### Added

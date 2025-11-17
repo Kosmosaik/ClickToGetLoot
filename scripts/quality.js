@@ -2,15 +2,16 @@
 
 // Use tiers from config (F..S)
 const TIER_ORDER = GAME_CONFIG.quality.tiers.slice();
+const SUBLEVELS_PER_TIER = 10; // 0..9
 
-// Precomputed quality ladder (F9..F1, E9..E1, ..., S9..S1)
+// Precomputed quality ladder (F0..F9, E0..E9, ..., S0..S9)
 const QUALITY_BUCKETS = [];
 (function initQualityBuckets() {
   const base = GAME_CONFIG.quality.expBase;
-  let rank = 0; // 0 = F9 (worst), 62 = S1 (best)
+  let rank = 0; // 0 = F0 (worst, most common), last = S9 (best, rarest)
 
   for (const tier of TIER_ORDER) {
-    for (let sub = 9; sub >= 1; sub--) {
+    for (let sub = 0; sub < SUBLEVELS_PER_TIER; sub++) {
       const weight = Math.pow(base, rank);
       QUALITY_BUCKETS.push({
         code: `${tier}${sub}`,
@@ -33,7 +34,7 @@ function pickWeighted(list) {
   return list[list.length - 1];
 }
 
-// Public: roll a quality string like "F7", "B3", "S1"
+// Public: roll a quality string like "F7", "B3", "S9"
 function rollQuality() {
   const q = pickWeighted(QUALITY_BUCKETS);
   return q.code;
@@ -44,8 +45,11 @@ function qualityMultiplier(q) {
   const tier = q[0];
   const sub = parseInt(q.slice(1), 10);
   const tierIdx = TIER_ORDER.indexOf(tier);
-  const totalSteps = TIER_ORDER.length * 9;
-  const step = tierIdx * 9 + (10 - sub); // 0..62
+
+  const stepsPerTier = SUBLEVELS_PER_TIER; // 10
+  const totalSteps = TIER_ORDER.length * stepsPerTier; // 7 * 10 = 70
+  const step = tierIdx * stepsPerTier + sub; // 0..69
+
   const t = step / (totalSteps - 1);
   const min = 0.75, max = 1.8;
   return min + (max - min) * t;

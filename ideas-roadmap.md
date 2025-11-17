@@ -2,23 +2,9 @@
 
 
 ===== GRAPHICS: =====
-Rarity animation: When the loot slider/progress is finished, if the item is higher than Common (Uncommon, Rare, Exotic etc), animate the slider with a pop up like effect after the first "roll/slider fill",
-reset the slider and fill it again, but this time with the Uncommon color. If the item is of rarity higher than Uncommon, repeat the same process and change the color to the next rarity (rare or whatever).
-This adds a jackpot-like feel to the looting system. Also, this means we will have to generate the item before we do the first check, so the slider-change process knows how many times it will repeat the slider reset/color change.
 
-   Process summary:
-   1. Click to loot, generate item (invisible to player in this state).
-   2. Slider starts to fill up (grey color)
-         If item is Abundant or Common, give item to player, else continue.
-   3. If items rarity is higher than common (Uncommon, Rare, Exotic), reset the slider -> pop up effect -> fill slider with Uncommon color.
-      	If item is Uncommon, give item to player, else continue.
-   4. If items rarity is higher than uncommon, reset slider -> pop up effect -> fill slider with Rare color.
-         If item is Rare, give item to player, else continue.
-   5. If items rarity is higher than rare, reset slider -> pop up effect -> fill slider with Exotic color.
-         If item is Exotic, give item to player.
 
 ===== IMPROVEMENTS: =====
-@ Change quality drop weight based on tier letter AND tier number (F9 most common, S1 rarest).
 @ Add debug mode (type in like a password in console to activate).
   Add statistics, loot rate help, timers, speed up time/progress stuff.
 
@@ -31,17 +17,121 @@ This adds a jackpot-like feel to the looting system. Also, this means we will ha
 
 
 ===== FEATURES =====
+
 FEATURE: Character & Classes
-  @ Add character system with stats (randomized name, Class, Stats (Strength, Vitality, Agility - HP, Encumbrance, Attack Speed, Evade, HP Regen)).
-  @ When game starts (opening the website for the first time) - Show character screen (hide loot button etc).
-  @ Create Character button -> Roll random name, random class, random stats.
+  @ Add Classes (templates for stat distr).
   @ Add Class/Stats calculations. Different stat distribution from different classes (still a bit random but weighted toward class related stats).
+  @ LATER: Add skill distribution??
   
 FEATURE: Equipment view
   @ Add Equipment menu
   @ Add more equipment related items (chest, head, weapon etc)
   @ Add equip/unequip function (move item from inventory to equipment and vice versa. Make slot busy/available)
   @ Add stats from equipment
+
+  Core Combat Stats
+  [X] : Weapon Damage
+  [X] : Attack Speed
+  [ ] : DPS (derived)
+  [ ] : Critical Chance
+  [ ] : Critical Damage Multiplier
+  [ ] : Accuracy / Hit Chance
+  [ ] : Elemental Damage (when elements gets added)
+  [ ] : Armor Penetration (ignore % of defense)
+  [ ] : Lifesteal (% of damage heals you)
+
+  Defensive Stats
+  [ ] : Armor / Defense (reduces incoming physical dmg)
+  [ ] : Dodge / Evasion (chance to avoid attacks)
+  [ ] : Block Chance (for shields)
+  [ ] : HP (Max Health)
+  [ ] : HP Regeneration (per second)
+  [ ] : Damage Reduction %
+  [ ] : Resistance (Fire, Cold, Poison, Magic etc - whene elements gets added)
+  [ ] : Tenacity / Status Resist (reduces duration of debuffs)
+
+  Magic / Ability Stats
+  [ ] : Mana (Max)
+  [ ] : Mana Regeneration
+  [ ] : Spell Damage Bonus
+  [ ] : Cooldown Reduction
+  [ ] : Energy / Resource for abilities (if not using mana)
+  [ ] : Aura Power (For passives / Companions)
+  [ ] : Summon Power (if minions gets added)
+
+  Loot & Economy Stats
+  [ ] : Loot Find (increases chance of higher-tier drops)
+  [ ] : Gold Find (if money gets added)
+  [ ] : Luck (general rare event chance modifier, also increases crit chance)
+
+  Progression / Utility Stats
+  [ ] : Carry Weight Limit
+  [ ] : Current Weight
+  [ ] : Encumbrance Penalty (affects speed, dodge and/or attack speed if overweight)
+
+  [ ] : Movement Speed (Explore maps faster)
+  [ ] : Action Speed (crafting/processing)
+  [ ] : Gathering Speed
+  [ ] : Mining Speed
+
+  Special / Unique Stats
+  [ ] : Reflect Damage
+  [ ] : Thorns
+  [ ] : Life on Hit
+  [ ] : Life on Kill
+
+=================== CHARACTER STUFF IDEAS ==========================
+
+Character:
+
+1. Name (We already have this implemented, but later on I'd like to expand the random name system to hold more names, and maybe even build a generator combining different character combinations (vowels and consonants in certain ways).
+
+2. Class (this will be empty templates with class names for now. Later we will flesh it out with stats distribution, maybe unique skills/buffs etc), but it's good to start with a template to build upon later.
+
+3. STR /Strength): This stat affects the "melee" physical power of the character, allowing it to deal damage even if no weapons are equipped if a sufficient amount of STR is invested. The STR value is also multiplied to the Weapon ATK value for even more damage increase.
++1 to BaseATK (BaseATK is derived from the player's Base Level, Str, Dex, and Luk. We will discuss the formula further down).
++0,5% weapon ATK
++20 carry weight.
+
+4. AGI (Agility): This stat affects the speed of the character in many aspects, allowing it to attack faster and dodge attacks more often.
++1 to Flee Rate (Increases chance to flee/avoid forced combat events).
++1% Attack Speed.
+Bleeding: -1% chance from being inflicted.
++1 to Movement Speed.
+
+5. VIT (Vitality): This stat affects the endurance, HP, and restorative power of the character, allowing it to last longer against monsters and to regain more life with healing items.
+Max HP +1%
+Healing Items effectiveness +2% (HP)
+Resistance vs following effects:
+	Stun: -1% chance from being inflicted + decreases duration
+	Poison: -1%  chance, decreases duration
+	Deadly Poison: Same stats as above
+	Burning: Same as above
+	Freezing: Same as above
++0,5 in Soft DEF
++0,1 HP regen/s
+
+6. DEX (Dexterity): This stat affects the accuracy (HIT) of the character in many aspects, allowing it to land hits easier, among other things. It is also the primary stat for "ranged" physical power, and the primary stat for decreasing variable cast time.
++1 to BaseATK for Ranged-type weapons (Bows, Guns etc)
++0,5% weapon ATK (for Ranged)
++1 Hit Rate
++0,1% Attack Speed
++0,1% Success rate to Forging (Blacksmith), Brewing (Alchemist) and similar professions
++0,2% Success rate to Cooking
+
+7. LUK (Luck): This stat affects the fortune of the character in some aspects, allowing it to deal Critical hits more often, luckily dodging enemy attacks more often, among several other small bonuses.
++0,3% Critical Hit Chance
++0,1% Success rate to Forging (Blacksmith), Brewing (Alchemist) and similar professions
++0,1% Success rate to Cooking
+-1% chance from being inflicted by Status Effects (All)
++0,3 to BaseATK
++0,3 to MagicATK (Not being implemented until later)
++0,3 to Hit Rate
++0,2 to Flee Rate
++0,1 to Dodge / Evasion
+
+
+  Action Speed / Gathering Speed (fingerfärdighet som ökar (xp) när man gör actions). Generell skill som reducerar tiden det tar för actions.
 
 FEATURE: Zones (Biomes)
    @ Add world map (grid of zones). Each zone is randomly generated when it comes to:
@@ -71,12 +161,13 @@ FEATURE: Combat
    @ Add simple combat system (timer based attacks with a simple log updating when player/enemy attacks, showing damage done etc).
    @ Add "Fight" button on the entity in the exploration list to change game state/interface to fight mode.
    @ Add loot generation based on enemy type, loot pool etc.
+   @ LATER: Add ranged weapon mechanics (slider / distance to enemy).
 
 FEATURE: Player Death
    @ When player health reaches <= 0 , 
    
 OTHER:
-@ Quality (F9 -> S1 = Higher Quality = Higher stat multipliers / higher enhancement values in crafting / higher success rates etc).
+@ Quality (F0 -> S1 = Higher Quality = Higher stat multipliers / higher enhancement values in crafting / higher success rates etc).
    Maybe add a property on items to set different min/max multiplier so all items can have different quality multipliers?
 @ Gear Score: Score summarized from item stats (Damage, Attack Speed etc)
 @ DPS: Calculate and show DPS on item (based on character stats + item stats)

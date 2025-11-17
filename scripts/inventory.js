@@ -60,7 +60,8 @@ function qualityStep(q) {
   const tier = q[0];
   const sub = parseInt(q.slice(1), 10);
   const tierIdx = TIER_ORDER.indexOf(tier);
-  return tierIdx * 9 + (10 - sub); // 0..62
+  const stepsPerTier = (typeof SUBLEVELS_PER_TIER === "number") ? SUBLEVELS_PER_TIER : 10;
+  return tierIdx * stepsPerTier + sub; // 0..69 (F0..S9)
 }
 
 function summarizeQualityRange(items = []) {
