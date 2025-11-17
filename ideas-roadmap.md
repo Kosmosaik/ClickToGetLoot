@@ -69,6 +69,21 @@ FEATURE: Equipment view
   [ ] : Current Weight
   [ ] : Encumbrance Penalty (affects speed, dodge and/or attack speed if overweight)
 
+  [ ] : Movement Speed (Explore maps faster)
+  [ ] : Action Speed (crafting/processing)
+  [ ] : Gathering Speed
+  [ ] : Mining Speed
+
+  Special / Unique Stats
+  [ ] : Reflect Damage
+  [ ] : Thorns
+  [ ] : Life on Hit
+  [ ] : Life on Kill
+
+  Other
+  [ ] : 
+  
+
   Action Speed / Gathering Speed (fingerfärdighet som ökar (xp) när man gör actions). Generell skill som reducerar tiden det tar för actions.
 
 FEATURE: Zones (Biomes)
