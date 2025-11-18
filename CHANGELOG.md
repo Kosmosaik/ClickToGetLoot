@@ -1,3 +1,18 @@
+## v0.0.52e (WIP) – Weapon item extensions
+
+### Added
+- Added `slot: "weapon"` and `attackType: "melee"` to Rusty Dagger and Simple Dagger.
+- Added randomized weapon stats for both daggers:
+  - `critChance` (in %)
+  - `lootFind` (in %)
+- These stats scale automatically with item quality tiers.
+
+### Notes
+- Damage and attackSpeed remain as before.
+- Only weapons have these new properties; non-weapons remain unchanged.
+
+---
+
 ## v0.0.54 (WIP) – Wire character & equipment math
 
 ### Added
