@@ -1,4 +1,4 @@
-## v0.0.52e (WIP) – Weapon item extensions
+## v0.0.55 (WIP) – Weapon item extensions
 
 ### Added
 - Added `slot: "weapon"` and `attackType: "melee"` to Rusty Dagger and Simple Dagger.
