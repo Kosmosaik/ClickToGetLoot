@@ -74,5 +74,5 @@ const GAME_CONFIG = {
     ],
   },
 
-  raritySortOrder: ["Abundant", "Common", "Uncommon", "Rare", "Exotic"],
+  raritySortOrder: ["Abundant", "Common", "Uncommon", "Rare", "Exotic", "Unique"],
 };
