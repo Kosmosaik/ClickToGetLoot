@@ -39,6 +39,37 @@ const patchNotesContent = document.getElementById("patch-notes-content");
 
 let patchNotesLoaded = false;
 
+// Holds the fully computed character state (attributes + derived stats)
+// so UI or other systems can use it.
+let characterComputed = null;
+
+/**
+ * Recompute the character's attributes and derived stats based on:
+ * - The current character's base stats (STR, DEX, INT, VIT)
+ * - The currently equipped items (summarized by equipment.js)
+ *
+ * This does NOT touch the UI yet. For now we just log the result so
+ * we can see Max HP, crit, loot find, etc., in the console.
+ */
+function recomputeCharacterComputedState() {
+  if (!currentCharacter) {
+    characterComputed = null;
+    console.warn("recomputeCharacterComputedState: no currentCharacter yet");
+    return;
+  }
+
+  // Ask the equipment system to summarize bonuses + weapon type
+  const equipmentSummary = summarizeEquipmentForCharacter();
+
+  // Ask character.js to build the full computed state
+  characterComputed = buildCharacterComputedState(
+    currentCharacter,
+    equipmentSummary
+  );
+
+  // For now, just inspect in dev tools
+  console.log("Character computed state:", characterComputed);
+}
 
 // Character summary on game screen
 const charSummaryName = document.getElementById("char-summary-name");
@@ -328,6 +359,8 @@ function loadSave(id) {
   loadInventoryFromSnapshot(save.inventory || {});
   updateCharacterSummary();
 
+  recomputeCharacterComputedState();
+
   // Restore feature unlocks
   const feats = save.features || {};
   inventoryUnlocked = !!feats.inventoryUnlocked;
@@ -358,7 +391,7 @@ function deleteSave(id) {
   renderSaveList();
 }
 
-
+recomputeCharacterComputedState();
 
 // ----- Initial screen -----
 setScreen("start");
@@ -525,3 +558,8 @@ function startLoot() {
     }
   }, tick * 1000);
 }
+
+window.debugCharacterComputed = () => {
+  console.log("Character computed state:", characterComputed);
+  return characterComputed;
+};
