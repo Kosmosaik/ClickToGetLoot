@@ -1,4 +1,4 @@
-### v0.0.54 (WIP) – Wire character & equipment math
+## v0.0.54 (WIP) – Wire character & equipment math
 
 ### Added
 - New `characterComputed` state in `game.js` to hold:
