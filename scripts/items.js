@@ -164,7 +164,7 @@ const RARITY_WEIGHTS = {
     Uncommon: 18,
     Rare:      6,
     Exotic:    1,
-    Unique:    0.1,
+    Unique:    150,
 };
 
 function getRandomItem() {
