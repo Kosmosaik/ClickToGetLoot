@@ -31,7 +31,8 @@ const ItemCatalog = [
     attackSpeed: [1.0, 1.4],
     critChance: [1, 3],
     lootFind: [0, 3],
-    },
+    }
+  },
   {
     name: "L33T POWER SWORD OF DOOM",
     description: "Boi you found it!",
