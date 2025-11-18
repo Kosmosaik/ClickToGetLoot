@@ -31,6 +31,7 @@ function rarityClass(rarity = "") {
     case "uncommon": return "r-uncommon";
     case "rare":     return "r-rare";
     case "exotic":   return "r-exotic";
+    case "unique":   return "r-unique";
     default:         return "r-common";
   }
 }
