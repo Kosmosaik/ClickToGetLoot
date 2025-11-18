@@ -31,6 +31,20 @@ const ItemCatalog = [
     attackSpeed: [1.0, 1.4],
     critChance: [1, 3],
     lootFind: [0, 3],
+    },
+  {
+    name: "L33T POWER SWORD OF DOOM",
+    description: "Boi you found it!",
+    category: "Weapon",
+    slot: "weapon",
+    attackType: "melee",
+    rarity: "Exotic",
+    usage: "Ehehe",
+    statRanges: {
+    damage: [220, 440],
+    attackSpeed: [1.1, 1.6],
+    critChance: [5, 15],
+    lootFind: [5, 20],
     }
   },
 // ========== ARMOR / EQUIPMENT ==========
