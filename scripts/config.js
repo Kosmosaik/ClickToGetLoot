@@ -16,7 +16,7 @@ const GAME_CONFIG = {
       Uncommon: 18,
       Rare:      6,
       Exotic:    1,
-      Unique:    150,
+      Unique:    0.1,
     },
 
     // How Loot Find % biases those weights.
