@@ -2,28 +2,38 @@
 // Keep rarity-weighted random; some items have optional statRanges.
 
 const ItemCatalog = [
+  // ========== WEAPONS ==========
   {
     name: "Rusty Dagger",
-    category: "Weapon",
     description: "A dull old dagger, but still sharp enough to draw blood.",
+    category: "Weapon",
+    slot: "weapon",
+    attackType: "melee",
     rarity: "Common",
     usage: "Basic melee weapon.",
     statRanges: {
     damage: [3, 6],
     attackSpeed: [1.0, 1.3],
+    critChance: [0.5, 2],
+    lootFind: [0, 1],
     }
   },
   {
     name: "Simple Dagger",
+    description: "A simple sharpened dagger, nothing fancy.",
     category: "Weapon",
-    description: "A dull old dagger, but still sharp enough to draw blood.",
+    slot: "weapon",
+    attackType: "melee",
     rarity: "Uncommon",
     usage: "Basic melee weapon.",
     statRanges: {
     damage: [4, 10],
-    attackSpeed: [1.0, 1.35],
+    attackSpeed: [1.0, 1.4],
+    critChance: [1, 3],
+    lootFind: [0, 3],
     }
   },
+    // ========== MATERIALS ==========
   {
     name: "Slime Core",
     category: "Crafting Component",
@@ -31,6 +41,21 @@ const ItemCatalog = [
     rarity: "Uncommon",
     usage: "Used for alchemy or crafting slime-based tools.",
   },
+  {
+    name: "Mythic Fragment",
+    category: "Material",
+    description: "Super rare thingy McDingy",
+    rarity: "Exotic",
+    usage: "eh oh",
+  },
+  {
+    name: "Healing Herb",
+    category: "Material",
+    description: "A fragrant herb used to create basic healing potions.",
+    rarity: "Common",
+    usage: "Restores 10 HP when brewed or eaten raw.",
+  },
+  // ========== TOOLS ==========
   {
     name: "Basic Fishing Rod",
     category: "Tool",
@@ -45,6 +70,7 @@ const ItemCatalog = [
     rarity: "Rare",
     usage: "Mining",
   },
+  // ========== RESOURCES ==========
   {
     name: "Birch Wood",
     category: "Resource",
@@ -72,20 +98,6 @@ const ItemCatalog = [
     description: "A chunk of iron ore ready to be smelted.",
     rarity: "Common",
     usage: "Refine into ingots at a forge.",
-  },
-  {
-    name: "Mythic Fragment",
-    category: "Material",
-    description: "Super rare thingy McDingy",
-    rarity: "Exotic",
-    usage: "eh oh",
-  },
-  {
-    name: "Healing Herb",
-    category: "Material",
-    description: "A fragrant herb used to create basic healing potions.",
-    rarity: "Common",
-    usage: "Restores 10 HP when brewed or eaten raw.",
   }
 ];
 
