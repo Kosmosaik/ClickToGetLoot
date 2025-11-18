@@ -143,6 +143,7 @@ button {
 .r-uncommon { color: #22c55e; }   /* green */
 .r-rare     { color: #3b82f6; }   /* blue */
 .r-exotic   { color: #a855f7; }   /* purple */
+.r-unique   { color: #FFDF00; }   /* yellow */
 
 /* Optional: subtle hover hint (keeps text-only style) */
 .inventory-stack > summary:hover { text-decoration: underline; }
