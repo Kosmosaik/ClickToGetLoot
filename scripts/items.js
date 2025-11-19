@@ -158,7 +158,18 @@ const ItemCatalog = [
 ];
 
 // Use global config-defined weights
-const RARITY_WEIGHTS = GAME_CONFIG.rarityWeights;
+const RARITY_WEIGHTS =
+  (typeof GAME_CONFIG !== "undefined" && GAME_CONFIG.rarityWeights)
+    ? GAME_CONFIG.rarityWeights
+    : {
+        Abundant: 90,
+        Common:   40,
+        Uncommon: 18,
+        Rare:      6,
+        Exotic:    1,
+        // add Unique here if you actually drop it:
+        // Unique:    0.2,
+      };
 
 function rollRarity() {
   return pickWeighted(RARITY_WEIGHTS);
