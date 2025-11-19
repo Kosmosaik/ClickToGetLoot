@@ -67,6 +67,8 @@ Loading a saved game restores your character exactly as you left them.
 - Improved button visibility logic for new and loaded games
 - Improved tooltip formatting and consistency across both panels
 - Cleaned UI layout to ensure Inventory and Equipment align properly
+- Equipping armor (specifically Bark Chest - the only armor item right now) now adds and calculate bonus VIT / HP correctly.
+- Equip button moved to the right side right besides the Trash-button (make sure you press the right button since Trash doesn't have any confirm-system yet).
 
 ### Known Errors/Bugs:
 - Attack stat doesn't take item damage into consideration.
