@@ -33,7 +33,7 @@ FEATURE: Equipment view
   [X] : Weapon Damage
   [X] : Attack Speed
   [ ] : DPS (derived)
-  [ ] : Critical Chance
+  [X] : Critical Chance
   [ ] : Critical Damage Multiplier
   [ ] : Accuracy / Hit Chance
   [ ] : Elemental Damage (when elements gets added)
@@ -60,7 +60,7 @@ FEATURE: Equipment view
   [ ] : Summon Power (if minions gets added)
 
   Loot & Economy Stats
-  [ ] : Loot Find (increases chance of higher-tier drops)
+  [X] : Loot Find (increases chance of higher-tier drops)
   [ ] : Gold Find (if money gets added)
   [ ] : Luck (general rare event chance modifier, also increases crit chance)
 
