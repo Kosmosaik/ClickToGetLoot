@@ -515,6 +515,7 @@ function saveCurrentGame() {
     equipped: getEquippedSnapshot(),
     features: {
       inventoryUnlocked: inventoryUnlocked,
+      equipmentUnlocked: equipmentUnlocked,
     },
   };
 
@@ -558,10 +559,13 @@ function loadSave(id) {
   inventoryUnlocked = !!feats.inventoryUnlocked;
 
   if (inventoryButton) {
-    inventoryButton.style.display = inventoryUnlocked ? "block" : "none";
+    inventoryButton.style.display = "none";
   }
   if (equipmentButton) {
-    equipmentButton.style.display = inventoryUnlocked ? "block" : "none";
+    equipmentButton.style.display = "none";
+  }
+  if (equipmentPanel) {
+    equipmentPanel.style.display = "none";
   }
 
   setScreen("game");
@@ -677,6 +681,7 @@ if (btnCreateCharacter) {
 // ----- Inventory / Loot / Equipment logic -----
 
 let inventoryUnlocked = false;
+let equipmentUnlocked = false;
 
 // Simple RNG helper for stats
 function randFloat(min, max) {
@@ -763,8 +768,14 @@ function startLoot() {
           setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 3000);
           setTimeout(() => inventoryButton.focus(), 200);
         }
+      }
+      
+      // Unlock equipment only when first equippable item drops
+      if (!equipmentUnlocked && instance.slot) {
+        equipmentUnlocked = true;
         if (equipmentButton) {
           equipmentButton.style.display = "block";
+          // optional: add a similar “highlight” class here too
         }
       }
 
