@@ -86,7 +86,6 @@ function getEquippedSnapshot() {
  * Load equipped items from a snapshot (e.g. from a save file).
  * Snapshot format should match what getEquippedSnapshot() produces.
  */
-
 function loadEquippedFromSnapshot(snapshot) {
   for (const slot of EQUIP_SLOTS) {
     const it = snapshot && snapshot[slot] ? snapshot[slot] : null;
@@ -118,11 +117,11 @@ function loadEquippedFromSnapshot(snapshot) {
  *   weaponAttackType: "melee" | "ranged" | null
  * }
  *
- * Right now:
- * - We only actually use critChance and lootFind from item.stats,
- *   and leave the rest as placeholders for later.
- * - Attribute bonuses (str/dex/int/vit) are 0 for now, but we keep the
- *   structure so we can add items that boost attributes later.
+ * Now:
+ * - Attribute bonuses can come from either direct stats (str/dex/int/vit)
+ *   or legacy keys (bonusStr/bonusDex/bonusInt/bonusVit).
+ * - CritChance and LootFind come from item.stats.critChance / lootFind.
+ * - HP, MeleeAtk, RangedAtk bonuses are kept for future use.
  */
 
 function summarizeEquipmentForCharacter() {
@@ -151,8 +150,16 @@ function summarizeEquipmentForCharacter() {
       }
     }
 
-    // ---- Attribute bonuses (future use) ----
-    // If we later add stats like bonusStr / bonusDex etc., they sum here.
+    // ---- Attribute bonuses ----
+    // Support BOTH direct attributes and bonus-style keys.
+    // Direct:   stats.str / stats.dex / stats.int / stats.vit
+    // Legacy:   stats.bonusStr / bonusDex / bonusInt / bonusVit
+
+    if (typeof stats.str === "number") attrBonus.str += stats.str;
+    if (typeof stats.dex === "number") attrBonus.dex += stats.dex;
+    if (typeof stats.int === "number") attrBonus.int += stats.int;
+    if (typeof stats.vit === "number") attrBonus.vit += stats.vit;
+
     if (typeof stats.bonusStr === "number") attrBonus.str += stats.bonusStr;
     if (typeof stats.bonusDex === "number") attrBonus.dex += stats.bonusDex;
     if (typeof stats.bonusInt === "number") attrBonus.int += stats.bonusInt;
@@ -164,7 +171,6 @@ function summarizeEquipmentForCharacter() {
     }
 
     // ---- Crit chance & Loot Find from item stats ----
-    // We'll add these to items (e.g. dagger stats) via statRanges later.
     if (typeof stats.critChance === "number") {
       statsBonus.bonusCritChance += stats.critChance;
     }
@@ -202,4 +208,3 @@ function getEquippedState() {
   }
   return out;
 }
-
