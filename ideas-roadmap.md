@@ -182,4 +182,7 @@ BRAINSTORM:
 @ Unlock new crafting recipes by:
  - Buying books from merchants
  - Figure out correct ingredient combinations.
+ - 
  - Random Events
+
+@ Escape combat: Character - Enemy. diatance between. movement speed + RNG etc will determine if player escapes. show distance dynamically change based on movement speed of player and enemy
