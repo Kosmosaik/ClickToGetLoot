@@ -186,3 +186,5 @@ BRAINSTORM:
  - Random Events
 
 @ Escape combat: Character - Enemy. diatance between. movement speed + RNG etc will determine if player escapes. show distance dynamically change based on movement speed of player and enemy
+
+@ Biome Specific recipes / merchant items.
