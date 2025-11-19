@@ -158,6 +158,55 @@ function removeOneFromGroup(itemName, quality, stats) {
   }
 }
 
+function equipOneFromGroup(itemName, quality, stats) {
+  const stack = inventory[itemName];
+  if (!stack) return;
+
+  // Find the specific instance that matches this quality + stats
+  const idx = stack.items.findIndex(
+    it => it.quality === quality && statsEqual(it.stats, stats)
+  );
+  if (idx === -1) return;
+
+  const item = stack.items[idx];
+
+  // Determine which slot this item should go into (weapon, chest, etc.)
+  const slot = getEquipSlotForItem(item);
+  if (!slot) {
+    console.warn("Item is not equippable:", item);
+    return;
+  }
+
+  // Equip this item, and get back whatever was previously in that slot
+  const previousEquipped = equipItemToSlot(slot, item);
+
+  // Remove ONE instance from the inventory stack
+  removeOneFromGroup(itemName, quality, stats);
+  // (removeOneFromGroup already decreases qty and re-renders)
+
+  // If a previous item was equipped, return it to the inventory
+  if (previousEquipped) {
+    addToInventory(previousEquipped);
+  }
+
+  // Recompute character stats (HP / attack / crit / loot find)
+  if (typeof recomputeCharacterComputedState === "function") {
+    recomputeCharacterComputedState();
+  }
+
+  // Auto-save after changing equipment
+  if (typeof saveCurrentGame === "function") {
+    saveCurrentGame();
+  }
+}
+
+function getEquipSlotForItem(item) {
+  // For now we just trust item.slot ("weapon", "chest", etc.)
+  if (!item || !item.slot) return null;
+  // Optional: validate slot name later
+  return item.slot;
+}
+
 // Category helpers
 function categoryHeaderLabel(category = "Other") {
   const map = {
@@ -391,6 +440,20 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
 
     return header + desc + stats;
   });
+
+  // --- NEW: Equip button (only if item is equippable) ---
+  if (rep.slot) {
+    const equipBtn = document.createElement("button");
+    equipBtn.className = "equip-btn";
+    equipBtn.textContent = "Equip";
+    equipBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      Tooltip.hide();
+      equipOneFromGroup(itemName, quality, rep.stats);
+    });
+    div.appendChild(document.createTextNode(" "));
+    div.appendChild(equipBtn);
+  }
 
   // Trash button
   const trashBtn = document.createElement("button");
