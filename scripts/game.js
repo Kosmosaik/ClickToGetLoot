@@ -775,9 +775,12 @@ function startLoot() {
         equipmentUnlocked = true;
         if (equipmentButton) {
           equipmentButton.style.display = "block";
-          // optional: add a similar “highlight” class here too
+          // NEW: same unlock effect (ring/glow) as inventory
+          equipmentButton.classList.add("inventory-unlock");
+          setTimeout(() => equipmentButton.classList.remove("inventory-unlock"), 3000);
+          setTimeout(() => equipmentButton.focus(), 200);
+          }
         }
-      }
 
       // Auto-save after loot (character must exist)
       saveCurrentGame();
