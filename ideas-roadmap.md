@@ -156,6 +156,8 @@ FEATURE: Enemies
    @ Add enemies to zones. Add all to starting zone in the beginning to test fighting, balancing, player death etc.
    @ Make some enemies appear in the exploration list (same as locations and pois), but also make some enemies trigger "forced combat".
    @ Add enemy loot pools: Different loot for different enemies.
+   @ Even though enenmies will have their own loot pool /drop table, there will be a chance for an enemy to drop from a "generic" loot pool that is much bigger, 
+   	 to randomize it more and give that element of surprise/freshness and jackpot feel.
 
 FEATURE: Combat
    @ Add simple combat system (timer based attacks with a simple log updating when player/enemy attacks, showing damage done etc).
