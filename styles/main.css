@@ -188,7 +188,7 @@ button {
 }
 
 .equipment-summary-row span:first-child {
-  width: 50px;        /* tweak to taste: 50–70px works nicely */
+  width: 80px;        /* tweak to taste: 50–70px works nicely */
 }
 
 .equipped-label {
