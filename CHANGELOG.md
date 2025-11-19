@@ -1,3 +1,30 @@
+## v0.0.57 (WIP) – Equipment panel & character summary
+
+### Added
+- New Equipment menu button next to the Inventory button on the game screen.
+- New Equipment panel displaying:
+  - Equipped slots: Weapon, Chest, Legs, Feet, Trinket.
+  - Per-slot item names with quality and rarity coloring.
+  - `[Unequip]` button per slot which returns items to the inventory.
+- Character summary in the Equipment panel:
+  - Attributes shown as `TOTAL (bonus)` for STR, DEX, INT, VIT.
+  - Derived stats:
+    - Max HP
+    - Active Attack (Melee/Ranged/Unarmed)
+    - Crit Chance (%)
+    - Loot Find (%)
+
+### Changed
+- Equip buttons now share styling with Trash buttons for visual consistency.
+- Inventory unlock now also reveals the Equipment button and allows both panels
+  to be open at the same time.
+
+### Notes
+- Tooltips for equipped items match inventory tooltips but include an
+  additional “Equipped” label under the Quality line.
+
+---
+
 ## v0.0.56 (WIP) – Equipment saving and core equip flow
 
 ### Added
