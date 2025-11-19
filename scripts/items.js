@@ -157,15 +157,12 @@ const ItemCatalog = [
   }
 ];
 
-// Rarity weights (use only buckets that actually exist)
-const RARITY_WEIGHTS = {
-    Abundant: 250,
-    Common:   100,
-    Uncommon: 50,
-    Rare:      25,
-    Exotic:    4,
-    Unique:    0.5,
-};
+// Use global config-defined weights
+const RARITY_WEIGHTS = GAME_CONFIG.rarityWeights;
+
+function rollRarity() {
+  return pickWeighted(RARITY_WEIGHTS);
+}
 
 function getRandomItem() {
   // Group items by rarity
