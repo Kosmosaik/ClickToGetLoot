@@ -441,7 +441,12 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
     return header + desc + stats;
   });
 
-  // --- NEW: Equip button (only if item is equippable) ---
+  // --- Buttons container: Equip (if equippable) + Trash together ---
+  const btnWrap = document.createElement("span");
+  btnWrap.className = "inv-actions";
+  btnWrap.style.marginLeft = "8px";
+
+  // Equip button (only if item is equippable)
   if (rep.slot) {
     const equipBtn = document.createElement("button");
     equipBtn.className = "equip-btn";
@@ -451,8 +456,7 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
       Tooltip.hide();
       equipOneFromGroup(itemName, quality, rep.stats);
     });
-    div.appendChild(document.createTextNode(" "));
-    div.appendChild(equipBtn);
+    btnWrap.appendChild(equipBtn);
   }
 
   // Trash button
@@ -464,8 +468,9 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
     Tooltip.hide();
     removeOneFromGroup(itemName, quality, rep.stats);
   });
-  div.appendChild(document.createTextNode(" "));
-  div.appendChild(trashBtn);
+  btnWrap.appendChild(trashBtn);
+
+  div.appendChild(btnWrap);
 
   return div;
 }
