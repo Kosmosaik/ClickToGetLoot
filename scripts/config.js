@@ -121,8 +121,8 @@ const GAME_CONFIG = {
     attackAverageFactor: 0.85,  // used later: AttackShown = EDMax * 0.85
 
     // Unarmed behaviour
-    unarmedBaseDamage: 5,
-    unarmedDamagePerStr: 0.5,
+    unarmedBaseDamage: 4,
+    unarmedDamagePerStr: 0.4,
     unarmedAttackSpeed: 1.2,
 
     defaultAttrPerPower: 2.0,
