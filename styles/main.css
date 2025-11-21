@@ -244,6 +244,34 @@ button {
   font-size: 0.8rem;
 }
 
+/* Skills panel – fixed on the right side */
+#skills-panel {
+  position: fixed;
+  top: 70px;
+  right: 10px;           /* stick to right edge */
+  display: none;
+  background: #111;
+  border: 1px solid #555;
+  padding: 10px;
+  border-radius: 8px;
+  width: 320px;
+  max-height: 70vh;
+  overflow: auto;
+  z-index: 1000;         /* make sure it's above inventory/equipment */
+}
+
+#skills-panel h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+#skills-list {
+  display: flex;
+  flex-direction: column;
+  row-gap: 4px;
+}
+
 /* Rarity colors (accessible on dark bg) */
 .rarity { font-weight: 600; }
 .r-abundant { color: #9aa5b1; }   /* gray */
