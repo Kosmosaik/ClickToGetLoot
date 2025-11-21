@@ -64,10 +64,10 @@ const GAME_CONFIG = {
     weapon: {
       // What we call each skill in the UI
       labels: {
-        dagger: "Daggers",
-        sword: "Swords",
-        axe: "Axes",
-        bow: "Bows",
+        dagger: "Dagger",
+        sword: "Sword",
+        axe: "Axe",
+        bow: "Bow",
         unarmed: "Unarmed",
       },
       // Starting values for a fresh character
