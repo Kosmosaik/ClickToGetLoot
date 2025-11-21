@@ -80,6 +80,13 @@ const GAME_CONFIG = {
       },
       minLevel: 0,
       maxLevel: 200,
+
+      requiredFromPower: {
+        base: 20,    // requirement even for very weak weapons
+        perPower: 5, // +5 required skill per 1 "power"
+        min: 0,
+        max: 200,
+      },
     },
   },
 
@@ -110,6 +117,11 @@ const GAME_CONFIG = {
   // Small combat constants
   combat: {
     attackAverageFactor: 0.85,  // used later: AttackShown = EDMax * 0.85
+
+    // Unarmed behaviour
+    unarmedBaseDamage: 1,
+    unarmedDamagePerStr: 0.2,
+    unarmedAttackSpeed: 1.2,
   },
 
   inventory: {
