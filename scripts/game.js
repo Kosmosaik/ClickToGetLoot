@@ -31,6 +31,12 @@ const btnIntPlus = document.getElementById("btn-int-plus");
 const btnVitMinus = document.getElementById("btn-vit-minus");
 const btnVitPlus = document.getElementById("btn-vit-plus");
 
+const hpBarContainer = document.getElementById("hp-bar-container");
+const hpBarFill = document.getElementById("hp-bar-fill");
+const hpBarLabel = document.getElementById("hp-bar-label");
+
+let currentHP = 0;
+
 // Patch notes
 const patchNotesBtn = document.getElementById("patch-notes-btn");
 const patchNotesPanel = document.getElementById("patch-notes-panel");
@@ -111,6 +117,31 @@ function changeWeaponSkill(key, delta) {
   }
 }
 
+function updateHPBar() {
+  if (!hpBarContainer || !hpBarFill || !hpBarLabel) return;
+
+  if (!characterComputed || !characterComputed.derivedStats) {
+    hpBarContainer.style.display = "none";
+    return;
+  }
+
+  const max = characterComputed.derivedStats.maxHP || 0;
+  if (max <= 0) {
+    hpBarContainer.style.display = "none";
+    return;
+  }
+
+  // For now, always full HP (no damage system yet)
+  if (!currentHP || currentHP > max) {
+    currentHP = max;
+  }
+
+  const pct = Math.max(0, Math.min(100, (currentHP / max) * 100));
+  hpBarFill.style.width = `${pct}%`;
+  hpBarLabel.textContent = `HP ${Math.round(currentHP)}/${Math.round(max)}`;
+  hpBarContainer.style.display = "block";
+}
+
 /**
  * Recompute the character's attributes and derived stats based on:
  * - The current character's base stats (STR, DEX, INT, VIT)
@@ -134,10 +165,11 @@ function recomputeCharacterComputedState() {
   );
 
   updateEquipmentPanel();
+  updateCharacterSummary();
+  updateHPBar();
 
   // For debugging:
   console.log("Character computed state:", characterComputed);
-}
 
 /**
  * Render the equipment panel: equipped items + character summary.
@@ -281,9 +313,19 @@ function updateEquipmentPanel() {
   }
 
   derivedSection.appendChild(makeDerivedRow("Max HP:", derived.maxHP));
-  derivedSection.appendChild(
-    makeDerivedRow(`${derived.activeAttack.label}:`, derived.activeAttack.value)
-  );
+
+  if (derived.attack) {
+    derivedSection.appendChild(
+      makeDerivedRow(`${derived.attack.label}:`, derived.attack.value)
+    );
+    derivedSection.appendChild(
+      makeDerivedRow("Attack Speed:", derived.attackSpeed)
+    );
+    derivedSection.appendChild(
+      makeDerivedRow("DPS:", derived.dps)
+    );
+  }
+
   derivedSection.appendChild(
     makeDerivedRow("Crit Chance:", derived.critChance, "%")
   );
@@ -500,14 +542,25 @@ function updateCharacterSummary() {
     return;
   }
 
-  const s = currentCharacter.stats;
   if (charSummaryName) {
     charSummaryName.textContent = currentCharacter.name;
   }
-  if (charSummaryStats) {
-    // We no longer show attributes here; keep it empty for now.
+
+  if (!charSummaryStats) return;
+
+  if (!characterComputed || !characterComputed.derivedStats) {
     charSummaryStats.textContent = "";
+    return;
   }
+
+  const d = characterComputed.derivedStats;
+  const hp = typeof fmt === "function" ? fmt(d.maxHP || 0) : d.maxHP;
+  const atk = d.attack ? fmt(d.attack.value || 0) : 0;
+  const as = d.attackSpeed != null ? fmt(d.attackSpeed) : 0;
+  const dps = d.dps != null ? fmt(d.dps) : 0;
+
+  charSummaryStats.textContent =
+    `HP ${hp} | ATK ${atk} | AS ${as} | DPS ${dps}`;
 }
 
 // ----- Save system -----
