@@ -78,9 +78,6 @@ Inventory and equipment tooltips now match in style and information.
 ---
 
 ## Fixes
-- Fixed crashes related to tooltips and item quality ranges.
-- Fixed issues loading older save files.
-- Fixed panels overlapping; the Skills menu now displays correctly.
 - Various minor UI cleanup and consistency fixes.
 
 ---
