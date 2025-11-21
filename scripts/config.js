@@ -46,11 +46,11 @@ const GAME_CONFIG = {
     hpPerVit: 5,       // +5 HP per VIT point
 
     // Crit chance
-    baseCritChance: 5, // % base crit chance
-    critPerDex: 0.5,   // % crit chance per 1 DEX
+    baseCritChance: 2, // % base crit chance
+    critPerDex: 0.25,   // % crit chance per 1 DEX
 
     // Loot find
-    lootFindPerInt: 0.5, // % loot find per 1 INT
+    lootFindPerInt: 0.25, // % loot find per 1 INT
 
     // Attack scaling (we'll use these in character.js)
     meleeMainScale: 2.0,   // STR contribution to melee
@@ -93,24 +93,24 @@ const GAME_CONFIG = {
   // Weapon type → which stats matter + how much recommended stats scale with power
   weaponProfiles: {
     dagger: {
-      attrWeights: { STR: 0.4, DEX: 0.6 },
-      attrPerPower: 1.8,
+      attrWeights: { STR: 0.3, DEX: 0.7 },
+      attrPerPower: 2.0,
     },
     sword: {
-      attrWeights: { STR: 0.6, DEX: 0.4 },
+      attrWeights: { STR: 0.7, DEX: 0.3 },
       attrPerPower: 2.0,
     },
     axe: {
-      attrWeights: { STR: 0.8, DEX: 0.2 },
-      attrPerPower: 2.2,
+      attrWeights: { STR: 0.9, DEX: 0.1 },
+      attrPerPower: 2.0,
     },
     bow: {
-      attrWeights: { STR: 0.2, DEX: 0.8 },
+      attrWeights: { STR: 0.1, DEX: 0.9 },
       attrPerPower: 2.0,
     },
     unarmed: {
       attrWeights: { STR: 0.5, DEX: 0.3, VIT: 0.2 },
-      attrPerPower: 1.5,
+      attrPerPower: 2.0,
     },
   },
 
@@ -119,11 +119,11 @@ const GAME_CONFIG = {
     attackAverageFactor: 0.85,  // used later: AttackShown = EDMax * 0.85
 
     // Unarmed behaviour
-    unarmedBaseDamage: 1,
+    unarmedBaseDamage: 2,
     unarmedDamagePerStr: 0.2,
     unarmedAttackSpeed: 1.2,
 
-    defaultAttrPerPower: 1.8,
+    defaultAttrPerPower: 2.0,
   },
 
   inventory: {
@@ -140,6 +140,6 @@ const GAME_CONFIG = {
     ],
   },
 
-  raritySortOrder: ["Abundant", "Common", "Uncommon", "Rare", "Exotic", "Unique"],
+  raritySortOrder: ["Unique", "Exotic", "Rare", "Uncommon", "Common", "Abundant"],
 };
 
