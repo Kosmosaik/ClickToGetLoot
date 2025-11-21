@@ -62,6 +62,11 @@ const equipmentButton = document.getElementById("equipment-btn");
 const equipmentSlotsContainer = document.getElementById("equipment-slots");
 const equipmentSummaryContainer = document.getElementById("equipment-summary");
 
+// NEW: skills UI
+const skillsPanel = document.getElementById("skills-panel");
+const skillsButton = document.getElementById("skills-btn");
+const skillsListContainer = document.getElementById("skills-list");
+
 // ----- Character summary on game screen -----
 const charSummaryName = document.getElementById("char-summary-name");
 const charSummaryStats = document.getElementById("char-summary-stats");
@@ -876,6 +881,13 @@ if (equipmentButton && equipmentPanel) {
   equipmentButton.addEventListener("click", () => {
     equipmentPanel.style.display =
       (equipmentPanel.style.display === "block") ? "none" : "block";
+  });
+}
+
+if (skillsButton && skillsPanel) {
+  skillsButton.addEventListener("click", () => {
+    const visible = skillsPanel.style.display === "block";
+    skillsPanel.style.display = visible ? "none" : "block";
   });
 }
 
