@@ -170,6 +170,7 @@ function recomputeCharacterComputedState() {
 
   // For debugging:
   console.log("Character computed state:", characterComputed);
+}
 
 /**
  * Render the equipment panel: equipped items + character summary.
