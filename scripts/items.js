@@ -39,8 +39,8 @@ const ItemCatalog = [
     description: "Boi you found it!",
     category: "Weapon",
     slot: "weapon",
-    weaponType: "dagger",
-    rarity: "Uncommon",
+    weaponType: "sword",
+    rarity: "Unique",
     skillReq: 100,
     attrPerPower: 2,
     statRanges: {
