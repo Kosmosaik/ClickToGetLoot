@@ -298,26 +298,19 @@ function buildEquipmentItemTooltip(item, slot) {
     lines.push(`Raw DPS: ${fmt(rawDps)}`);
 
     // Required skill vs your skill (same format as inventory)
-    const skillsCfg =
-      (GAME_CONFIG.skills && GAME_CONFIG.skills.weapon) || {};
-    const labels = skillsCfg.labels || {};
-    const weaponType = inferWeaponType(item);
-    const label = labels[weaponType] || weaponType;
+    const required =
+      typeof item.skillReq === "number" ? item.skillReq : 0;
 
-    if (typeof computeRequiredSkillForWeapon === "function") {
-      const reqInfo = computeRequiredSkillForWeapon(dmg, as, weaponType);
+    const playerSkill =
+      (window.currentCharacter &&
+        window.currentCharacter.skills &&
+        window.currentCharacter.skills[weaponType]) ||
+      0;
 
-      const playerSkill =
-        (window.currentCharacter &&
-          window.currentCharacter.skills &&
-          window.currentCharacter.skills[weaponType]) ||
-        0;
-
-      if (reqInfo) {
-        lines.push(
-          `${label}: ${reqInfo.required} (${fmt(playerSkill)})`
-        );
-      }
+    if (required > 0) {
+      lines.push(
+        `${label}: ${required} (${fmt(playerSkill)})`
+      );
     }
   }
 
