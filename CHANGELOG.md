@@ -1,3 +1,123 @@
+## v0.0.65 — Combat, Skills & Character Sheet
+
+### Added
+- **Combat & derived stat system**
+  - New unified combat pipeline in `character.js` that derives:
+    - `Max HP`, `Attack`, `Attack Speed`, `DPS`, `Crit Chance`, `Loot Find`.
+  - Attack is now based on:
+    - Weapon damage and attack speed.
+    - Weapon skill efficiency (how well you’ve trained with that weapon type).
+    - Attribute efficiency (how well your STR/DEX/INT fit the weapon’s profile).
+  - A small `baseAttack` value is added so early-game numbers never feel completely flat.
+
+- **Weapon skill system**
+  - Added weapon skills to the character:
+    - `Dagger`, `Sword`, `Axe`, `Bow`, `Unarmed`.
+  - Skills are configured in `GAME_CONFIG.skills.weapon` with:
+    - `labels` (what to show in UI),
+    - `defaultLevels` (starting values),
+    - and `requiredFromPower` (how much skill a weapon “wants” based on its power).
+  - Each character now saves and loads their weapon skills alongside stats and inventory.
+
+- **Skills panel (dev UI)**
+  - New **Skills** menu button next to Inventory and Equipment.
+  - Opens a dedicated **Skills panel** that lists all weapon skills with **– / +** buttons for quick testing.
+  - Adjusting skills immediately recomputes combat stats and is saved with the character.
+
+- **Equipment-driven character sheet**
+  - Equipment panel now doubles as the **character sheet**:
+    - Shows attributes (`STR`, `DEX`, `INT`, `VIT`) as `Total (bonus)`.
+    - Shows derived stats: `Max HP`, `Attack`, `Attack Speed`, `DPS`, `Crit Chance %`, `Loot Find %`.
+  - All values are taken from the new computed character state (base stats + equipment bonuses + weapon metadata).
+
+- **HP bar**
+  - Added an **HP bar** under the loot area:
+    - Shows `HP current / max`.
+    - Currently always full (no damage system yet), but fully wired to `Max HP` from the combat system.
+
+- **Weapon metadata on items**
+  - Weapons in `items.js` now carry combat metadata:
+    - `weaponType` (e.g. `dagger`, `sword`, `axe`, `bow`, `unarmed`).
+    - `skillReq` (required level in that weapon skill to fully “master” the item).
+    - `attrPerPower` (how many relevant attribute points are recommended per point of weapon power).
+  - This lets each item define its own difficulty/“mastery curve” instead of relying purely on generic formulas.
+
+- **Save system improvements**
+  - Save snapshots now include:
+    - `skills` (per-weapon skill levels),
+    - `equipped` (equipped items snapshot),
+    - `features` flags (`inventoryUnlocked`, `equipmentUnlocked`).
+  - Load logic can still handle older saves (falls back to sensible defaults if fields are missing).
+
+- **Debug hooks**
+  - Added `window.debugCharacterComputed()` to quickly inspect the fully computed state in the console.
+  - Makes it easier to verify Attack/DPS/HP values while tuning config or weapons.
+
+---
+
+### Changed
+- **Character summary & header**
+  - The old top-right header stats have been removed.
+  - Character name is now shown in the small summary area, while **all stats** live in the Equipment (character sheet) panel.
+  - The game-screen summary now shows a compact line: `HP | ATK | AS | DPS`, driven by the new combat system.
+
+- **Equipment panel layout**
+  - Each equipment slot (Weapon / Chest / Legs / Feet / Trinket) shows:
+    - The currently equipped item, colored by rarity.
+    - An **Unequip** button that sends the item back to the inventory.
+  - Hovering an equipped item now uses the same tooltip structure as inventory items and adds an **“Equipped”** marker.
+
+- **Inventory equip/trash ordering**
+  - In item rows, the action buttons have been reordered:
+    - **Equip** is now on the **left**.
+    - **Trash** is now on the **right**.
+  - This better matches expectations and reduces misclick risk.
+
+- **Inventory stack display & tooltips**
+  - Inventory still groups identical items into stacks, but:
+    - The **stack header** (`Item xN`) no longer shows a tooltip (to avoid redundant info).
+    - Each **individual entry inside the stack** has its own detailed tooltip.
+  - Item tooltips now show:
+    - Damage, Attack Speed, raw DPS.
+    - Skill requirement line in the form: `Dagger: 20 (17)` (Required skill vs your current skill).
+    - All rolled stats using readable labels (via `STAT_LABELS`).
+    - For inventory items, comparisons vs currently equipped item in that slot (using `+ / –` style differences).
+
+- **Combat config centralization**
+  - All combat-related tuning is now in `GAME_CONFIG`:
+    - `combat`: unarmed behavior, attack averaging factor, defaults.
+    - `skills.weapon`: skill labels, default levels, requirement-from-power curve.
+    - `weaponProfiles`: per-weapon attribute weightings and recommended attribute scaling.
+  - This makes it much easier to tweak balance without hunting through multiple scripts.
+
+- **Rarity / sorting tweaks**
+  - Rarity and inventory sort order are now driven by `GAME_CONFIG.raritySortOrder` and `GAME_CONFIG.inventory`.
+  - Sorting by “grade” now shows **better items first** (highest grade at the top of the list).
+
+---
+
+### Fixed
+- **Tooltip crashes**
+  - Fixed a `label is not defined` error in equipment tooltips when displaying skill requirements.
+  - Fixed `qualityStep` and related issues causing crashes when rendering inventory stacks.
+
+- **Save/load edge cases**
+  - Loading old saves without `skills` or `equipped` data no longer breaks anything:
+    - Skills default to `GAME_CONFIG.skills.weapon.defaultLevels`.
+    - Equipped state defaults to empty, but inventory remains intact.
+  - Feature unlock flags are restored from save data when present, or inferred from contents when loading older saves.
+
+- **Inventory UI oddities**
+  - Removed the stack-level tooltip that duplicated item info and didn’t add much value.
+  - Ensured the Skills panel appears above other panels and doesn’t hide behind Inventory/Equipment.
+
+---
+
+> **Note:**  
+> After merging this branch, update `GAME_CONFIG.version` in `config.js` from `"0.0.65-dev"` to `"0.0.65"` and place this section at the top of `CHANGELOG.md`. Then you’re officially on **v0.0.65**. 🎉
+
+---
+
 ## v0.0.61 — Equipment & Stat Polish
 
 ### Added
