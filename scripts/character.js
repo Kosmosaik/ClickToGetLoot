@@ -202,7 +202,7 @@ function computeDerivedStats(
     } else {
       const over = ratio - 1;
       const bonus = over * 0.25;
-      skillEff = Math.min(1 + bonus, 1.15);
+      skillEff = Math.min(1 + bonus, 1.10);
     }
   }
 
