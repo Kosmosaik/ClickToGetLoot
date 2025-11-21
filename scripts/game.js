@@ -122,6 +122,26 @@ function changeWeaponSkill(key, delta) {
   }
 }
 
+// NEW: dev helper to tweak base attributes directly from equipment panel
+function changeAttribute(key, delta) {
+  if (!currentCharacter || !currentCharacter.stats) return;
+
+  const stats = currentCharacter.stats;
+  if (typeof stats[key] !== "number") {
+    stats[key] = 0;
+  }
+
+  const next = stats[key] + delta;
+  if (next < 1) return; // avoid 0 or negative for now
+
+  stats[key] = next;
+
+  recomputeCharacterComputedState();
+  if (typeof saveCurrentGame === "function") {
+    saveCurrentGame();
+  }
+}
+
 function updateHPBar() {
   if (!hpBarContainer || !hpBarFill || !hpBarLabel) return;
 
@@ -172,6 +192,7 @@ function recomputeCharacterComputedState() {
   updateEquipmentPanel();
   updateCharacterSummary();
   updateHPBar();
+  updateSkillsPanel(); // NEW
 
   // For debugging:
   console.log("Character computed state:", characterComputed);
@@ -179,6 +200,7 @@ function recomputeCharacterComputedState() {
 
 /**
  * Render the equipment panel: equipped items + character summary.
+ * (Equipment view is the "character sheet" now.)
  */
 function updateEquipmentPanel() {
   if (!equipmentSlotsContainer || !equipmentSummaryContainer) return;
@@ -265,14 +287,42 @@ function updateEquipmentPanel() {
   function makeAttrRow(label, key) {
     const row = document.createElement("div");
     row.className = "equipment-summary-row";
+
     const left = document.createElement("span");
     left.textContent = label;
-    const right = document.createElement("span");
+    row.appendChild(left);
+
+    const mid = document.createElement("span");
     const t = total[key];
     const b = bonus[key];
-    right.textContent = `${fmt(t)} (${fmt(b)})`;
-    row.appendChild(left);
+    mid.textContent = `${fmt(t)} (${fmt(b)})`;
+    row.appendChild(mid);
+
+    // Right: dev +/- buttons for testing attributes
+    const right = document.createElement("span");
+
+    const minusBtn = document.createElement("button");
+    minusBtn.type = "button";
+    minusBtn.className = "trash-btn";
+    minusBtn.textContent = "-";
+    minusBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      changeAttribute(key, -1);
+    });
+
+    const plusBtn = document.createElement("button");
+    plusBtn.type = "button";
+    plusBtn.className = "equip-btn";
+    plusBtn.textContent = "+";
+    plusBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      changeAttribute(key, +1);
+    });
+
+    right.appendChild(minusBtn);
+    right.appendChild(plusBtn);
     row.appendChild(right);
+
     return row;
   }
 
@@ -326,64 +376,74 @@ function updateEquipmentPanel() {
   );
 
   equipmentSummaryContainer.appendChild(derivedSection);
+}
 
-  // ---- Weapon Skills ----
+/**
+ * Render the Skills panel: weapon skills with dev +/- controls.
+ */
+function updateSkillsPanel() {
+  if (!skillsPanel || !skillsListContainer) return;
+
+  skillsListContainer.innerHTML = "";
+
+  if (!currentCharacter) return;
+
   const skillsCfg = GAME_CONFIG.skills && GAME_CONFIG.skills.weapon;
-  const skills = currentCharacter && currentCharacter.skills;
+  const skills = currentCharacter.skills;
 
-  if (skillsCfg && skills) {
-    const skillsSection = document.createElement("div");
-    skillsSection.className = "equipment-summary-section";
+  if (!skillsCfg || !skills) {
+    skillsListContainer.textContent = "No skills available.";
+    return;
+  }
 
-    const skillsTitle = document.createElement("div");
-    skillsTitle.className = "equipment-summary-title";
-    skillsTitle.textContent = "Weapon Skills (dev)";
-    skillsSection.appendChild(skillsTitle);
+  const labels = skillsCfg.labels || {};
+  const skillKeys = Object.keys(labels);
 
-    const labels = skillsCfg.labels || {};
-    const skillKeys = Object.keys(labels);
+  const title = document.createElement("div");
+  title.className = "equipment-summary-title";
+  title.textContent = "Weapon Skills";
+  skillsListContainer.appendChild(title);
 
-    skillKeys.forEach((key) => {
-      const row = document.createElement("div");
-      row.className = "equipment-summary-row";
+  skillKeys.forEach((key) => {
+    const row = document.createElement("div");
+    row.className = "equipment-summary-row";
 
-      const left = document.createElement("span");
-      left.textContent = labels[key] + ":";
-      row.appendChild(left);
+    const left = document.createElement("span");
+    left.textContent = labels[key] + ":";
+    row.appendChild(left);
 
-      const mid = document.createElement("span");
-      mid.textContent = skills[key] ?? 0;
-      row.appendChild(mid);
+    const mid = document.createElement("span");
+    mid.textContent = skills[key] ?? 0;
+    row.appendChild(mid);
 
-      const right = document.createElement("span");
+    const right = document.createElement("span");
 
-      const minusBtn = document.createElement("button");
-      minusBtn.type = "button";
-      minusBtn.className = "trash-btn";
-      minusBtn.textContent = "-";
-      minusBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        changeWeaponSkill(key, -1);
-      });
-
-      const plusBtn = document.createElement("button");
-      plusBtn.type = "button";
-      plusBtn.className = "equip-btn";
-      plusBtn.textContent = "+";
-      plusBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        changeWeaponSkill(key, +1);
-      });
-
-      right.appendChild(minusBtn);
-      right.appendChild(plusBtn);
-      row.appendChild(right);
-
-      skillsSection.appendChild(row);
+    const minusBtn = document.createElement("button");
+    minusBtn.type = "button";
+    minusBtn.className = "trash-btn";
+    minusBtn.textContent = "-";
+    minusBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      changeWeaponSkill(key, -1);
+      updateSkillsPanel();
     });
 
-    equipmentSummaryContainer.appendChild(skillsSection);
-  }
+    const plusBtn = document.createElement("button");
+    plusBtn.type = "button";
+    plusBtn.className = "equip-btn";
+    plusBtn.textContent = "+";
+    plusBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      changeWeaponSkill(key, +1);
+      updateSkillsPanel();
+    });
+
+    right.appendChild(minusBtn);
+    right.appendChild(plusBtn);
+    row.appendChild(right);
+
+    skillsListContainer.appendChild(row);
+  });
 }
 
 // ----- Patch notes -----
@@ -527,6 +587,7 @@ function randomizeStats() {
 }
 
 function updateCharacterSummary() {
+  // Only show the character name in the header; all stats are in the equipment view.
   if (!currentCharacter) {
     if (charSummaryName) charSummaryName.textContent = "";
     if (charSummaryStats) charSummaryStats.textContent = "";
@@ -540,20 +601,6 @@ function updateCharacterSummary() {
   if (charSummaryStats) {
     charSummaryStats.textContent = "";
   }
-
-  if (!characterComputed || !characterComputed.derivedStats) {
-    charSummaryStats.textContent = "";
-    return;
-  }
-
-  const d = characterComputed.derivedStats;
-  const hp = typeof fmt === "function" ? fmt(d.maxHP || 0) : d.maxHP;
-  const atk = d.attack ? fmt(d.attack.value || 0) : 0;
-  const as = d.attackSpeed != null ? fmt(d.attackSpeed) : 0;
-  const dps = d.dps != null ? fmt(d.dps) : 0;
-
-  charSummaryStats.textContent =
-    `HP ${hp} | ATK ${atk} | AS ${as} | DPS ${dps}`;
 }
 
 // ----- Save system -----
@@ -642,7 +689,7 @@ function saveCurrentGame() {
     id: currentSaveId || generateId(),
     name: currentCharacter.name,
     stats: { ...currentCharacter.stats },
-    skills: cloneSkills(currentCharacter.skills),   // NEW
+    skills: cloneSkills(currentCharacter.skills),
     inventory: getInventorySnapshot(),
     equipped: getEquippedSnapshot(),
     features: {
@@ -922,13 +969,11 @@ function startLoot() {
         category: template.category,
         description: template.description,
         rarity: template.rarity,
-        usage: template.usage,
         quality,
         stats,
         slot: template.slot || null,
-        attackType: template.attackType || null,
 
-        // NEW: pass through combat metadata
+        // Pass through combat metadata from items.js
         weaponType: template.weaponType || null,
         skillReq: typeof template.skillReq === "number" ? template.skillReq : null,
         attrPerPower: typeof template.attrPerPower === "number"
