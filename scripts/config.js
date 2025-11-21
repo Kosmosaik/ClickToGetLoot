@@ -11,12 +11,12 @@ const GAME_CONFIG = {
 
     // Base rarity weights (these should match what you currently use in items.js)
     rarityWeights: {
-      Abundant: 250,
+      Abundant: 200,
       Common:   100,
       Uncommon: 50,
       Rare:      25,
-      Exotic:    4,
-      Unique:    0.5,
+      Exotic:    12,
+      Unique:    6,
     },
 
     // How Loot Find % biases those weights.
