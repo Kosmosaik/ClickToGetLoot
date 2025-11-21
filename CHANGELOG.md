@@ -1,4 +1,4 @@
-# Patch Notes – Version 0.0.65 - Character & Combat Revamp”
+# Patch Notes – Version 0.0.65 - Character & Combat Revamp
 
 ## New Features
 
