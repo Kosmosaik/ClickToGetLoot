@@ -136,7 +136,8 @@ function summarizeEquipmentForCharacter() {
   };
 
   let weaponAttackType = null;
-
+  let mainWeapon = null;
+  
   for (const slot of EQUIP_SLOTS) {
     const item = equipped[slot];
     if (!item) continue;
@@ -148,6 +149,42 @@ function summarizeEquipmentForCharacter() {
       if (item.attackType === "melee" || item.attackType === "ranged") {
         weaponAttackType = item.attackType;
       }
+    }
+
+    // Main weapon snapshot for combat calculations
+    if (slot === "weapon") {
+      const damage = typeof stats.damage === "number" ? stats.damage : 0;
+      const attackSpeed =
+        typeof stats.attackSpeed === "number" ? stats.attackSpeed : 1;
+
+      const weaponType = inferWeaponType(item);
+      const profiles = GAME_CONFIG.weaponProfiles || {};
+      const prof = profiles[weaponType] || profiles["sword"] || {};
+      const attrPerPower = prof.attrPerPower || 2.0;
+
+      const power = damage * attackSpeed;
+
+      const skillsCfg = (GAME_CONFIG.skills && GAME_CONFIG.skills.weapon) || {};
+      const reqCfg = skillsCfg.requiredFromPower || {};
+      const baseReq = reqCfg.base ?? 20;
+      const perPower = reqCfg.perPower ?? 5;
+      const minReq = reqCfg.min ?? 0;
+      const maxReq = reqCfg.max ?? (skillsCfg.maxLevel ?? 200);
+
+      let requiredSkill = Math.round(baseReq + power * perPower);
+      if (requiredSkill < minReq) requiredSkill = minReq;
+      if (requiredSkill > maxReq) requiredSkill = maxReq;
+
+      const recommendedAttrScore = power * attrPerPower;
+
+      mainWeapon = {
+        weaponType,
+        trueDamage: damage,
+        attackSpeed,
+        power,
+        requiredSkill,
+        recommendedAttrScore,
+      };
     }
 
     // ---- Attribute bonuses ----
@@ -191,7 +228,27 @@ function summarizeEquipmentForCharacter() {
     attrBonus,
     statsBonus,
     weaponAttackType,
+    mainWeapon,
   };
+}
+
+function inferWeaponType(item) {
+  if (!item) return "unarmed";
+  const name = (item.name || "").toLowerCase();
+
+  // If we ever add explicit weaponType on items, prefer that.
+  if (item.weaponType) return item.weaponType;
+
+  if (item.attackType === "ranged") {
+    return "bow";
+  }
+
+  if (name.includes("dagger")) return "dagger";
+  if (name.includes("sword")) return "sword";
+  if (name.includes("axe") || name.includes("hatchet")) return "axe";
+
+  // Generic fallback
+  return "sword";
 }
 
 /**
