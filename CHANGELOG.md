@@ -2,7 +2,7 @@
 
 ## New Features
 
-### New Combat System
+### New Combat Calculation System (No combat gameplay though)
 Combat has been fully rebuilt. Your character’s Attack, DPS, Crit Chance, Loot Find, and Max HP now scale from:
 - Your weapon
 - Your attributes (STR / DEX / INT / VIT)
@@ -22,7 +22,7 @@ Each weapon type now has its own skill:
 - Unarmed  
 
 Higher skill → higher damage with that weapon type.  
-Tooltips now show the exact skill requirement for each weapon.
+Tooltips now show the exact skill requirement for each weapon (however, you can equip any weapon no matter your skills).
 
 ---
 
