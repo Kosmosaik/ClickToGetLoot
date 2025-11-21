@@ -361,28 +361,12 @@ function renderInventory() {
       });
 
       if (isCollapsed) {
-        details.style.display = "none";
+        details.style.display =
+          collapsed ? "none" : "";
+        node = node.nextElementSibling;
       }
 
       const summary = document.createElement("summary");
-
-      // Tooltip for the stack
-      const first = stack.items[0] || {};
-      Tooltip.bind(summary, () => {
-        const lines = [
-          `<strong>${name}</strong>`,
-          `<span class="rarity ${rarityClass(rarity)}">${rarity}</span>`,
-        ];
-        const qRange = summarizeQualityRange(stack.items);
-        if (qRange) lines.push(`Quality Range: ${qRange}`);
-        if (first.description) {
-          lines.push("");
-          lines.push(first.description);
-        }
-        return lines
-          .filter(v => v !== undefined && v !== null)
-          .join("<br>");
-      });
 
       // Column-ish layout: Name (colored by rarity) | Qty | Quality range
       const nameSpan = span(name, `rarity ${rarityClass(rarity)}`);
