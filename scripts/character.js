@@ -114,8 +114,17 @@ function computeAttributeTotals(base, bonus) {
  *   "ranged" => show Ranged Attack as active
  *   null/undefined => Unarmed Attack
  */
-function computeDerivedStats(attrTotals, equipmentStats, weaponAttackType) {
-  const cfg = GAME_CONFIG.character;
+function computeDerivedStats(
+  attrTotals,
+  equipmentStats,
+  weaponAttackType,
+  skills,
+  mainWeapon
+) {
+  const cfgChar = GAME_CONFIG.character;
+  const cfgCombat = GAME_CONFIG.combat || {};
+  const profiles = GAME_CONFIG.weaponProfiles || {};
+  const skillsCfg = (GAME_CONFIG.skills && GAME_CONFIG.skills.weapon) || {};
 
   const total = attrTotals.total;
   const STR = total.str;
@@ -127,71 +136,128 @@ function computeDerivedStats(attrTotals, equipmentStats, weaponAttackType) {
   const bonusHP = Number(eq.bonusHP) || 0;
   const bonusCrit = Number(eq.bonusCritChance) || 0;
   const bonusLootFind = Number(eq.bonusLootFind) || 0;
-  const bonusMeleeAtk = Number(eq.bonusMeleeAtk) || 0;
-  const bonusRangedAtk = Number(eq.bonusRangedAtk) || 0;
 
   // ---- Max HP ----
   const maxHP =
-    cfg.baseHP +
-    VIT * cfg.hpPerVit +
+    cfgChar.baseHP +
+    VIT * cfgChar.hpPerVit +
     bonusHP;
-
-  // ---- Attack calculations ----
-  // Melee attack: STR is main, DEX gives a smaller contribution.
-  const meleeAttack =
-    STR * cfg.meleeMainScale +
-    DEX * cfg.meleeOffScale +
-    bonusMeleeAtk;
-
-  // Ranged attack: DEX is main, STR gives a smaller contribution.
-  const rangedAttack =
-    DEX * cfg.rangedMainScale +
-    STR * cfg.rangedOffScale +
-    bonusRangedAtk;
 
   // ---- Crit chance (%) ----
   const critChance =
-    cfg.baseCritChance +
-    DEX * cfg.critPerDex +
+    cfgChar.baseCritChance +
+    DEX * cfgChar.critPerDex +
     bonusCrit;
 
   // ---- Loot Find (%) ----
   const lootFind =
-    INT * cfg.lootFindPerInt +
+    INT * cfgChar.lootFindPerInt +
     bonusLootFind;
 
-  // ---- Active Attack (for the character screen) ----
-  let attackLabel = "Attack";
-  let attackType = "unarmed";
-  let attackValue = 0;
+  // ---- Weapon + skill + attribute efficiencies ----
 
-  if (weaponAttackType === "melee") {
-    attackLabel = "Attack";
-    attackType = "melee";
-    attackValue = meleeAttack;
-  } else if (weaponAttackType === "ranged") {
-    attackLabel = "Attack";
-    attackType = "ranged";
-    attackValue = rangedAttack;
-  } else {
-    // Unarmed: we can choose a simple formula.
-    // For example: unarmed uses melee attack but scaled down a bit.
-    attackLabel = "Unarmed Attack";
-    attackType = "unarmed";
-    attackValue = meleeAttack * 0.5;
+  // 1) Determine active weapon or fallback to unarmed
+  let weaponType = (mainWeapon && mainWeapon.weaponType) || "unarmed";
+  let trueDamage = (mainWeapon && mainWeapon.trueDamage) || 0;
+  let attackSpeed = (mainWeapon && mainWeapon.attackSpeed) || 1;
+  let requiredSkill = (mainWeapon && mainWeapon.requiredSkill) || 0;
+  let recommendedAttrScore =
+    (mainWeapon && mainWeapon.recommendedAttrScore) || 0;
+
+  // If no actual weapon stats, treat as unarmed
+  if (!mainWeapon || !trueDamage) {
+    weaponType = "unarmed";
+
+    const baseUnarmed = cfgCombat.unarmedBaseDamage ?? 1;
+    const perStr = cfgCombat.unarmedDamagePerStr ?? 0.2;
+    trueDamage = baseUnarmed + STR * perStr;
+
+    attackSpeed = cfgCombat.unarmedAttackSpeed ?? 1.2;
+
+    const unarmedProf = profiles.unarmed || {};
+    const attrPerPower = unarmedProf.attrPerPower || 1.5;
+    const power = trueDamage * attackSpeed;
+    recommendedAttrScore = power * attrPerPower;
+
+    const reqCfg = skillsCfg.requiredFromPower || {};
+    const baseReq = reqCfg.base ?? 10;
+    const perPower = reqCfg.perPower ?? 3;
+    const minReq = reqCfg.min ?? 0;
+    const maxReq = reqCfg.max ?? (skillsCfg.maxLevel ?? 200);
+
+    requiredSkill = Math.round(baseReq + power * perPower);
+    if (requiredSkill < minReq) requiredSkill = minReq;
+    if (requiredSkill > maxReq) requiredSkill = maxReq;
   }
+
+  // 2) Skill efficiency
+  let skillEff = 1;
+  const skillLevels = skills || {};
+  const playerSkill = skillLevels[weaponType] ?? 0;
+
+  if (requiredSkill > 0) {
+    const ratio = playerSkill / requiredSkill;
+    if (ratio <= 1) {
+      skillEff = Math.max(0.1, Math.pow(ratio || 0.0001, 0.7));
+    } else {
+      const over = ratio - 1;
+      const bonus = over * 0.25;
+      skillEff = Math.min(1 + bonus, 1.15);
+    }
+  }
+
+  // 3) Attribute efficiency
+  let attrEff = 1;
+  const prof = profiles[weaponType] || profiles["sword"] || {};
+  const w = prof.attrWeights || {};
+
+  function wVal(key) {
+    const v = w[key];
+    return typeof v === "number" ? v : 0;
+  }
+
+  const playerAttrScore =
+    STR * wVal("STR") +
+    DEX * wVal("DEX") +
+    INT * wVal("INT") +
+    VIT * wVal("VIT");
+
+  if (recommendedAttrScore > 0) {
+    const ratio = playerAttrScore / recommendedAttrScore;
+    let offset = ratio - 1;
+    let bonus = offset * 0.25;
+    if (bonus < -0.2) bonus = -0.2;
+    if (bonus > 0.2) bonus = 0.2;
+    attrEff = 1 + bonus;
+  }
+
+  // 4) Final effective damage, Attack, DPS
+  const avgFactor = cfgCombat.attackAverageFactor ?? 0.85;
+  const effectiveMax = trueDamage * skillEff * attrEff;
+  const attackValue = effectiveMax * avgFactor;
+  const dps = attackValue * attackSpeed;
+
+  const attackLabel = "Attack";
+  const attackType =
+    weaponAttackType || weaponType;
 
   return {
     maxHP,
-    meleeAttack,
-    rangedAttack,
     critChance,
     lootFind,
-    activeAttack: {
+    attack: {
       label: attackLabel,
       type: attackType,
       value: attackValue,
+      max: effectiveMax,
+      trueDamage,
+      skillEff,
+      attrEff,
+      requiredSkill,
+      weaponType,
     },
+    attackSpeed,
+    dps,
   };
 }
 
@@ -215,6 +281,7 @@ function computeDerivedStats(attrTotals, equipmentStats, weaponAttackType) {
  * For now, if you call this with only the character, it will assume
  * no equipment bonuses and unarmed.
  */
+
 function buildCharacterComputedState(character, equipmentSummary) {
   const baseAttrs = getBaseAttributesFromCharacter(character);
 
@@ -233,10 +300,18 @@ function buildCharacterComputedState(character, equipmentSummary) {
   const weaponAttackType =
     (equipmentSummary && equipmentSummary.weaponAttackType) || null;
 
+  const mainWeapon =
+    (equipmentSummary && equipmentSummary.mainWeapon) || null;
+
+  const skills =
+    (character && character.skills) || {};
+
   const derived = computeDerivedStats(
     attrTotals,
     statsBonus,
-    weaponAttackType
+    weaponAttackType,
+    skills,
+    mainWeapon
   );
 
   return {
