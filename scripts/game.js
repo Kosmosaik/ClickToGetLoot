@@ -532,7 +532,9 @@ function updateCharacterSummary() {
     charSummaryName.textContent = currentCharacter.name;
   }
 
-  if (!charSummaryStats) return;
+  if (charSummaryStats) {
+    charSummaryStats.textContent = "";
+  }
 
   if (!characterComputed || !characterComputed.derivedStats) {
     charSummaryStats.textContent = "";
@@ -913,6 +915,13 @@ function startLoot() {
         stats,
         slot: template.slot || null,
         attackType: template.attackType || null,
+
+        // NEW: pass through combat metadata
+        weaponType: template.weaponType || null,
+        skillReq: typeof template.skillReq === "number" ? template.skillReq : null,
+        attrPerPower: typeof template.attrPerPower === "number"
+          ? template.attrPerPower
+          : null,
       };
 
       addToInventory(instance); // from inventory.js
