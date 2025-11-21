@@ -122,6 +122,8 @@ const GAME_CONFIG = {
     unarmedBaseDamage: 1,
     unarmedDamagePerStr: 0.2,
     unarmedAttackSpeed: 1.2,
+
+    defaultAttrPerPower: 1.8,
   },
 
   inventory: {
