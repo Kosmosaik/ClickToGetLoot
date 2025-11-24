@@ -76,6 +76,7 @@ function inferWeaponTypeFromItem(item) {
   if (atkType === "ranged") return "bow";
   if (name.includes("dagger")) return "dagger";
   if (name.includes("sword")) return "sword";
+  if (name.includes("club")) return "club";
   if (name.includes("axe") || name.includes("hatchet")) return "axe";
 
   return "sword";
