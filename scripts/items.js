@@ -163,13 +163,12 @@ const RARITY_WEIGHTS =
   (typeof GAME_CONFIG !== "undefined" && GAME_CONFIG.rarityWeights)
     ? GAME_CONFIG.rarityWeights
     : {
-        Abundant: 90,
-        Common:   40,
-        Uncommon: 18,
-        Rare:      6,
-        Exotic:    1,
-        // add Unique here if you actually drop it:
-        // Unique:    0.2,
+        Abundant: 170,
+        Common:   130,
+        Uncommon: 80,
+        Rare:      45,
+        Exotic:    22,
+        Unique:    12,
       };
 
 function rollRarity() {
