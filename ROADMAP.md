@@ -103,6 +103,14 @@ Introduces resource gathering
 
 ---
 
+## v0.0.90 — Weight, Encumbrance & Storage system
+
+- Item weight & encumbrance system
+- Backpacks
+- STR affecting encumbrance
+
+---
+
 ## v0.1.0 - Crafting v1
 - Crafting recipes
 
@@ -125,7 +133,6 @@ Builds on the first Equipment Update with deeper gear systems.
 - More item slots (ring, necklace, off-hand, belt)
 - Item modifiers (prefixes/suffixes)
 - Set bonuses
-- Item weight & encumbrance system
 - Durability (optional)
 
 ---
