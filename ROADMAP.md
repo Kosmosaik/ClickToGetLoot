@@ -106,6 +106,8 @@ Introduces resource gathering
 ## v0.1.0 - Crafting v1
 - Crafting recipes
 
+---
+
 ## v0.1.10 — Gathering Professions (Mining, Herbalism, Woodcutting)
 Profession system tied to resources and crafting.
 
