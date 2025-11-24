@@ -1,3 +1,9 @@
+## v0.0.65b - Inventory Category Fix
+- Fixed an issue where collapsing an item category and then equipping a weapon or armor would cause all categories beneath it to temporarily disappear.  
+All categories now stay visible and behave correctly when equipping, unequipping, or looting items.
+- Added a few new items in preparation for exploration, gathering and crafting updates.
+
+
 ## v0.0.65 - Character & Combat Revamp
 
 ## New Features
