@@ -4,33 +4,47 @@
 const ItemCatalog = [
 // ========== WEAPONS ==========
   {
-    name: "Rusty Dagger",
-    description: "A dull old dagger, but still sharp enough to draw blood.",
+    name: "Crude Knife",
+    description: "A primitive cutting tool made from stone and twine.",
     category: "Weapon",
     slot: "weapon",
     weaponType: "dagger",
     rarity: "Common",
-    skillReq: 10,
+    skillReq: 3,
     attrPerPower: 1.5,
     statRanges: {
-    damage: [3, 6],
-    attackSpeed: [1.0, 1.3],
-    critChance: [0, 2],
+    damage: [2, 4],
+    attackSpeed: [0.9, 1.1],
+    critChance: [0, 1],
     }
   },
   {
-    name: "Simple Dagger",
-    description: "A simple sharpened dagger, nothing fancy.",
+    name: "Wooden Club",
+    description: "A branch trimmed into a club",
+    category: "Weapon",
+    slot: "weapon",
+    weaponType: "club",
+    rarity: "Common",
+    skillReq: 3,
+    attrPerPower: 1.5,
+    statRanges: {
+    damage: [3, 6],
+    attackSpeed: [0.8, 1.0],
+    }
+  },
+  {
+    name: "Stone Knife",
+    description: "A simple sharpened knife, nothing fancy.",
     category: "Weapon",
     slot: "weapon",
     weaponType: "dagger",
     rarity: "Uncommon",
-    skillReq: 20,
+    skillReq: 10,
     attrPerPower: 1.6,
     statRanges: {
-    damage: [5, 11],
-    attackSpeed: [1.0, 1.35],
-    critChance: [1, 3],
+    damage: [4, 8],
+    attackSpeed: [1.0, 1.2],
+    critChance: [1, 2],
     }
   },
   {
