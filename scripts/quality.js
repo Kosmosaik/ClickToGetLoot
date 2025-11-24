@@ -51,6 +51,6 @@ function qualityMultiplier(q) {
   const step = tierIdx * stepsPerTier + sub; // 0..69
 
   const t = step / (totalSteps - 1);
-  const min = 0.75, max = 1.8;
+  const min = 0.70, max = 1.30;
   return min + (max - min) * t;
 }
