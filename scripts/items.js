@@ -62,6 +62,20 @@ const ItemCatalog = [
     }
   },
   {
+    name: "Stone Axe",
+    description: "Basic Stone Axe",
+    category: "Weapon",
+    slot: "weapon",
+    weaponType: "axe",
+    rarity: "Common",
+    skillReq: 3,
+    attrPerPower: 1.5,
+    statRanges: {
+    damage: [4, 10],
+    attackSpeed: [0.75, 0.95],
+    }
+  },
+  {
     name: "Leet Power Sword of Doom",
     description: "Boi you found it!",
     category: "Weapon",
@@ -87,17 +101,31 @@ const ItemCatalog = [
     usage: "Basic armor.",
     statRanges: {
     vit: [1, 4],
-    lootFind: [0, 2],
+    }
+  },
+  {
+    name: "Grass Wraps Chest",
+    description: "Primitive chest clothing. Minimal protection",
+    category: "Armor",
+    slot: "chest",
+    rarity: "Uncommon",
+    usage: "Basic armor.",
+    statRanges: {
+    vit: [1, 2],
+    }
+  },
+  {
+    name: "Grass Wraps Loincloth",
+    description: "Primitive clothing. Minimal protection",
+    category: "Armor",
+    slot: "legs",
+    rarity: "Uncommon",
+    usage: "Basic armor.",
+    statRanges: {
+    vit: [1, 2],
     }
   },
 // ========== MATERIALS ==========
-  {
-    name: "Slime Core",
-    category: "Crafting Component",
-    description: "A gelatinous orb pulsating with faint energy.",
-    rarity: "Uncommon",
-    usage: "Used for alchemy or crafting slime-based tools.",
-  },
   {
     name: "Mythic Fragment",
     category: "Material",
@@ -127,6 +155,13 @@ const ItemCatalog = [
     rarity: "Rare",
     usage: "Mining",
   },
+  {
+    name: "Digging Stick",
+    category: "Tool",
+    description: "A basic tool for digging up roots and tubers",
+    rarity: "Rare",
+    usage: "Digging",
+  },
   // ========== RESOURCES ==========
   {
     name: "Grass Bundle",
@@ -141,6 +176,13 @@ const ItemCatalog = [
     description: "Plant fibers gathered from fibrous plants, like hemp, flax, or wild grasses",
     rarity: "Common",
     usage: "Ropes, simple baskets, fire tinder",
+  },
+  {
+    name: "Dry Leaves",
+    category: "Resource",
+    description: "Good as kindling or for thatched roof",
+    rarity: "Common",
+    usage: "eh",
   },
   {
     name: "Twig",
