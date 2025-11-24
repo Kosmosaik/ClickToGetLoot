@@ -48,6 +48,20 @@ const ItemCatalog = [
     }
   },
   {
+    name: "Stone-Headed Club",
+    description: "Heavier and stronger than Wooden Club",
+    category: "Weapon",
+    slot: "weapon",
+    weaponType: "club",
+    rarity: "Common",
+    skillReq: 3,
+    attrPerPower: 1.5,
+    statRanges: {
+    damage: [5, 9],
+    attackSpeed: [0.75, 0.95],
+    }
+  },
+  {
     name: "Leet Power Sword of Doom",
     description: "Boi you found it!",
     category: "Weapon",
