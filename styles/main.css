@@ -390,7 +390,7 @@ button {
 #tooltip {
   position: fixed;
   z-index: 9999;
-  max-width: 280px;
+  max-width: 300px;
   background: #111;
   color: #e0e4e8;
   border: 1px solid #555;
