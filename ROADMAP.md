@@ -25,6 +25,7 @@ A small update to improve inventory UI and create more options for the player
 - Add a toggle to collapse/expand all inventory categories at once
 - Add a toggle to remove categories and keep all items (no matter category) in a single list.
   Add sorting option for category (inside "all items list"-view) and keep the other sorting options for new view.
+- Add category next to the item name in inventory if sorting without category (in All items view).
 - Add stats in tooltip for "actual stats" that the player will get by equipping an item.
   In other words, there will be "Weapon stats - Comparison with equipped item - characters stats after equipping the item".
 
