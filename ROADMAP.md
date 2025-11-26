@@ -7,19 +7,15 @@ This roadmap is flexible and will evolve as development continues.
 
 ---
 
-## v0.0.66 — Polish & Stability Update
+## v0.0.66 — Polish & Stability Update & Inventory improvements
 Small but important improvements
 
 ### Planned:
 - UI consistency pass (button styles, panel spacing, tooltip clarity)
 - Improve layout logic for Inventory/Equipment/Skills panels when resizing web page.
-  Game looks awful on mobile (both portrait and horizontal mode). Try to improve this and come up with a system that will work on future features and panels etc.
 - Add more settings and variables to config.js if possible.
 - Refactor code and create new scripts to move code and make the project more modular.
 
----
-
-## v0.0.67 - Inventory improvements
 A small update to improve inventory UI and create more options for the player
 
 - Add a toggle to collapse/expand all inventory categories at once
@@ -31,7 +27,7 @@ A small update to improve inventory UI and create more options for the player
 
 ---
 
-## v0.0.68 - Level / Experience and armor improvements
+## v0.0.67 - Level / Experience and armor improvements
 - Add Level stat and experience points.
 - Make a temporary easy exp formula for exp to next level etc
 - Add a "Give EXP" button for testing purposes
