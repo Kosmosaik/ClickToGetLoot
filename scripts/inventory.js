@@ -6,11 +6,17 @@ const inventoryList = document.getElementById("inventory-list");
 // Inventory data
 const inventory = Object.create(null);
 
-// Sorting state for inventory
-let inventorySort = {
-  key: GAME_CONFIG.inventory.defaultSortKey, // "name" | "rarity" | "qty"
-  dir: GAME_CONFIG.inventory.defaultSortDir, // "asc" | "desc"
-};
+import {
+    getInventoryViewMode,
+    setInventoryViewMode,
+    getInventorySort,
+    setInventorySort,
+    isStackOpen,
+    setStackOpen,
+    isCategoryCollapsed,
+    setCategoryCollapsed
+} from "./inventory/inventory.state.js";
+
 
 // Rarity sort order
 const RARITY_ORDER = GAME_CONFIG.raritySortOrder.slice();
@@ -18,10 +24,6 @@ function raritySortValue(r) {
   const idx = RARITY_ORDER.indexOf(r);
   return idx === -1 ? RARITY_ORDER.length : idx;
 }
-
-// Remember which stacks and categories are expanded/collapsed
-const openStacks = new Set();
-const collapsedCategories = new Set();
 
 // Helper: rarity → CSS class
 function rarityClass(rarity = "") {
