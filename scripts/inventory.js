@@ -207,6 +207,11 @@ function renderInventory() {
     // Sort items within category according to current sort
     group.sort((a, b) => compareStacks(a, b));
 
+    // If the category is collapsed, do not render its stacks
+    if (isCollapsed) {
+      return;
+    }
+
     // ---- Render each stack ----
     group.forEach(({ name, stack }) => {
       const rarity = stack.items[0]?.rarity || "";
@@ -222,15 +227,12 @@ function renderInventory() {
       }
 
       details.addEventListener("toggle", () => {
-        if (details.open) openStacks.add(key);
-        else openStacks.delete(key);
+        if (details.open) {
+          openStacks.add(key);
+        } else {
+          openStacks.delete(key);
+        }
       });
-
-      if (isCollapsed) {
-        details.style.display =
-          collapsed ? "none" : "";
-        node = node.nextElementSibling;
-      }
 
       const summary = document.createElement("summary");
 
@@ -265,7 +267,6 @@ function renderInventory() {
       inventoryList.appendChild(details);
     });
   });
-}
 
 function makeIdenticalGroupLine(itemName, rarity, group) {
   const div = document.createElement("div");
