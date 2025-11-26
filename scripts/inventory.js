@@ -267,6 +267,7 @@ function renderInventory() {
       inventoryList.appendChild(details);
     });
   });
+}
 
 function makeIdenticalGroupLine(itemName, rarity, group) {
   const div = document.createElement("div");
