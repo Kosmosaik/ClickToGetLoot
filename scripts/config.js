@@ -75,12 +75,12 @@ const GAME_CONFIG = {
       },
       // Starting values for a fresh character
       defaultLevels: {
-        dagger: 0,
-        sword: 0,
-        axe: 0,
-        club: 0,
-        bow: 0,
-        unarmed: 0,
+        dagger: 1,
+        sword: 1,
+        axe: 1,
+        club: 1,
+        bow: 1,
+        unarmed: 1,
       },
       minLevel: 0,
       maxLevel: 200,
@@ -127,7 +127,7 @@ const GAME_CONFIG = {
     attackAverageFactor: 0.85,  // used later: AttackShown = EDMax * 0.85
 
     // Unarmed behaviour
-    unarmedBaseDamage: 2,
+    unarmedBaseDamage: 1,
     unarmedDamagePerStr: 0.4,
     unarmedAttackSpeed: 1.2,
 
