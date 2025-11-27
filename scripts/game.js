@@ -4,36 +4,11 @@ console.log(`game.js loaded v${GAME_CONFIG.version}`);
 // ----- Screen elements -----
 const saveListContainer = document.getElementById("save-list");
 
-const hpBarContainer = document.getElementById("hp-bar-container");
-const hpBarFill = document.getElementById("hp-bar-fill");
-const hpBarLabel = document.getElementById("hp-bar-label");
-
 let currentHP = 0;
 
 // Holds the fully computed character state (attributes + derived stats)
 // so UI or other systems can use it.
 let characterComputed = null;
-
-// ----- Equipment / loot / inventory UI elements -----
-const lootButton = document.getElementById("loot-button");
-const progressBar = document.getElementById("progress");
-const progressContainer = document.getElementById("progress-container");
-const inventoryPanel = document.getElementById("inventory-panel");
-const inventoryButton = document.getElementById("inventory-btn");
-
-const equipmentPanel = document.getElementById("equipment-panel");
-const equipmentButton = document.getElementById("equipment-btn");
-const equipmentSlotsContainer = document.getElementById("equipment-slots");
-const equipmentSummaryContainer = document.getElementById("equipment-summary");
-
-// NEW: skills UI
-const skillsPanel = document.getElementById("skills-panel");
-const skillsButton = document.getElementById("skills-btn");
-const skillsListContainer = document.getElementById("skills-list");
-
-// ----- Character summary on game screen -----
-const charSummaryName = document.getElementById("char-summary-name");
-const charSummaryStats = document.getElementById("char-summary-stats");
 
 // ----- Equipment helpers -----
 function unequipSlotToInventory(slotKey) {
@@ -429,33 +404,6 @@ renderSaveList();
 
 let inventoryUnlocked = false;
 let equipmentUnlocked = false;
-
-// UI events
-if (lootButton) {
-  lootButton.addEventListener("click", startLoot);
-}
-
-if (inventoryButton) {
-  inventoryButton.addEventListener("click", () => {
-    if (!inventoryPanel) return;
-    inventoryPanel.style.display =
-      (inventoryPanel.style.display === "block") ? "none" : "block";
-  });
-}
-
-if (equipmentButton && equipmentPanel) {
-  equipmentButton.addEventListener("click", () => {
-    equipmentPanel.style.display =
-      (equipmentPanel.style.display === "block") ? "none" : "block";
-  });
-}
-
-if (skillsButton && skillsPanel) {
-  skillsButton.addEventListener("click", () => {
-    const visible = skillsPanel.style.display === "block";
-    skillsPanel.style.display = visible ? "none" : "block";
-  });
-}
 
 window.debugCharacterComputed = () => {
   console.log("Character computed state:", characterComputed);
