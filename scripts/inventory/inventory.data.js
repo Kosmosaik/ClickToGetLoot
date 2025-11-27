@@ -115,3 +115,17 @@ function groupByIdentical(items = []) {
   });
   return arr;
 }
+
+// Category label helper for headers
+function categoryHeaderLabel(category = "Other") {
+  const map = {
+    "Material": "MATERIALS",
+    "Crafting Component": "CRAFTING COMPONENTS",
+    "Resource": "RESOURCES",
+    "Weapon": "WEAPONS",
+    "Tool": "TOOLS",
+    "Wood": "WOOD",
+    "Food": "FOOD",
+  };
+  return map[category] || (category || "OTHER").toUpperCase();
+}
