@@ -1,0 +1,416 @@
+/* === Loot button & progress === */
+
+/* Center loot button */
+#loot-button {
+  position: fixed;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: monospace;
+  font-size: 1.5rem;
+
+  padding: 10px 18px;
+  background: #171a21;
+  color: #e0e4e8;
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.02);
+  transition: background .15s ease, transform .05s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+#loot-button:hover {
+  background: #1c2430;
+  border-color: #3a4150;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+#loot-button:active {
+  transform: translate(-50%, -50%) translateY(1px);
+  background: #202a36;
+}
+
+#loot-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.35), 0 8px 24px rgba(0,0,0,.45);
+  border-color: #3b82f6;
+}
+
+/* Shared small buttons (trash / equip) */
+.trash-btn,
+.equip-btn {
+  background: transparent;
+  color: #a8b3c2;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  font: inherit;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.trash-btn:hover,
+.equip-btn:hover {
+  background: #1b2230;
+  color: #e0e4e8;
+  border-color: #3a4150;
+}
+
+.trash-btn:active,
+.equip-btn:active {
+  background: #202a36;
+}
+
+/* Progress bar under the loot button */
+#progress-container {
+  position: fixed;
+  top: calc(70% + 50px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 10px;
+  background: #222;
+  display: none;
+  border-radius: 5px;
+}
+
+#progress {
+  height: 100%;
+  width: 0%;
+  background: #63f;
+  border-radius: 5px;
+  transition: width 0.1s linear;
+}
+
+/* === HP bar near bottom center === */
+#hp-bar-container {
+  position: fixed;
+  bottom: 40px;           /* above the bottom header */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  display: none;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+#hp-bar-label {
+  margin-bottom: 2px;
+  opacity: 0.9;
+}
+
+#hp-bar {
+  width: 100%;
+  height: 10px;
+  background: #222;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+#hp-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #22c55e;
+  border-radius: 5px;
+  transition: width 0.15s linear;
+}
+
+/* === Inventory panel === */
+#inventory-panel {
+  position: fixed;
+  top: 70px;   /* <-- pushed down */
+  left: 10px;
+  display: none;
+  background: #111;
+  border: 1px solid #555;
+  padding: 10px;
+  border-radius: 8px;
+
+  /* Resizable width */
+  width: 500px;
+  min-width: 360px;
+  max-width: 60vw;
+  max-height: 70vh;
+  overflow: auto;
+  resize: horizontal; /* user can drag the right edge */
+}
+
+/* === Equipment panel sits to the right of the inventory panel === */
+#equipment-panel {
+  position: fixed;
+  top: 70px;
+  left: 535px; /* 10px left + 500px inventory width + 20px gap */
+  display: none;
+  background: #111;
+  border: 1px solid #555;
+  padding: 10px;
+  border-radius: 8px;
+  width: 400px;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+#equipment-panel h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.equipment-slot-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+.equipment-slot-label {
+  width: 80px;
+  font-weight: bold;
+  color: #cbd5f5;
+}
+
+.equipment-slot-item {
+  flex: 1;
+}
+
+.equipment-slot-empty {
+  flex: 1;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.equipment-summary-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #333;
+  font-size: 0.85rem;
+}
+
+.equipment-summary-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #d1d5db;
+}
+
+.equipment-summary-row {
+  display: flex;
+  justify-content: flex-start;
+  column-gap: 16px;   /* space between label and values */
+}
+
+.equipment-summary-row span:first-child {
+  width: 120px;
+}
+
+.equipped-label {
+  color: #4ade80;
+  font-size: 0.75rem;
+}
+
+/* Inventory stacks + variants */
+.inventory-stack summary {
+  cursor: pointer;
+}
+
+.inventory-stack { margin: 6px 0; }
+.inventory-stack > summary { cursor: pointer; }
+.stack-variants { margin-left: 12px; padding-left: 8px; border-left: 1px solid #555; }
+
+.meta {
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+/* === Skills panel – fixed on the right side === */
+#skills-panel {
+  position: fixed;
+  top: 70px;
+  right: 10px;           /* stick to right edge */
+  display: none;
+  background: #111;
+  border: 1px solid #555;
+  padding: 10px;
+  border-radius: 8px;
+  width: 320px;
+  max-height: 70vh;
+  overflow: auto;
+  z-index: 1000;         /* make sure it's above inventory/equipment */
+}
+
+#skills-panel h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+#skills-list {
+  display: flex;
+  flex-direction: column;
+  row-gap: 4px;
+}
+
+/* === Rarity colors (accessible on dark bg) === */
+.rarity { font-weight: 600; }
+.r-abundant { color: #9aa5b1; }   /* gray */
+.r-common   { color: #e0e4e8; }   /* light */
+.r-uncommon { color: #22c55e; }   /* green */
+.r-rare     { color: #3b82f6; }   /* blue */
+.r-exotic   { color: #a855f7; }   /* purple */
+.r-unique   { color: #FFDF00; }   /* yellow */
+
+/* Optional: subtle hover hint (keeps text-only style) */
+.inventory-stack > summary:hover { text-decoration: underline; }
+
+.inventory-category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: #9aa5b1;
+  opacity: 0.9;
+}
+
+.inventory-category-header::before,
+.inventory-category-header::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+}
+
+/* Left line */
+.inventory-category-header::before {
+  background: linear-gradient(to left, transparent, #6b7280);
+}
+
+/* Right line */
+.inventory-category-header::after {
+  background: linear-gradient(to right, transparent, #6b7280);
+}
+
+.inventory-category-header {
+  cursor: pointer;
+}
+
+/* Sort bar above inventory list */
+.inventory-sort-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.75rem;
+  color: #9aa5b1;
+}
+
+.inventory-sort-bar > span:first-child {
+  opacity: 0.9;
+}
+
+.inventory-sort-bar .sort-btn {
+  background: transparent;
+  border: 0;
+  padding: 0 4px;
+  cursor: pointer;
+  color: #a8b3c2;
+  font-size: 0.75rem;
+}
+
+.inventory-sort-bar .sort-btn.active {
+  color: #e0e4e8;
+  text-decoration: underline;
+}
+
+/* Make summary rows column-ish */
+.inventory-stack > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.inventory-stack > summary .inv-name {
+  flex: 1;
+}
+
+.inventory-stack > summary .inv-qty {
+  width: 50px;
+  text-align: right;
+}
+
+.inventory-stack > summary .inv-qrange {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Expanded inventory rows: left text + right actions */
+.inventory-stack .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+/* Left side text */
+.inventory-stack .meta-left {
+  display: inline-block;
+}
+
+/* Right side buttons */
+.inventory-stack .inv-actions {
+  display: inline-flex;
+  gap: 4px;         /* space between Trash and Equip */
+}
+
+/* === Unlock attention effect for menu buttons === */
+.inventory-unlock {
+  position: relative;
+  animation: invGlow 2.8s ease-out 0s 1;
+  text-shadow: 0 0 0.35rem rgba(246,244,110, 0.9);
+}
+
+@keyframes invGlow {
+  0%   { text-shadow: 0 0 0rem rgba(246,244,110,0.0); transform: translateY(0); }
+  25%  { text-shadow: 0 0 0.6rem rgba(246,244,110,0.95); transform: translateY(-5px); }
+  60%  { text-shadow: 0 0 0.25rem rgba(246,244,110,0.65); transform: translateY(0); }
+  100% { text-shadow: 0 0 0rem rgba(246,244,110,0.0); }
+}
+
+/* A subtle expanding ring behind the text */
+.inventory-unlock::after {
+  content: "";
+  position: absolute;
+  inset: -6px -10px;
+  border: 3px solid rgba(246,244,110,0.8);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: invPing 2.8s ease-out 0s 1;
+}
+
+@keyframes invPing {
+  0%   { opacity: 0; transform: scale(0.85); }
+  20%  { opacity: 1; transform: scale(1.0); }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+/* === Game screen – character summary bar (text only part) === */
+
+#character-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #2a2a2a;
+  background: #151515;
+}
+
+#char-summary-name {
+  font-weight: 600;
+}
+
+#char-summary-stats {
+  opacity: 0.85;
+}
