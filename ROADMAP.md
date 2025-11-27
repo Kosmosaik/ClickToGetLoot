@@ -23,7 +23,7 @@ A small update to improve UI and create more options for the player
 
 ---
 
-## v0.0.68 - Level / Experience and armor improvements
+## v0.0.68 - Level / Experience System
 - Add Level stat and experience points.
 - Make a temporary easy exp formula for exp to next level etc
 - Add a "Give EXP" button for testing purposes
