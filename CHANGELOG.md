@@ -1,3 +1,50 @@
+## v0.0.66 - Modularization & UI Foundation
+
+### Refactors & Code Structure
+
+- Split the previously monolithic `game.js` into focused modules:
+  - `game.creation.js` – character creation logic (base stats, point spend, randomization, creation button).
+  - `game.save.js` – save/load system, save list rendering, snapshot helpers.
+  - `game.patchnotes.js` – patch notes panel + `CHANGELOG.md` fetch/parsing.
+  - `game.screens.js` – simple screen state machine (`start` / `character` / `game`).
+  - `game.loot.js` – loot flow, progress bar timer, stat rolling and item instance creation.
+  - `game.ui.panels.js` – DOM lookups + button wiring for inventory, equipment, skills, HP bar and loot button.
+- Slimmed down the core `game.js` so it now focuses on:
+  - Character-derived state (`characterComputed`, `currentHP`).
+  - Equipment helpers (equip/unequip → inventory, auto-save hooks).
+  - Recompute pipeline (`summarizeEquipmentForCharacter` → `buildCharacterComputedState` → UI updates).
+  - Rendering of the Equipment panel, Skills panel, HP bar, and character summary header.
+- Kept all global behavior and data formats intact so existing saves remain compatible.
+
+### Inventory & Equipment Stability
+
+- Fixed category collapsing logic in the inventory:
+  - Removed the old `collapsed` variable bug that caused JavaScript errors.
+  - Collapsed categories now simply skip rendering their stacks, so categories no longer disappear or behave erratically when equipping items or toggling sections.
+- Improved equip/unequip flow:
+  - Unequipping via the Equipment panel cleanly returns items to the inventory and triggers a stat recompute.
+  - Equip / Unequip both now hook into the shared auto-save path so equipment changes are always persisted.
+- Fixed an issue where trashing items did not persist:
+  - Deleting items from the inventory now correctly updates the save snapshot, so trashed items stay gone after reload.
+
+### UI & Styling
+
+- Extracted tooltip behavior into a dedicated `ui.tooltip.js` module:
+  - Centralized tooltip creation, positioning and show/hide logic.
+  - Inventory and equipment tooltips now share the same underlying system.
+- Modularized the global CSS:
+  - Replaced `main.css` with:
+    - `styles/base.css` – global look & feel, start/character screens, save list, character creation, header/menu bar, patch notes modal, tooltip styling.
+    - `styles/game.panels.css` – loot button, progress bar, HP bar, inventory panel, equipment panel, skills panel, rarity colors, unlock “glow” effect, and inventory row layout.
+  - No intentional visual changes; this is a structural cleanup to make future UI/layout work (like resizable inventory and new views) easier.
+
+### Notes
+
+- No new gameplay systems were added in this version.  
+- This update is focused on internal structure, stability, and preparing the codebase for upcoming updates.
+
+---
+
 ## v0.0.65b - Inventory Category Fix
 - Fixed an issue where collapsing an item category and then equipping a weapon or armor would cause all categories beneath it to temporarily disappear.  
 All categories now stay visible and behave correctly when equipping, unequipping, or looting items.
