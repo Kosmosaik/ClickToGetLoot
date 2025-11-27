@@ -7,17 +7,13 @@ This roadmap is flexible and will evolve as development continues.
 
 ---
 
-## v0.0.66 — Polish & Stability Update & Inventory improvements
-Small but important improvements
+## v0.0.67 — Polish & Inventory improvements
+A small update to improve UI and create more options for the player
 
 ### Planned:
 - UI consistency pass (button styles, panel spacing, tooltip clarity)
 - Improve layout logic for Inventory/Equipment/Skills panels when resizing web page.
-- Add more settings and variables to config.js if possible.
-- Refactor code and create new scripts to move code and make the project more modular.
-
-A small update to improve inventory UI and create more options for the player
-
+- Make all menus resizable and movable (free moving and sizing).
 - Add a toggle to collapse/expand all inventory categories at once
 - Add a toggle to remove categories and keep all items (no matter category) in a single list.
   Add sorting option for category (inside "all items list"-view) and keep the other sorting options for new view.
@@ -27,14 +23,20 @@ A small update to improve inventory UI and create more options for the player
 
 ---
 
-## v0.0.67 - Level / Experience and armor improvements
+## v0.0.68 - Level / Experience and armor improvements
 - Add Level stat and experience points.
 - Make a temporary easy exp formula for exp to next level etc
 - Add a "Give EXP" button for testing purposes
 - Add a text field to input how much exp to give character per click
 - Add a "Give level" button for testing purposes
 - Give character 3 attribute points to distribute on level up.
+
+---
+
+## v0.0.69 - Prep for exploration
 - Add defense values and other stats to armor/equipment.
+- Add more items that are going to exist in the starting zone
+- Add all variables, properties/values etc on all items/equipment/character stats in preparation for crafting/gathering and exploring updates.
 
 ---
 
