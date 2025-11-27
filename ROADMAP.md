@@ -36,7 +36,7 @@ A small update to improve UI and create more options for the player
 ## v0.0.69 - Prep for exploration
 - Add defense values and other stats to armor/equipment.
 - Add more items that are going to exist in the starting zone
-- Add all variables, properties/values etc on all items/equipment/character stats in preparation for crafting/gathering and exploring updates.
+- Add all variables, properties/values etc on all items/equipment/character stats in preparation for crafting/gathering and exploring updates. Armor/PDEF, crafting modifier attributes/stats and more.
 
 ---
 
@@ -44,27 +44,51 @@ A small update to improve UI and create more options for the player
 Unlocks real gameplay beyond clicking “Loot”. Exploring
 
 ### Planned:
-- Add “Zones” (locations the player can visit)
+- Add “Zones” (areas the player can visit , kinda like biomes). 
 - Each zone has:
-  - Level range / Difficulty system (we need to discuss this a lot to find a good balance).
+  - Level range / Difficulty system (we need to discuss this a lot to find a good balance), a specific biome, Points of interests (small interactable objects/areas), locations (stage-transitioning areas where new exploration progress starts with its oen POIs and entities), enemies etc. Not all of this will be implemented in 0.0.70, but it till be discussed and a lot of decisions will be made here to set the foundation going forward.
+- Zone unlock progression (unlocks adjacent/neighbouring zones to "finished" zones)
+- A Starting Zone that the player will begin in. This zone will contain all the tutorials and we will focus on expanding this zone first after the world map and starting zone has been implemented. This zone will have predefined quests/tasks that the player will have to complete before 100%-ing the zone and continue to the next zone, while future zones will have optional/randomly generated quests and progress will be more time based.
+- Generate Resource Nodes and POIs (Locations and Entities will come later).
+- Make resource nodes contain resources (item/loot table) - No interaction/gathering system yet.
 
-- Zone unlock progression.
-- Starting Zone that the player will begin in. This zone will contain all the tutorials and we will focus on expanding this zone first after the world map and starting zone has been implemented.
 
 ### UI:
-- New Zone selection panel (World map)
+- New Zone selection panel (World map - This will be locked and invisible to the player until Starting Zone has been finished).
 - Zone descriptions
 - Zone completion time bar (similar to loot bar), going from 0% to 100%. During this time resource nodes, entities, POIs, Locations etc will pop up in a list that you can interact with.
 - World map -> Zone -> World map transition
 - Zone "finished" screen when clicking a button "Exit Zone" when 100% explored. Brings you back to the world map.
+- Make it shown that a zone has been "completed".
+- Timers when player chooses to interact with things in the list (timers for "Walking to X...", "Preparing ....", "Searching for a place to build shelter..." etc). This will make it feel like the character is actually walking around and doing stuff than just instantly interact with everything in the zome.
 
 ---
 
+## v0.0.71 -> 0.0.74 - Polish, Expand & Improve existing systems
+
+### Planned:
+- Add more POIs and other interactables to the Starting Zone
+- Add more items
+- Interact / Use system: Combine items and do basic tasks that's not really a crafting task (Right click a branch -> Make Lean-To Shelter (blueprint), Right Click Campfire -> Add Items -> Raw Meat, Right click cooked meat -> Eat, Drink etc). These small interactions will complete predefined tasks later.
+- Blueprint system for Lean-To Shelter. Adds a blueprint. when clicking on blueprint you'll see a small window with required items to complete the shelter.
+- Hunger & Thirst System
+- Eat / Drink System
+
+---
+
+## v0.0.75 - Quests/Tasks System
+
+### Planned:
+- Quest system that first and foremosts define the exploration progress in the Starting Zone. This quests system should be built so it can be reused for randomly generated quests later in other zones.
+- Collect x item - Complete - Progress exploration x %
+- Add tutorial quests
+
 ## v0.0.80 — Combat v1
-The first real combat mechanics appear.
+The first real combat mechanics and enemies appear.
 
 ### Planned:
 - Basic enemy system
+- Entity spawning system (enemies or passive entities).
 - Simulation-style combat:
   - Player Attack vs Enemy Defense
   - Enemy Attack vs Player HP
