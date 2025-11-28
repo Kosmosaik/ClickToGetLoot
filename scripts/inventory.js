@@ -55,7 +55,7 @@ if (inventoryViewToggleBtn) {
 
 // ----- Column resizing for All Items flat view -----
 function setupInventoryFlatColumnResizing(headerEl) {
-  const MIN_WIDTH = 80;
+  const MIN_WIDTH = 40;
 
   // Remove any old handles (in case we re-rendered)
   headerEl.querySelectorAll(".col-resize-handle").forEach((h) => h.remove());
