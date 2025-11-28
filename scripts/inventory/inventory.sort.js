@@ -23,5 +23,27 @@ function compareStacks(A, B) {
     return A.name.localeCompare(B.name) * mul;
   }
 
-  return A.name.localeCompare(B.name) * mul;
+    if (key === "category") {
+    const ca = A.stack.items[0]?.category || "Other";
+    const cb = B.stack.items[0]?.category || "Other";
+
+    const CATEGORY_ORDER = GAME_CONFIG.inventory.categoryOrder;
+    const ia = CATEGORY_ORDER.indexOf(ca);
+    const ib = CATEGORY_ORDER.indexOf(cb);
+
+    let diff;
+    if (ia === -1 && ib === -1) {
+      // If both are unknown categories, fall back to alphabetical
+      diff = ca.localeCompare(cb);
+    } else if (ia === -1) {
+      diff = 1;
+    } else if (ib === -1) {
+      diff = -1;
+    } else {
+      diff = ia - ib;
+    }
+
+    if (diff !== 0) return diff * mul;
+    return A.name.localeCompare(B.name) * mul;
+  }
 }
