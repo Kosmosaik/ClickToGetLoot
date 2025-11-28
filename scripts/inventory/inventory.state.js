@@ -68,3 +68,53 @@ function expandAllCategories() {
     renderInventory();
   }
 }
+
+// ----- Inventory flat view column widths -----
+// We have 5 columns: Item Name, Category, Rarity, Qty, Grades
+const INVENTORY_FLAT_COL_COUNT = 5;
+
+// Lazily-loaded widths array, in pixels
+let inventoryFlatColumnWidths = null;
+
+function getInventoryFlatColumnWidths() {
+  if (!inventoryFlatColumnWidths) {
+    // Try to load from localStorage
+    try {
+      const stored = localStorage.getItem("inventoryFlatColumnWidths");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length === INVENTORY_FLAT_COL_COUNT) {
+          inventoryFlatColumnWidths = parsed.map((n) => Number(n) || 0);
+        }
+      }
+    } catch {
+      // Ignore storage errors and fall back to defaults
+    }
+
+    // Defaults if nothing stored or invalid
+    if (!inventoryFlatColumnWidths) {
+      inventoryFlatColumnWidths = [220, 140, 100, 70, 90]; // px
+    }
+  }
+  return inventoryFlatColumnWidths;
+}
+
+function setInventoryFlatColumnWidths(widths) {
+  inventoryFlatColumnWidths = widths.slice();
+  try {
+    localStorage.setItem(
+      "inventoryFlatColumnWidths",
+      JSON.stringify(inventoryFlatColumnWidths)
+    );
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// Apply current widths to any grid element (header or row summary)
+function applyInventoryFlatColumnWidthsToElement(el) {
+  const widths = getInventoryFlatColumnWidths();
+  el.style.display = "grid";
+  el.style.gridTemplateColumns = widths.map((w) => `${w}px`).join(" ");
+}
+
