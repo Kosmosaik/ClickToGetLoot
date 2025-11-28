@@ -322,6 +322,20 @@
   text-decoration: underline;
 }
 
+.inventory-toolbar button {
+  background: #1f2430;
+  border: 1px solid #313844;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #d0d7e2;
+}
+
+.inventory-toolbar button:hover {
+  background: #262c3a;
+}
+
 /* Make summary rows column-ish */
 .inventory-stack > summary {
   display: flex;
