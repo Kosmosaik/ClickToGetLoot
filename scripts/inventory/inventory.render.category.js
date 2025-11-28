@@ -412,6 +412,8 @@ function renderInventoryAllItemsView() {
   header.appendChild(makeHeaderCell("quality", "Grades"));
   inventoryList.appendChild(header);
 
+  applyInventoryFlatColumnWidthsToElement(header);
+
   // ---- Build & sort the flat stack list ----
   const stacks = names.map((name) => ({
     name,
@@ -489,7 +491,12 @@ function renderInventoryAllItemsView() {
       variantsWrap.appendChild(makeIdenticalGroupLine(name, rarity, g));
     });
     details.appendChild(variantsWrap);
+    
+    applyInventoryFlatColumnWidthsToElement(summary);
 
     inventoryList.appendChild(details);
   });
+  if (typeof setupInventoryFlatColumnResizing === "function") {
+    setupInventoryFlatColumnResizing(header);
+  }
 }
