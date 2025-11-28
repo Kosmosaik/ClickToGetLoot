@@ -29,5 +29,27 @@ if (inventoryExpandAllBtn) {
   });
 }
 
-// View toggle will be wired up in v0.0.67 Step 2
-// (Category view vs All Items view)
+// Set initial label for view toggle
+if (inventoryViewToggleBtn) {
+  const label =
+    typeof inventoryViewMode !== "undefined" && inventoryViewMode === "all"
+      ? "View: All items ▼"
+      : "View: Category ▼";
+
+  inventoryViewToggleBtn.textContent = label;
+}
+
+// View toggle: switch between "category" and "all" modes
+if (inventoryViewToggleBtn) {
+  inventoryViewToggleBtn.addEventListener("click", () => {
+    if (typeof setInventoryViewMode !== "function") return;
+
+    const newMode = inventoryViewMode === "category" ? "all" : "category";
+    setInventoryViewMode(newMode);
+
+    // Update button text
+    inventoryViewToggleBtn.textContent =
+      newMode === "all" ? "View: All items ▼" : "View: Category ▼";
+  });
+}
+
