@@ -1,7 +1,17 @@
 // scripts/inventory/inventory.render.category.js
 // Renders the standard "by category" inventory view.
 
+// Main inventory renderer: dispatches based on current view mode
 function renderInventory() {
+  if (inventoryViewMode === "all") {
+    // For now, fall back to category view until we implement the All Items renderer
+    renderInventoryAllItemsView();
+  } else {
+    renderInventoryCategoryView();
+  }
+}
+
+function renderInventoryCategoryView() {
   inventoryList.innerHTML = "";
   const names = Object.keys(inventory);
   if (!names.length) return;
@@ -350,3 +360,10 @@ function makeIdenticalGroupLine(itemName, rarity, group) {
 
   return div;
 }
+
+// Temporary "All Items" renderer – will be replaced in the next step
+function renderInventoryAllItemsView() {
+  // For now, use the same category view. We'll implement a true flat list next.
+  renderInventoryCategoryView();
+}
+
