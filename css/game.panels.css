@@ -348,6 +348,11 @@
   flex: 1;
 }
 
+/* In the All Items flat view, let the grid control the Qty width */
+.inventory-stack-flat > summary .inv-qty {
+  width: auto;
+}
+
 .inventory-stack > summary .inv-qty {
   width: 40px;
   text-align: left;
