@@ -34,19 +34,24 @@ function setInventoryViewMode(mode) {
 
 // Collapse all categories currently present in the inventory
 function collapseAllCategories() {
-  if (!window.inventory) return;
+  // Use the global "inventory" object directly.
+  // It exists because we declare `const inventory = Object.create(null);`
+  // in scripts/inventory.js (loaded after this file).
+
+  if (typeof inventory === "undefined") return;
 
   const names = Object.keys(inventory);
+  if (!names.length) return;
+
   // For each item stack, add its category to the collapsed set
   for (const name of names) {
     const group = inventory[name];
     if (!group || !Array.isArray(group.items)) continue;
 
-    for (const inst of group.items) {
-      if (inst && inst.category) {
-        collapsedCategories.add(inst.category);
-        break; // one instance is enough; all stacks share the same category
-      }
+    // Look at one instance to grab its category
+    const firstInst = group.items[0];
+    if (firstInst && firstInst.category) {
+      collapsedCategories.add(firstInst.category);
     }
   }
 
