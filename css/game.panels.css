@@ -349,8 +349,9 @@
 }
 
 /* In the All Items flat view, let the grid control the Qty width */
-.inventory-stack-flat > summary .inv-qty {
-  width: auto;
+.inventory-stack.inventory-stack-flat > summary .inv-qty {
+  width: auto !important;
+  text-align: left;
 }
 
 .inventory-stack > summary .inv-qty {
@@ -432,6 +433,7 @@
   display: block;
   border-right: 1px solid #3c3c3c;
   padding-right: 6px;
+  text-align: left;
 }
 
 /* Remove line on the last cell of the row */
