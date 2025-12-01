@@ -425,22 +425,12 @@
   padding-right: 6px;
 }
 
-/* Remove the line on the last column */
-.inventory-flat-header .flat-header-cell:last-child {
-  border-right: none;
-}
-
 /* Row cells inside <summary> */
 .inventory-stack-flat > summary span {
   display: block;
   border-right: 1px solid #3c3c3c;
   padding-right: 6px;
   text-align: left;
-}
-
-/* Remove line on the last cell of the row */
-.inventory-stack-flat > summary span:last-child {
-  border-right: none;
 }
 
 .inventory-flat-header .flat-header-cell.active {
