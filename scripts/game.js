@@ -10,6 +10,10 @@ let currentHP = 0;
 // so UI or other systems can use it.
 let characterComputed = null;
 
+// ----- Zones / Exploration -----
+// For now we just track a single current Zone in memory.
+let currentZone = null;
+
 // ----- Equipment helpers -----
 function unequipSlotToInventory(slotKey) {
   const item = unequipSlot(slotKey); // from equipment.js
@@ -408,4 +412,15 @@ let equipmentUnlocked = false;
 window.debugCharacterComputed = () => {
   console.log("Character computed state:", characterComputed);
   return characterComputed;
+};
+
+window.debugZoneState = () => {
+  console.log("Current Zone:", currentZone);
+  if (currentZone && window.ZoneDebug) {
+    console.log(
+      "Exploration stats:",
+      window.ZoneDebug.getZoneExplorationStats(currentZone)
+    );
+  }
+  return currentZone;
 };
