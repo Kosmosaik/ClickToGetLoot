@@ -94,28 +94,29 @@ function setupInventoryFlatColumnResizing(headerEl) {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
   }
-
- headerCells.forEach((cell, index) => {
-  const handle = document.createElement("div");
-  handle.className = "col-resize-handle";
-  cell.appendChild(handle);
-
-  handle.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    isResizing = true;
-    startX = e.clientX;
-    colIndex = index;
-
-    startWidths = getInventoryFlatColumnWidths().slice();
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
+  
+  headerCells.forEach((cell, index) => {
+    const handle = document.createElement("div");
+    handle.className = "col-resize-handle";
+    cell.appendChild(handle);
+  
+    handle.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+  
+      isResizing = true;
+      startX = e.clientX;
+      colIndex = index;
+  
+      startWidths = getInventoryFlatColumnWidths().slice();
+  
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    });
+  
+    handle.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
   });
-
-  handle.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  });
-});
+}
