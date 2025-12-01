@@ -414,6 +414,11 @@ function renderInventoryAllItemsView() {
 
   applyInventoryFlatColumnWidthsToElement(header);
 
+  // Adjust panel width to fit current columns
+  if (typeof updateInventoryPanelWidthToFitColumns === "function") {
+    updateInventoryPanelWidthToFitColumns();
+  }
+
   // ---- Build & sort the flat stack list ----
   const stacks = names.map((name) => ({
     name,
