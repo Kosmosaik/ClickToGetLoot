@@ -1,3 +1,73 @@
+# ProgressCrawl – Patch v0.0.67
+## **UI Polish, Smarter Inventory & Movable Panels!**
+
+This update focuses entirely on making the UI feel smoother, look cleaner, and give you more control.  
+No new gameplay systems yet — just a ton of improvements that make everything more enjoyable and easier to interact with.
+
+---
+
+# New: All-Items Inventory View
+You can now switch between:
+- **Category View** – the original grouped list  
+- **All Items View** – a clean spreadsheet-style layout
+
+The All-Items view gives you:
+- One long list of all your items  
+- Sortable columns (Name, Category, Rarity, Quantity, Grades)  
+- Column-by-column organization just like an RPG stash or MMO bank  
+- Category tag added next to each item name for clarity  
+
+Perfect for players who want full control over their inventory.
+
+---
+
+# New: Resize Inventory Columns (Like Excel!)
+All columns in the new All-Items view can be resized by dragging the divider lines.
+
+- Drag left or right to shrink or expand any column  
+- The layout updates instantly  
+- Column widths are saved  
+- Makes browsing and organizing a breeze  
+
+---
+
+# New: Auto-Adjusting Inventory Panel
+The inventory panel now **automatically resizes** to fit whatever columns you create.
+
+- No more hidden stats off-screen  
+- No need to stretch the panel manually  
+- The panel always remains “tight” around the table  
+
+---
+
+# New: Movable Panels
+Inventory, Equipment, and Skills panels can now be freely moved around the screen!
+
+- Grab the title bar and drag anywhere  
+- Panels stay within the play area  
+- They can’t be dragged below the bottom HUD  
+- Their position is saved and restored when you return  
+
+---
+
+# Quality-of-Life Improvements
+- “Collapse All” and “Expand All” buttons added  
+- Categories are sorted alphabetically in All-Items view  
+- Column resize handles no longer accidentally trigger sorting  
+- Item rows and column lines now align perfectly  
+- Grades column now has a proper divider line  
+
+---
+
+# General UI Clean-up
+- Consistent spacing and fonts  
+- More readable tooltips  
+- Better alignment in lists  
+- Improved mouse interaction zones  
+- Panels no longer overlap awkwardly  
+
+---
+
 ## v0.0.66 - Modularization & UI Foundation
 
 ### Refactors & Code Structure
