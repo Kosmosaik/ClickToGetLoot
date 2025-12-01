@@ -291,16 +291,4 @@ This is the official, comprehensive list used for worldbuilding and profession d
 
 ---
 
-# 📘 Instructions for Future ChatGPT Sessions
-
-When this file is uploaded:
-
-1. Read the entire list  
-2. Understand that Agriculture is completed already  
-3. Ask the user:  
-   **“Which skill should we deep dive into next?”**  
-4. Build a complete system drawing from all 35+ games into one complex and deep skill system that would fit in a complete version of ProgressCrawl.
-
----
-
 # END OF FILE
