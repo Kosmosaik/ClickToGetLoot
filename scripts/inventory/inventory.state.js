@@ -20,12 +20,30 @@ const collapsedCategories = new Set();
 
 // View mode for inventory ("category" | "all").
 // We'll fully use this in v0.0.67 Step 2.
+// View mode for inventory ("category" | "all")
 let inventoryViewMode = "category";
 
 // Change view mode and re-render inventory
 function setInventoryViewMode(mode) {
   if (inventoryViewMode === mode) return;
   inventoryViewMode = mode;
+
+  const panel = document.getElementById("inventory-panel");
+  if (panel) {
+    if (mode === "all") {
+      // All Items: auto-fit columns, no manual resize
+      panel.style.resize = "none";
+      panel.style.overflowX = "hidden";
+
+      if (typeof updateInventoryPanelWidthToFitColumns === "function") {
+        updateInventoryPanelWidthToFitColumns();
+      }
+    } else {
+      // Category mode: user can resize horizontally
+      panel.style.resize = "horizontal";
+      panel.style.overflowX = "auto";
+    }
+  }
 
   if (typeof renderInventory === "function") {
     renderInventory();
