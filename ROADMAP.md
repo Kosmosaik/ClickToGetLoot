@@ -7,22 +7,6 @@ This roadmap is flexible and will evolve as development continues.
 
 ---
 
-## v0.0.67 — Polish & Inventory improvements
-A small update to improve UI and create more options for the player
-
-### Planned:
-- UI consistency pass (button styles, panel spacing, tooltip clarity)
-- Improve layout logic for Inventory/Equipment/Skills panels when resizing web page.
-- Make all menus resizable and movable (free moving and sizing).
-- Add a toggle to collapse/expand all inventory categories at once
-- Add a toggle to remove categories and keep all items (no matter category) in a single list.
-  Add sorting option for category (inside "all items list"-view) and keep the other sorting options for new view.
-- Add category next to the item name in inventory if sorting without category (in All items view).
-- Add stats in tooltip for "actual stats" that the player will get by equipping an item.
-  In other words, there will be "Weapon stats - Comparison with equipped item - characters stats after equipping the item".
-
----
-
 ## v0.0.68 - Level / Experience System
 - Add Level stat and experience points.
 - Make a temporary easy exp formula for exp to next level etc
