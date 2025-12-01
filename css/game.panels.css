@@ -130,10 +130,11 @@
   /* Resizable width */
   width: 500px;
   min-width: 360px;
-  max-width: 60vw;
+  max-width: 70vw;
   max-height: 70vh;
-  overflow: auto;
-  resize: horizontal; /* user can drag the right edge */
+  overflow-y: auto;
+  overflow-x: hidden;    /* columns should always fit */
+  resize: none;          /* no manual horizontal resize needed now */
 }
 
 /* === Equipment panel sits to the right of the inventory panel === */
