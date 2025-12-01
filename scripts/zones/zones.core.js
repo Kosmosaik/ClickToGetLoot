@@ -155,4 +155,5 @@ window.ZoneDebug = {
   createDebugZone,
   getZoneExplorationStats,
   revealRandomExplorableTile,
+  revealNextExplorableTileSequential,
 };
