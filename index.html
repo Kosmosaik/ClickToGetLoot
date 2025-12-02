@@ -9,7 +9,7 @@
 <body>
 <div id="game-header">
   <span class="game-header-text">
-    ProgressCrawl — v0.0.70a-dev : Exploration (EXPERIMENTAL) v8
+    ProgressCrawl — v0.0.70a-dev : Exploration (EXPERIMENTAL) v9
   </span>
   <button id="patch-notes-btn" type="button">Patch Notes</button>
 </div>
@@ -107,22 +107,34 @@
       </div>
     
       <div id="zone-actions">
-        <button id="zone-explore-random" type="button">
-          Explore (Random)
+        <button id="zone-explore-next" type="button">
+          Explore Next Tile
         </button>
-        <button id="zone-explore-sequential" type="button">
-          Explore (Sequential)
+        <button id="zone-explore-auto" type="button">
+          Explore Auto
+        </button>
+        <button id="zone-explore-stop" type="button">
+          Stop Exploring
         </button>
       </div>
     
-      <pre id="zone-grid-view" class="zone-grid-view">
+      <div id="zone-main-layout">
+        <div id="zone-grid-container">
+          <pre id="zone-grid-view" class="zone-grid-view">
     (No active zone)
-      </pre>
+          </pre>
+        </div>
     
-      <!-- Discovery list -->
-      <div id="zone-discovery-log">
-        <h3>Discoveries</h3>
-        <ul id="zone-discovery-list"></ul>
+        <div id="zone-discoveries-log">
+          <h3>Discoveries</h3>
+          <ul id="zone-discoveries-list"></ul>
+        </div>
+      </div>
+    
+      <!-- Messages (was called Discoveries before) -->
+      <div id="zone-messages-log">
+        <h3>Messages</h3>
+        <ul id="zone-messages-list"></ul>
       </div>
     
       <!-- Finish Zone menu -->
@@ -131,7 +143,7 @@
         <button id="zone-finish-stay" type="button">STAY</button>
         <button id="zone-finish-leave" type="button">LEAVE ZONE</button>
       </div>
-    </div>
+
 
     <button id="loot-button">Loot!</button>
     <div id="progress-container">
