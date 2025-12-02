@@ -29,7 +29,9 @@ const ZONE_GENERIC_MESSAGES = [
   "You scout a quiet stretch of the zone.",
   "You reveal more of the surrounding area.",
   "You push the boundary of the unknown.",
-  "You chart another small piece of this zone."
+  "You chart another small piece of this zone.",
+  "You smell fart in the air, but decide to continue anyway.",
+  "You slipped on a piece of shit."
 ];
 
 function addRandomZoneMessage() {
