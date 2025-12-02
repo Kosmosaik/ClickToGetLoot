@@ -176,24 +176,6 @@ if (zoneExploreSequentialBtn) {
   });
 };
 
-// Enter Starting Zone (Debug)
-if (zoneEnterBtn) {
-  zoneEnterBtn.addEventListener("click", () => {
-    if (typeof createDebugZone === "function") {
-      currentZone = createDebugZone();
-      isInZone = true;
-      console.log("Entered Starting Zone (Debug):", currentZone);
-
-      // Start tick-based exploration
-      if (typeof startZoneExplorationTicks === "function") {
-        startZoneExplorationTicks();
-      }
-
-      renderZoneUI();
-    }
-  });
-}
-
 // Finish menu: STAY
 if (zoneFinishStayBtn) {
   zoneFinishStayBtn.addEventListener("click", () => {
