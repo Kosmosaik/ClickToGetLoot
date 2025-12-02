@@ -238,3 +238,31 @@ if (zoneFinishLeaveBtn) {
   });
 }
 
+function addZoneMessage(text) {
+  if (!zoneMessagesListEl) return;
+
+  const li = document.createElement("li");
+  li.textContent = text;
+  zoneMessagesListEl.prepend(li);
+
+  while (zoneMessagesListEl.children.length > 30) {
+    zoneMessagesListEl.removeChild(zoneMessagesListEl.lastChild);
+  }
+}
+
+function addZoneDiscovery(text) {
+  if (!zoneDiscoveriesListEl) return;
+
+  const li = document.createElement("li");
+  li.textContent = text;
+  zoneDiscoveriesListEl.prepend(li);
+
+  while (zoneDiscoveriesListEl.children.length > 50) {
+    zoneDiscoveriesListEl.removeChild(zoneDiscoveriesListEl.lastChild);
+  }
+}
+
+// Expose (messages used now, discoveries later)
+window.addZoneMessage = addZoneMessage;
+window.addZoneDiscovery = addZoneDiscovery;
+
