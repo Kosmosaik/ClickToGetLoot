@@ -40,9 +40,9 @@ const NAME_POOL = [
   "Arin", "Lyra", "Drog", "Mira", "Thalen",
   "Kira", "Borin", "Selene", "Rogar", "Elira",
   "Bullen", "Ballen", "Bongen", "Mjolk", "Riskakan",
-
   "Jared the Greedy", "Four Fingered Westby", "Rawley the Viper",
   "Jessie Smokes", "Teresa Mad Dog", "Kaley the Reaper",
+  "Stom", "Elmadreth", "Glurn", "Jurngof", "Grimbald", "Kalylia"
 ];
 
 function randomName() {
