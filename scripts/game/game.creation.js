@@ -154,18 +154,17 @@ if (btnCreateCharacter) {
     saveCurrentGame();
     updateCharacterSummary();
     
-    // --- 0.0.70a: Enter Starting Zone automatically ---
+    // --- 0.0.70a: Enter Starting Zone automatically (exploration paused) ---
     if (typeof createDebugZone === "function") {
-      currentZone = createDebugZone();      // this is our temporary "Starting Zone"
+      currentZone = createDebugZone();      // temporary "Starting Zone"
       isInZone = true;
       console.log("Entered Starting Zone (Debug):", currentZone);
 
       if (typeof renderZoneUI === "function") {
         renderZoneUI();                     // show the zone immediately
       }
-      if (typeof startZoneExplorationTicks === "function") {
-        startZoneExplorationTicks();        // start the 2–5s exploration ticks
-      }
+      // Do NOT start auto exploration here.
+      // The player will start it with "Explore Auto" later.
     }
 
     setScreen("game");
