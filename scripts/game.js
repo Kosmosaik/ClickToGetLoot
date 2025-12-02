@@ -76,7 +76,7 @@ function runZoneExplorationTick() {
         ];
         const msg =
           genericMessages[Math.floor(Math.random() * genericMessages.length)];
-        addZoneDiscoveryEntry(msg);
+        addZoneMessage(msg);
       }
 
       if (typeof renderZoneUI === "function") {
