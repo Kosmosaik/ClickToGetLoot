@@ -71,6 +71,8 @@ function runZoneExplorationTick() {
           "You reveal more of the surrounding area.",
           "You push the boundary of the unknown.",
           "You chart another small piece of this zone.",
+          "You slipped and fell on a piece of shit.",
+          "You smell fart in the air, but decide to continue anyway.",
         ];
         const msg =
           genericMessages[Math.floor(Math.random() * genericMessages.length)];
