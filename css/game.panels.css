@@ -624,7 +624,7 @@
   display: inline-block;
   font-family: "Fira Code", "Consolas", monospace;
   font-size: 1rem;           /* emoji are smaller, slightly increase size */
-  line-height: 1.1;
+  line-height: 0.95;
   background: #000;
   border: 1px solid #333;
   padding: 8px;
