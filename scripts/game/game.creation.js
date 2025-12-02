@@ -153,7 +153,20 @@ if (btnCreateCharacter) {
     // Fresh save for this character (empty inventory)
     saveCurrentGame();
     updateCharacterSummary();
+    
+    // --- 0.0.70a: Enter Starting Zone automatically ---
+    if (typeof createDebugZone === "function") {
+      currentZone = createDebugZone();      // this is our temporary "Starting Zone"
+      isInZone = true;
+      console.log("Entered Starting Zone (Debug):", currentZone);
 
+      if (typeof renderZoneUI === "function") {
+        renderZoneUI();                     // show the zone immediately
+      }
+      if (typeof startZoneExplorationTicks === "function") {
+        startZoneExplorationTicks();        // start the 2–5s exploration ticks
+      }
+    }
 
     setScreen("game");
   });
