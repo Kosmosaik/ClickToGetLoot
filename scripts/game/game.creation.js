@@ -39,6 +39,7 @@ let pointsLeft = EXTRA_POINTS;
 const NAME_POOL = [
   "Arin", "Lyra", "Drog", "Mira", "Thalen",
   "Kira", "Borin", "Selene", "Rogar", "Elira",
+  "Bullen", "Ballen", "Bongen", "Mjolk", "Riskakan",
 ];
 
 function randomName() {
