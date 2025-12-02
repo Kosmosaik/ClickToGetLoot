@@ -6,8 +6,6 @@ console.log("zones.ui.js loaded");
 // ----- DOM references -----
 const zonePanel = document.getElementById("zone-panel");
 
-const zonePanel = document.getElementById("zone-panel");
-
 const zoneNameEl = document.getElementById("zone-name");
 const zoneStatusEl = document.getElementById("zone-status");
 const zoneStatsEl = document.getElementById("zone-exploration-stats");
