@@ -38,7 +38,7 @@ function buildZoneGridString(zone) {
 
       let ch;
       if (tile.kind === "blocked") {
-        ch = "🌲";
+        ch = "⛰️";
       } else if (tile.kind === "locked") {
         ch = "🔒"; // lock
       } else {
