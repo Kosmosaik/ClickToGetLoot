@@ -548,97 +548,125 @@
 /* === Zone main panel === */
 #zone-panel {
   margin: 0 auto 10px auto;
-  max-width: 640px;
+  max-width: 900px;
   background: #111;
   border: 1px solid #555;
-  padding: 10px;
+  padding: 12px 16px;
   border-radius: 8px;
+  color: #ddd;
 }
 
 #zone-panel h2 {
   margin-top: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
-#zone-status {
-  font-size: 0.8rem;
-  color: #aaa;
-  margin-bottom: 4px;
-}
-
-/* Left main + right discoveries column */
+/* Main layout: left column + right sidebar */
 #zone-layout {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: flex-start;
 }
 
-/* Main content column (info + buttons + grid + messages + finish) */
+/* LEFT MAIN COLUMN */
 #zone-main-column {
   flex: 1 1 auto;
 }
 
-/* Discoveries sidebar, full panel height visually */
+/* RIGHT DISCOVERIES COLUMN */
 #zone-discoveries-column {
-  flex: 0 0 220px;
+  flex: 0 0 240px;
   border-left: 1px solid #333;
-  padding-left: 10px;
-  font-size: 0.75rem;
+  padding-left: 14px;
+  min-height: 100%;
 }
 
-#zone-discoveries-column h3 {
-  margin: 4px 0;
-  font-size: 0.8rem;
+#zone-discoveries-column .zone-section-title {
+  margin-bottom: 6px;
 }
 
-#zone-discoveries-list {
-  list-style-type: disc;
-  padding-left: 16px;
-  max-height: 400px;
-  overflow-y: auto;
+/* === Section styling === */
+.zone-section {
+  margin-bottom: 18px;
 }
 
-/* Center the grid nicely within the main column */
+.zone-section-title {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 2px;
+}
+
+/* === Controls (buttons) === */
+#zone-actions button {
+  margin-right: 8px;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  background: #222;
+  border: 1px solid #444;
+  color: #eee;
+  border-radius: 4px;
+}
+
+#zone-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === Map Grid === */
 #zone-grid-container {
   text-align: center;
-  margin: 8px 0;
 }
 
 .zone-grid-view {
-  display: inline-block;                /* shrink to content (no huge black box) */
+  display: inline-block;
   font-family: "Fira Code", "Consolas", monospace;
   font-size: 0.75rem;
   line-height: 1.1;
   background: #000;
   border: 1px solid #333;
-  padding: 6px;
+  padding: 8px;
   border-radius: 4px;
-  max-height: 200px;
+  max-height: 220px;
   overflow: auto;
   text-align: left;
 }
 
-/* Messages below the grid */
-#zone-messages-log {
-  margin-top: 8px;
-  font-size: 0.75rem;
-}
-
-#zone-messages-log h3 {
-  margin: 4px 0;
-  font-size: 0.8rem;
-}
-
+/* === Messages === */
 #zone-messages-list {
   list-style-type: disc;
-  padding-left: 16px;
-  max-height: 160px;
+  padding-left: 18px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
-/* Finish menu buttons */
-#zone-finish-menu button {
+#zone-messages-list li {
+  margin-bottom: 3px;
   font-size: 0.8rem;
-  margin-right: 6px;
 }
 
+/* === Discoveries === */
+#zone-discoveries-list {
+  list-style-type: disc;
+  padding-left: 18px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+#zone-discoveries-list li {
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+
+/* === Finish Zone Buttons === */
+#zone-finish-menu button {
+  font-size: 0.85rem;
+  margin-right: 10px;
+  padding: 4px 8px;
+  border: 1px solid #444;
+  background: #222;
+  color: #eee;
+  border-radius: 4px;
+}
