@@ -1,5 +1,5 @@
 // scripts/zones/zones.ui.js
-// Small UI layer for the Zone panel (0.0.70a test).
+// UI layer for Zone main panel (0.0.70a).
 
 console.log("zones.ui.js loaded");
 
@@ -40,7 +40,7 @@ function buildZoneGridString(zone) {
       if (tile.kind === "blocked") {
         ch = "#";
       } else if (tile.kind === "locked") {
-        ch = "L";          // always show lock as L
+        ch = "L"; // lock
       } else {
         // walkable
         ch = tile.explored ? "." : "?";
@@ -54,19 +54,24 @@ function buildZoneGridString(zone) {
   return lines.join("\n");
 }
 
-function getZoneStatusText() {
-  if (!currentZone || !isInZone) {
+function getZoneStatusText(zone, stats) {
+  if (!zone || !isInZone) {
     return "Status: Not in a zone";
   }
 
-  if (window.ZoneDebug && typeof ZoneDebug.getZoneExplorationStats === "function") {
-    const stats = ZoneDebug.getZoneExplorationStats(currentZone);
-    if (stats.percentExplored >= 100) {
-      return "Status: Zone completed";
-    }
+  if (!stats) {
+    return "Status: Exploring";
   }
 
-  return "Status: Exploring zone";
+  if (stats.percentExplored >= 100) {
+    return "Status: Zone completed";
+  }
+
+  if (zoneExplorationActive) {
+    return "Status: Exploring (Auto)";
+  }
+
+  return "Status: Idle (Ready to explore)";
 }
 
 function renderZoneUI() {
@@ -97,6 +102,14 @@ function renderZoneUI() {
 
   const zone = currentZone;
 
+  // Exploration stats
+  let stats = null;
+  let statsText = "Exploration stats unavailable";
+  if (window.ZoneDebug && typeof ZoneDebug.getZoneExplorationStats === "function") {
+    stats = ZoneDebug.getZoneExplorationStats(zone);
+    statsText = `Explored: ${stats.percentExplored}% (${stats.exploredTiles} / ${stats.totalExplorableTiles} tiles)`;
+  }
+
   // Zone name
   if (zoneNameEl) {
     const name = zone.name || zone.id || "Unknown Zone";
@@ -105,29 +118,10 @@ function renderZoneUI() {
 
   // Status
   if (zoneStatusEl) {
-    if (!isInZone) {
-      zoneStatusEl.textContent = "Status: Not in a zone";
-    } else if (window.ZoneDebug && typeof ZoneDebug.getZoneExplorationStats === "function") {
-      const stats = ZoneDebug.getZoneExplorationStats(zone);
-      if (stats.percentExplored >= 100) {
-        zoneStatusEl.textContent = "Status: Zone completed";
-      } else if (zoneExplorationActive) {
-        zoneStatusEl.textContent = "Status: Exploring (Auto)";
-      } else {
-        zoneStatusEl.textContent = "Status: Idle (Ready to explore)";
-      }
-    } else {
-      zoneStatusEl.textContent = "Status: Exploring";
-    }
+    zoneStatusEl.textContent = getZoneStatusText(zone, stats);
   }
 
-  // Exploration stats
-  let stats = null;
-  let statsText = "Exploration stats unavailable";
-  if (window.ZoneDebug && typeof ZoneDebug.getZoneExplorationStats === "function") {
-    stats = ZoneDebug.getZoneExplorationStats(zone);
-    statsText = `Explored: ${stats.percentExplored}% (${stats.exploredTiles} / ${stats.totalExplorableTiles} tiles)`;
-  }
+  // Stats text
   if (zoneStatsEl) {
     zoneStatsEl.textContent = statsText;
   }
@@ -154,87 +148,23 @@ function renderZoneUI() {
     stats.percentExplored < 100;
 
   if (zoneExploreNextBtn) {
+    // Manual exploration only allowed if auto is not running
     zoneExploreNextBtn.disabled = !canExplore || zoneExplorationActive;
   }
   if (zoneExploreAutoBtn) {
+    // Auto only allowed if not already auto-exploring
     zoneExploreAutoBtn.disabled = !canExplore || zoneExplorationActive;
   }
   if (zoneExploreStopBtn) {
+    // Stop is only meaningful when auto is active
     zoneExploreStopBtn.disabled = !zoneExplorationActive;
   }
 }
 
-function addZoneDiscoveryEntry(text) {
-  if (!zoneDiscoveryListEl) return;
-
-  const li = document.createElement("li");
-  li.textContent = text;
-  zoneDiscoveryListEl.prepend(li); // newest at top
-
-  // Limit to, say, 30 entries
-  while (zoneDiscoveryListEl.children.length > 30) {
-    zoneDiscoveryListEl.removeChild(zoneDiscoveryListEl.lastChild);
-  }
-}
-
-// Expose so game.js can use it after each tick
-window.addZoneDiscoveryEntry = addZoneDiscoveryEntry;
-
-// Expose this so game.creation.js can call it after creating the debug zone.
+// Expose so other scripts can trigger UI refresh
 window.renderZoneUI = renderZoneUI;
 
-// Explore once (Random)
-if (zoneExploreRandomBtn) {
-  zoneExploreRandomBtn.addEventListener("click", () => {
-    if (!window.ZoneDebug || typeof ZoneDebug.revealRandomExplorableTile !== "function") return;
-    if (!currentZone) return;
-
-    const changed = ZoneDebug.revealRandomExplorableTile(currentZone);
-    if (!changed) {
-      console.log("Zone already fully explored (random explore).");
-    }
-    renderZoneUI();
-  });
-}
-
-// Explore once (Sequential)
-if (zoneExploreSequentialBtn) {
-  zoneExploreSequentialBtn.addEventListener("click", () => {
-    if (!window.ZoneDebug || typeof ZoneDebug.revealNextExplorableTileSequential !== "function") return;
-    if (!currentZone) return;
-
-    const changed = ZoneDebug.revealNextExplorableTileSequential(currentZone);
-    if (!changed) {
-      console.log("Zone already fully explored (sequential explore).");
-    }
-    renderZoneUI();
-  });
-};
-
-// Finish menu: STAY
-if (zoneFinishStayBtn) {
-  zoneFinishStayBtn.addEventListener("click", () => {
-    console.log("Player chose to STAY in the zone.");
-    // For now, just log it. In future, maybe change behavior.
-  });
-}
-
-// Finish menu: LEAVE ZONE
-if (zoneFinishLeaveBtn) {
-  zoneFinishLeaveBtn.addEventListener("click", () => {
-    console.log("Player chose to LEAVE the zone.");
-
-    isInZone = false;
-    currentZone = null;
-
-    if (typeof stopZoneExplorationTicks === "function") {
-      stopZoneExplorationTicks();
-    }
-
-    // Clear grid and stats
-    renderZoneUI();
-  });
-}
+// ----- Message / Discovery helpers -----
 
 function addZoneMessage(text) {
   if (!zoneMessagesListEl) return;
@@ -260,9 +190,10 @@ function addZoneDiscovery(text) {
   }
 }
 
-// Expose (messages used now, discoveries later)
 window.addZoneMessage = addZoneMessage;
 window.addZoneDiscovery = addZoneDiscovery;
+
+// ----- Button wiring -----
 
 // Explore Next Tile (manual, one step)
 if (zoneExploreNextBtn) {
@@ -273,19 +204,11 @@ if (zoneExploreNextBtn) {
 
     const changed = ZoneDebug.revealNextExplorableTileSequential(currentZone);
     if (changed) {
-      if (typeof addZoneMessage === "function") {
-        addZoneMessage("You carefully explore the next stretch of ground.");
-      }
-      if (typeof renderZoneUI === "function") {
-        renderZoneUI();
-      }
+      addZoneMessage("You carefully explore the next stretch of ground.");
+      renderZoneUI();
     } else {
-      if (typeof addZoneMessage === "function") {
-        addZoneMessage("There is nothing left to explore here.");
-      }
-      if (typeof renderZoneUI === "function") {
-        renderZoneUI();
-      }
+      addZoneMessage("There is nothing left to explore here.");
+      renderZoneUI();
     }
   });
 }
@@ -298,9 +221,7 @@ if (zoneExploreAutoBtn) {
     if (typeof startZoneExplorationTicks === "function") {
       startZoneExplorationTicks();
     }
-    if (typeof renderZoneUI === "function") {
-      renderZoneUI();
-    }
+    renderZoneUI();
   });
 }
 
@@ -311,12 +232,32 @@ if (zoneExploreStopBtn) {
     if (typeof stopZoneExplorationTicks === "function") {
       stopZoneExplorationTicks();
     }
-    if (typeof addZoneMessage === "function") {
-      addZoneMessage("You stop to catch your breath and look around.");
-    }
-    if (typeof renderZoneUI === "function") {
-      renderZoneUI();
-    }
+    addZoneMessage("You stop to catch your breath and look around.");
+    renderZoneUI();
   });
 }
 
+// Finish menu: STAY
+if (zoneFinishStayBtn) {
+  zoneFinishStayBtn.addEventListener("click", () => {
+    console.log("Player chose to STAY in the zone.");
+    // No special behavior yet; they just remain in the completed zone.
+  });
+}
+
+// Finish menu: LEAVE ZONE
+if (zoneFinishLeaveBtn) {
+  zoneFinishLeaveBtn.addEventListener("click", () => {
+    console.log("Player chose to LEAVE the zone.");
+
+    if (typeof stopZoneExplorationTicks === "function") {
+      stopZoneExplorationTicks();
+    }
+
+    isInZone = false;
+    currentZone = null;
+
+    addZoneMessage("You leave the area behind.");
+    renderZoneUI();
+  });
+}
