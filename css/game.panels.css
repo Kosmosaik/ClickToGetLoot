@@ -622,10 +622,9 @@
 
 .zone-grid-view {
   display: inline-block;
-  font-family: "Segoe UI Emoji", "Noto Color Emoji", monospace;
-  letter-spacing: 0;
+  font-family: "Fira Code", "Consolas", monospace;
   font-size: 1rem;           /* emoji are smaller, slightly increase size */
-  line-height: 1.15;
+  line-height: 1.1;
   background: #000;
   border: 1px solid #333;
   padding: 8px;
