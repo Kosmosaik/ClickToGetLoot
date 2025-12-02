@@ -595,3 +595,31 @@
   overflow: auto;
 }
 
+#zone-status {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+#zone-discovery-log {
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+
+#zone-discovery-log h3 {
+  margin: 4px 0;
+  font-size: 0.8rem;
+}
+
+#zone-discovery-list {
+  list-style-type: disc;
+  padding-left: 16px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+#zone-finish-menu button {
+  font-size: 0.8rem;
+  margin-right: 6px;
+}
+
