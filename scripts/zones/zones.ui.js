@@ -67,8 +67,14 @@ function getZoneStatusText(zone, stats) {
     return "Status: Zone completed";
   }
 
+  const manualActive = !!zoneManualExplorationActive;
+
   if (zoneExplorationActive) {
     return "Status: Exploring (Auto)";
+  }
+
+  if (manualActive) {
+    return "Status: Exploring (Manual)";
   }
 
   return "Status: Idle (Ready to explore)";
