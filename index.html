@@ -138,14 +138,22 @@
     <!-- === Zone panel (0.0.70a test UI) === -->
     <div id="zone-panel" class="panel" style="display:none">
       <h2 class="draggable-handle">Zone</h2>
-
+    
       <div id="zone-info">
         <div id="zone-name">Zone: (none)</div>
+        <div id="zone-status">Status: Not in a zone</div>
         <div id="zone-exploration-stats">
           Explored: 0% (0 / 0 tiles)
         </div>
       </div>
-
+    
+      <!-- Debug: Enter Starting Zone -->
+      <div id="zone-enter-container">
+        <button id="zone-enter-debug" type="button">
+          Enter Starting Zone (Debug)
+        </button>
+      </div>
+    
       <div id="zone-actions">
         <button id="zone-explore-random" type="button">
           Explore (Random)
@@ -154,11 +162,25 @@
           Explore (Sequential)
         </button>
       </div>
-
+    
       <pre id="zone-grid-view" class="zone-grid-view">
-(No active zone)
+    (No active zone)
       </pre>
+    
+      <!-- Discovery list -->
+      <div id="zone-discovery-log">
+        <h3>Discoveries</h3>
+        <ul id="zone-discovery-list"></ul>
+      </div>
+    
+      <!-- Finish Zone menu -->
+      <div id="zone-finish-menu" style="display:none; margin-top:8px;">
+        <div>Zone fully explored.</div>
+        <button id="zone-finish-stay" type="button">STAY</button>
+        <button id="zone-finish-leave" type="button">LEAVE ZONE</button>
+      </div>
     </div>
+
 
     <div id="skills-panel" class="panel" style="display:none">
       <h2 class="draggable-handle">Skills</h2>
