@@ -147,16 +147,19 @@ function renderZoneUI() {
     stats.totalExplorableTiles > 0 &&
     stats.percentExplored < 100;
 
+  // Manual or auto in progress?
+  const anyExploreInProgress = zoneExplorationActive || zoneManualExplorationActive;
+
   if (zoneExploreNextBtn) {
-    // Manual exploration only allowed if auto is not running
-    zoneExploreNextBtn.disabled = !canExplore || zoneExplorationActive;
+    // Manual only allowed when nothing else is running
+    zoneExploreNextBtn.disabled = !canExplore || anyExploreInProgress;
   }
   if (zoneExploreAutoBtn) {
-    // Auto only allowed if not already auto-exploring
-    zoneExploreAutoBtn.disabled = !canExplore || zoneExplorationActive;
+    // Auto only allowed when nothing else is running
+    zoneExploreAutoBtn.disabled = !canExplore || anyExploreInProgress;
   }
   if (zoneExploreStopBtn) {
-    // Stop is only meaningful when auto is active
+    // Stop only for auto
     zoneExploreStopBtn.disabled = !zoneExplorationActive;
   }
 }
@@ -198,20 +201,11 @@ window.addZoneDiscovery = addZoneDiscovery;
 // Explore Next Tile (manual, one step)
 if (zoneExploreNextBtn) {
   zoneExploreNextBtn.addEventListener("click", () => {
-    if (!currentZone || !isInZone) return;
-    if (!window.ZoneDebug || typeof ZoneDebug.revealNextExplorableTileSequential !== "function") return;
-    if (zoneExplorationActive) return; // guard: no manual while auto is running
-
-    const changed = ZoneDebug.revealNextExplorableTileSequential(currentZone);
-    if (changed) {
-      addZoneMessage("You carefully explore the next stretch of ground.");
-      renderZoneUI();
-    } else {
-      addZoneMessage("There is nothing left to explore here.");
-      renderZoneUI();
-    }
+    if (typeof startZoneManualExploreOnce !== "function") return;
+    startZoneManualExploreOnce();
   });
 }
+
 
 // Explore Auto (start tick-based exploring)
 if (zoneExploreAutoBtn) {
