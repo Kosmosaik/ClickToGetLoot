@@ -94,58 +94,65 @@
       <button id="skills-btn" class="menu-btn">Skills</button>
     </div>
 
-    <!-- === Zone panel (0.0.70a test UI) === -->
     <div id="zone-panel" class="panel">
       <h2 class="draggable-handle">Zone</h2>
     
       <div id="zone-layout">
-        <!-- Left: main column (info + actions + grid + messages + finish) -->
+        
+        <!-- LEFT MAIN COLUMN -->
         <div id="zone-main-column">
-          <div id="zone-info">
-            <div id="zone-name">Zone: (none)</div>
-            <div id="zone-status">Status: Not in a zone</div>
-            <div id="zone-exploration-stats">
-              Explored: 0% (0 / 0 tiles)
+    
+          <!-- Zone Info -->
+          <div class="zone-section">
+            <div class="zone-section-title">Zone Info</div>
+            <div id="zone-info">
+              <div id="zone-name">Zone: (none)</div>
+              <div id="zone-status">Status: Not in a zone</div>
+              <div id="zone-exploration-stats">Explored: 0% (0 / 0 tiles)</div>
             </div>
           </div>
     
-          <div id="zone-actions">
-            <button id="zone-explore-next" type="button">
-              Explore Next Tile
-            </button>
-            <button id="zone-explore-auto" type="button">
-              Explore Auto
-            </button>
-            <button id="zone-explore-stop" type="button">
-              Stop Exploring
-            </button>
+          <!-- Controls -->
+          <div class="zone-section">
+            <div class="zone-section-title">Controls</div>
+            <div id="zone-actions">
+              <button id="zone-explore-next" type="button">Explore Next Tile</button>
+              <button id="zone-explore-auto" type="button">Explore Auto</button>
+              <button id="zone-explore-stop" type="button">Stop Exploring</button>
+            </div>
           </div>
     
-          <div id="zone-grid-container">
-            <pre id="zone-grid-view" class="zone-grid-view">
-    (No active zone)
-            </pre>
+          <!-- Map -->
+          <div class="zone-section">
+            <div class="zone-section-title">Map</div>
+            <div id="zone-grid-container">
+              <pre id="zone-grid-view" class="zone-grid-view">(No active zone)</pre>
+            </div>
           </div>
     
           <!-- Messages -->
-          <div id="zone-messages-log">
-            <h3>Messages</h3>
-            <ul id="zone-messages-list"></ul>
+          <div class="zone-section">
+            <div class="zone-section-title">Messages</div>
+            <div id="zone-messages-log">
+              <ul id="zone-messages-list"></ul>
+            </div>
           </div>
     
-          <!-- Finish Zone menu -->
-          <div id="zone-finish-menu" style="display:none; margin-top:8px;">
-            <div>Zone fully explored.</div>
+          <!-- Finish Zone -->
+          <div class="zone-section" id="zone-finish-menu" style="display:none;">
+            <div class="zone-section-title">Zone Completed</div>
             <button id="zone-finish-stay" type="button">STAY</button>
             <button id="zone-finish-leave" type="button">LEAVE ZONE</button>
           </div>
+    
         </div>
     
-        <!-- Right: discoveries column spanning panel height -->
+        <!-- RIGHT DISCOVERIES SIDEBAR -->
         <div id="zone-discoveries-column">
-          <h3>Discoveries</h3>
+          <div class="zone-section-title">Discoveries</div>
           <ul id="zone-discoveries-list"></ul>
         </div>
+    
       </div>
     </div>
 
