@@ -623,15 +623,16 @@
 .zone-grid-view {
   display: inline-block;
   font-family: "Fira Code", "Consolas", monospace;
-  font-size: 0.75rem;
-  line-height: 1.1;
+  font-size: 1rem;           /* emoji are smaller, slightly increase size */
+  line-height: 1.15;
   background: #000;
   border: 1px solid #333;
   padding: 8px;
   border-radius: 4px;
-  max-height: 220px;
+  max-height: 300px;
   overflow: auto;
   text-align: left;
+  white-space: pre;          /* keeps perfect grid alignment */
 }
 
 /* === Messages === */
