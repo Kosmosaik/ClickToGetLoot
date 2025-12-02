@@ -20,6 +20,8 @@ let isInZone = false;
 // Tick-based exploration (2–5s) timer
 let zoneExplorationActive = false;
 let zoneExplorationTimerId = null;
+let zoneManualExplorationActive = false;
+let zoneManualTimerId = null;
 
 // Shared generic messages for exploration
 const ZONE_GENERIC_MESSAGES = [
@@ -124,6 +126,7 @@ function stopZoneExplorationTicks() {
 
 function startZoneManualExploreOnce() {
   if (zoneManualExplorationActive) return;
+  if (zoneExplorationActive) return;
   if (!isInZone || !currentZone) return;
   if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
 
