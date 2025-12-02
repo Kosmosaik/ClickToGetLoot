@@ -154,15 +154,6 @@ if (btnCreateCharacter) {
     saveCurrentGame();
     updateCharacterSummary();
 
-    // --- 0.0.70a: initialize a debug Zone for testing ---
-    if (typeof createDebugZone === "function") {
-      currentZone = createDebugZone();
-      console.log("Debug Zone created:", currentZone);
-
-      if (typeof renderZoneUI === "function") {
-        renderZoneUI();
-      }
-    }
 
     setScreen("game");
   });
