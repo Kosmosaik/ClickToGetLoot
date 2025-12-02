@@ -21,6 +21,22 @@ let isInZone = false;
 let zoneExplorationActive = false;
 let zoneExplorationTimerId = null;
 
+// Shared generic messages for exploration
+const ZONE_GENERIC_MESSAGES = [
+  "You uncover a patch of ground.",
+  "You scout a quiet stretch of the zone.",
+  "You reveal more of the surrounding area.",
+  "You push the boundary of the unknown.",
+  "You chart another small piece of this zone."
+];
+
+function addRandomZoneMessage() {
+  if (typeof addZoneMessage !== "function") return;
+  const msg =
+    ZONE_GENERIC_MESSAGES[Math.floor(Math.random() * ZONE_GENERIC_MESSAGES.length)];
+  addZoneMessage(msg);
+}
+
 // --- Zone exploration tick system (2–5s random delay) ---
 
 function scheduleNextZoneExplorationTick() {
@@ -32,6 +48,30 @@ function scheduleNextZoneExplorationTick() {
   zoneExplorationTimerId = setTimeout(() => {
     runZoneExplorationTick();
   }, delay);
+}
+
+// Reveal the next explorable tile (sequential), add a random message, update UI.
+// Returns true if a tile was actually revealed, false otherwise.
+function revealNextTileWithMessageAndUI() {
+  if (!window.ZoneDebug || typeof ZoneDebug.revealNextExplorableTileSequential !== "function") {
+    return false;
+  }
+  if (!currentZone) return false;
+
+  const changed = ZoneDebug.revealNextExplorableTileSequential(currentZone);
+  if (changed) {
+    addRandomZoneMessage();
+  } else {
+    if (typeof addZoneMessage === "function") {
+      addZoneMessage("There is nothing left to explore here.");
+    }
+  }
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+
+  return changed;
 }
 
 function runZoneExplorationTick() {
@@ -52,38 +92,11 @@ function runZoneExplorationTick() {
     if (typeof renderZoneUI === "function") {
       renderZoneUI();
     }
-
-    // You *could* auto-open the finish menu here later, but for now,
-    // the UI logic already shows it when renderZoneUI sees 100%.
     return;
   }
 
-  // Reveal next tile (sequential for core logic)
-  if (typeof ZoneDebug.revealNextExplorableTileSequential === "function") {
-    const changed = ZoneDebug.revealNextExplorableTileSequential(currentZone);
-
-    if (changed) {
-      // Add a generic discovery entry
-      if (typeof addZoneDiscoveryEntry === "function") {
-        const genericMessages = [
-          "You uncover a patch of ground.",
-          "You scout a quiet stretch of the zone.",
-          "You reveal more of the surrounding area.",
-          "You push the boundary of the unknown.",
-          "You chart another small piece of this zone.",
-          "You slipped and fell on a piece of shit.",
-          "You smell fart in the air, but decide to continue anyway.",
-        ];
-        const msg =
-          genericMessages[Math.floor(Math.random() * genericMessages.length)];
-        addZoneMessage(msg);
-      }
-
-      if (typeof renderZoneUI === "function") {
-        renderZoneUI();
-      }
-    }
-  }
+  // Reveal one tile + message + UI
+  revealNextTileWithMessageAndUI();
 
   // Schedule the next tick
   scheduleNextZoneExplorationTick();
@@ -108,6 +121,46 @@ function stopZoneExplorationTicks() {
   }
   console.log("Zone exploration ticks stopped.");
 }
+
+function startZoneManualExploreOnce() {
+  if (zoneManualExplorationActive) return;
+  if (!isInZone || !currentZone) return;
+  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
+
+  const stats = ZoneDebug.getZoneExplorationStats(currentZone);
+  if (stats.percentExplored >= 100) {
+    if (typeof addZoneMessage === "function") {
+      addZoneMessage("There is nothing left to explore here.");
+    }
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
+
+  zoneManualExplorationActive = true;
+
+  // Same 2–5s delay as auto
+  const delay = 2000 + Math.random() * 3000;
+
+  zoneManualTimerId = setTimeout(() => {
+    zoneManualTimerId = null;
+    zoneManualExplorationActive = false;
+
+    revealNextTileWithMessageAndUI();
+
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+  }, delay);
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+}
+
+// Expose for UI
+window.startZoneManualExploreOnce = startZoneManualExploreOnce;
 
 // Expose for UI script
 window.startZoneExplorationTicks = startZoneExplorationTicks;
