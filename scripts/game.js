@@ -14,6 +14,13 @@ let characterComputed = null;
 // For now we just track a single current Zone in memory.
 let currentZone = null;
 
+// Are we currently "inside" a zone?
+let isInZone = false;
+
+// Tick-based exploration (2–5s) timer
+let zoneExplorationActive = false;
+let zoneExplorationTimerId = null;
+
 // ----- Equipment helpers -----
 function unequipSlotToInventory(slotKey) {
   const item = unequipSlot(slotKey); // from equipment.js
