@@ -10,6 +10,167 @@ let currentHP = 0;
 // so UI or other systems can use it.
 let characterComputed = null;
 
+// ----- Zones / Exploration -----
+// For now we just track a single current Zone in memory.
+let currentZone = null;
+
+// Are we currently "inside" a zone?
+let isInZone = false;
+
+// Tick-based exploration (2–5s) timer
+let zoneExplorationActive = false;
+let zoneExplorationTimerId = null;
+let zoneManualExplorationActive = false;
+let zoneManualTimerId = null;
+
+// Shared generic messages for exploration
+const ZONE_GENERIC_MESSAGES = [
+  "You uncover a patch of ground.",
+  "You scout a quiet stretch of the zone.",
+  "You reveal more of the surrounding area.",
+  "You push the boundary of the unknown.",
+  "You chart another small piece of this zone.",
+  "You smell fart in the air, but decide to continue anyway.",
+  "You slipped on a piece of shit."
+];
+
+function addRandomZoneMessage() {
+  if (typeof addZoneMessage !== "function") return;
+  const msg =
+    ZONE_GENERIC_MESSAGES[Math.floor(Math.random() * ZONE_GENERIC_MESSAGES.length)];
+  addZoneMessage(msg);
+}
+
+// --- Zone exploration tick system (2–5s random delay) ---
+
+function scheduleNextZoneExplorationTick() {
+  if (!zoneExplorationActive) return;
+
+  // 2–5 seconds delay (2000–5000 ms)
+  const delay = 2000 + Math.random() * 3000;
+
+  zoneExplorationTimerId = setTimeout(() => {
+    runZoneExplorationTick();
+  }, delay);
+}
+
+// Reveal the next explorable tile (sequential), add a random message, update UI.
+// Returns true if a tile was actually revealed, false otherwise.
+function revealNextTileWithMessageAndUI() {
+  if (!window.ZoneDebug || typeof ZoneDebug.revealNextExplorableTileSequential !== "function") {
+    return false;
+  }
+  if (!currentZone) return false;
+
+  const changed = ZoneDebug.revealNextExplorableTileSequential(currentZone);
+  if (changed) {
+    addRandomZoneMessage();
+  } else {
+    if (typeof addZoneMessage === "function") {
+      addZoneMessage("There is nothing left to explore here.");
+    }
+  }
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+
+  return changed;
+}
+
+function runZoneExplorationTick() {
+  if (!zoneExplorationActive || !isInZone || !currentZone) {
+    return;
+  }
+
+  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") {
+    return;
+  }
+
+  const stats = ZoneDebug.getZoneExplorationStats(currentZone);
+  if (stats.percentExplored >= 100) {
+    // Zone already done, stop ticking
+    console.log("Zone fully explored. Stopping exploration ticks.");
+    stopZoneExplorationTicks();
+
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
+
+  // Reveal one tile + message + UI
+  revealNextTileWithMessageAndUI();
+
+  // Schedule the next tick
+  scheduleNextZoneExplorationTick();
+}
+
+function startZoneExplorationTicks() {
+  if (zoneExplorationActive) return;
+  if (!isInZone || !currentZone) return;
+
+  console.log("Starting zone exploration ticks.");
+  zoneExplorationActive = true;
+  scheduleNextZoneExplorationTick();
+}
+
+function stopZoneExplorationTicks() {
+  if (!zoneExplorationActive) return;
+
+  zoneExplorationActive = false;
+  if (zoneExplorationTimerId) {
+    clearTimeout(zoneExplorationTimerId);
+    zoneExplorationTimerId = null;
+  }
+  console.log("Zone exploration ticks stopped.");
+}
+
+function startZoneManualExploreOnce() {
+  if (zoneManualExplorationActive) return;
+  if (zoneExplorationActive) return;
+  if (!isInZone || !currentZone) return;
+  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
+
+  const stats = ZoneDebug.getZoneExplorationStats(currentZone);
+  if (stats.percentExplored >= 100) {
+    if (typeof addZoneMessage === "function") {
+      addZoneMessage("There is nothing left to explore here.");
+    }
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
+
+  zoneManualExplorationActive = true;
+
+  // Same 2–5s delay as auto
+  const delay = 2000 + Math.random() * 3000;
+
+  zoneManualTimerId = setTimeout(() => {
+    zoneManualTimerId = null;
+    zoneManualExplorationActive = false;
+
+    revealNextTileWithMessageAndUI();
+
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+  }, delay);
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+}
+
+// Expose for UI
+window.startZoneManualExploreOnce = startZoneManualExploreOnce;
+
+// Expose for UI script
+window.startZoneExplorationTicks = startZoneExplorationTicks;
+window.stopZoneExplorationTicks = stopZoneExplorationTicks;
+
 // ----- Equipment helpers -----
 function unequipSlotToInventory(slotKey) {
   const item = unequipSlot(slotKey); // from equipment.js
@@ -408,4 +569,15 @@ let equipmentUnlocked = false;
 window.debugCharacterComputed = () => {
   console.log("Character computed state:", characterComputed);
   return characterComputed;
+};
+
+window.debugZoneState = () => {
+  console.log("Current Zone:", currentZone);
+  if (currentZone && window.ZoneDebug) {
+    console.log(
+      "Exploration stats:",
+      window.ZoneDebug.getZoneExplorationStats(currentZone)
+    );
+  }
+  return currentZone;
 };

@@ -9,7 +9,7 @@
 <body>
 <div id="game-header">
   <span class="game-header-text">
-    ProgressCrawl — v0.0.67-stable : UI Improvements
+    ProgressCrawl — v0.0.70a-dev : Exploration (EXPERIMENTAL) v19
   </span>
   <button id="patch-notes-btn" type="button">Patch Notes</button>
 </div>
@@ -88,11 +88,73 @@
       <span id="char-summary-stats"></span>
     </div>
 
-  <div id="menu-bar">
-    <button id="inventory-btn" style="display:none;">Inventory</button>
-    <button id="equipment-btn" style="display:none;">Equipment</button>
-    <button id="skills-btn" class="menu-btn">Skills</button>
-  </div>
+    <div id="menu-bar">
+      <button id="inventory-btn" style="display:none;">Inventory</button>
+      <button id="equipment-btn" style="display:none;">Equipment</button>
+      <button id="skills-btn" class="menu-btn">Skills</button>
+    </div>
+
+    <div id="zone-panel" class="panel">
+      <h2 class="draggable-handle">Zone</h2>
+    
+      <div id="zone-layout">
+        
+        <!-- LEFT MAIN COLUMN -->
+        <div id="zone-main-column">
+    
+          <!-- Zone Info -->
+          <div class="zone-section">
+            <div class="zone-section-title">Zone Info</div>
+            <div id="zone-info">
+              <div id="zone-name">Zone: (none)</div>
+              <div id="zone-status">Status: Not in a zone</div>
+              <div id="zone-exploration-stats">Explored: 0% (0 / 0 tiles)</div>
+            </div>
+          </div>
+    
+          <!-- Controls -->
+          <div class="zone-section">
+            <div class="zone-section-title">Controls</div>
+            <div id="zone-actions">
+              <button id="zone-explore-next" type="button">Explore Next Tile</button>
+              <button id="zone-explore-auto" type="button">Explore Auto</button>
+              <button id="zone-explore-stop" type="button">Stop Exploring</button>
+            </div>
+          </div>
+    
+          <!-- Map -->
+          <div class="zone-section">
+            <div class="zone-section-title">Map</div>
+            <div id="zone-grid-container">
+              <pre id="zone-grid-view" class="zone-grid-view">(No active zone)</pre>
+            </div>
+          </div>
+    
+          <!-- Messages -->
+          <div class="zone-section">
+            <div class="zone-section-title">Messages</div>
+            <div id="zone-messages-log">
+              <ul id="zone-messages-list"></ul>
+            </div>
+          </div>
+    
+          <!-- Finish Zone -->
+          <div class="zone-section" id="zone-finish-menu" style="display:none;">
+            <div class="zone-section-title">Zone Completed</div>
+            <button id="zone-finish-stay" type="button">STAY</button>
+            <button id="zone-finish-leave" type="button">LEAVE ZONE</button>
+          </div>
+    
+        </div>
+    
+        <!-- RIGHT DISCOVERIES SIDEBAR -->
+        <div id="zone-discoveries-column">
+          <div class="zone-section-title">Discoveries</div>
+          <ul id="zone-discoveries-list"></ul>
+        </div>
+    
+      </div>
+    </div>
 
     <button id="loot-button">Loot!</button>
     <div id="progress-container">
@@ -176,6 +238,9 @@
 <script src="scripts/ui/ui.tooltip.js"></script>
 <script src="scripts/ui/ui.draggablePanels.js"></script>
 <script src="scripts/ui.js"></script>
+
+<script src="scripts/zones/zones.core.js"></script>
+<script src="scripts/zones/zones.ui.js"></script>
 
 <script src="scripts/game/game.loot.js"></script>
 <script src="scripts/game/game.save.js"></script>

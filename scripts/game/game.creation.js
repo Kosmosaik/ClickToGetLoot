@@ -39,6 +39,10 @@ let pointsLeft = EXTRA_POINTS;
 const NAME_POOL = [
   "Arin", "Lyra", "Drog", "Mira", "Thalen",
   "Kira", "Borin", "Selene", "Rogar", "Elira",
+  "Bullen", "Ballen", "Bongen", "Mjolk", "Riskakan",
+  "Jared the Greedy", "Four Fingered Westby", "Rawley the Viper",
+  "Jessie Smokes", "Teresa Mad Dog", "Kaley the Reaper",
+  "Stom", "Elmadreth", "Glurn", "Jurngof", "Grimbald", "Kalylia"
 ];
 
 function randomName() {
@@ -153,6 +157,20 @@ if (btnCreateCharacter) {
     // Fresh save for this character (empty inventory)
     saveCurrentGame();
     updateCharacterSummary();
+    
+    // --- 0.0.70a: Enter Starting Zone automatically (exploration paused) ---
+    if (typeof createDebugZone === "function") {
+      currentZone = createDebugZone();      // temporary "Starting Zone"
+      isInZone = true;
+      console.log("Entered Starting Zone (Debug):", currentZone);
+
+      if (typeof renderZoneUI === "function") {
+        renderZoneUI();                     // show the zone immediately
+      }
+      // Do NOT start auto exploration here.
+      // The player will start it with "Explore Auto" later.
+    }
+
     setScreen("game");
   });
 }

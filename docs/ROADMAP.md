@@ -7,16 +7,6 @@ This roadmap is flexible and will evolve as development continues.
 
 ---
 
-## v0.0.68 - Level / Experience System
-- Add Level stat and experience points.
-- Make a temporary easy exp formula for exp to next level etc
-- Add a "Give EXP" button for testing purposes
-- Add a text field to input how much exp to give character per click
-- Add a "Give level" button for testing purposes
-- Give character 3 attribute points to distribute on level up.
-
----
-
 ## v0.0.70 — Zones & Exploration (Phase 1)
 Unlocks real gameplay beyond clicking “Loot”. Exploring
 
@@ -41,18 +31,25 @@ Unlocks real gameplay beyond clicking “Loot”. Exploring
 
 ---
 
-## v0.0.71 -> 0.0.74 - Polish, Expand & Improve existing systems
+## v0.0.71 -> 0.0.74 - Polish, Expand & Improve existing systems + Level System
 
 ### Planned:
-- Add more POIs and other interactables to the Starting Zone
-- Add more items
-- Interact / Use system: Combine items and do basic tasks that's not really a crafting task (Right click a branch -> Make Lean-To Shelter (blueprint), Right Click Campfire -> Add Items -> Raw Meat, Right click cooked meat -> Eat, Drink etc). These small interactions will complete predefined tasks later.
-- Blueprint system for Lean-To Shelter. Adds a blueprint. when clicking on blueprint you'll see a small window with required items to complete the shelter.
+- Add more POIs and other interactables
+- Add more items (especially for the Starting / Tutorial Zone)
+- Interact / Use system: Combine items and do basic tasks that's not really a separate crafting system task:
+  (Right click a branch -> Make Lean-To Shelter (blueprint)), (Right Click Campfire -> Add Items -> Raw Meat to cook or wood to make fire), (Right click cooked meat -> Eat, or Drink if water container etc). These small interactions will complete predefined tasks/quests later.
+- Blueprint system for Lean-To Shelter and upcoming camps/constructions. Adds a blueprint to tile/tiles in the zone. When clicking on blueprint you'll see a small window with required items to complete the shelter.
 - Hunger & Thirst System
 - Eat / Drink System
 - Add defense values and other stats to armor/equipment.
-- Add more items that are going to exist in the starting zone
 - Add all variables, properties/values etc on all items/equipment/character stats in preparation for crafting/gathering and exploring updates. Armor/PDEF, crafting modifier attributes/stats and more.
+## Level / Experience System
+- Add Level stat and experience points.
+- Make a temporary easy exp formula for exp to next level etc (Maybe increase EXP required by 12% per level or something).
+- Add a "Give EXP" button for testing purposes
+- Add a text field to input how much exp to give character per click
+- Add a "Give level" button for testing purposes
+- Give character 3 attribute points to distribute on level up.
 
 ---
 
