@@ -15,6 +15,7 @@ const ZONE_DEFINITIONS = {
     type: "static_layout",
     width: 10,
     height: 10,
+    defaultWeatherState: "clear",
 
     // Handcrafted layout:
     // # = border (blocked)
