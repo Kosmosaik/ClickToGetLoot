@@ -78,6 +78,9 @@ function createZoneFromDefinition(zoneId) {
   // Start with a blank walkable zone (all unexplored).
   const zone = createZone({ id, name, width, height });
 
+  // Carry over simple metadata from the definition
+  zone.defaultWeatherState = def.defaultWeatherState || null;
+
   for (let y = 0; y < height; y++) {
     const rowStr = layout[y];
 
