@@ -62,16 +62,3 @@ if (skillsButton && skillsPanel) {
   });
 }
 
-// World map panel toggle
-if (worldMapButton && worldMapPanel) {
-  worldMapButton.addEventListener("click", () => {
-    const visible = worldMapPanel.style.display === "block";
-    worldMapPanel.style.display = visible ? "none" : "block";
-
-    // When opening, refresh the ASCII map
-    if (!visible && typeof renderWorldMapUI === "function") {
-      renderWorldMapUI();
-    }
-  });
-}
-
