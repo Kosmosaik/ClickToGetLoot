@@ -546,7 +546,8 @@
 }
 
 /* === Zone main panel === */
-#zone-panel {
+#zone-panel,
+#worldmap-panel {
   margin: 0 auto 10px auto;
   max-width: 850px;
   background: #111;
