@@ -57,60 +57,107 @@ function createZoneFromDefinition(zoneId) {
     return null;
   }
 
-  if (def.type !== "static_layout") {
-    console.error(
-      `createZoneFromDefinition: unsupported zone type "${def.type}" for zoneId="${zoneId}".` +
-      ` Only "static_layout" is supported in 0.0.70a2.`
-    );
-    return null;
-  }
+  // Handle STATIC layout zones (tutorial, etc.)
+  if (def.type === "static_layout") {
+    const { id, name, width, height, layout } = def;
 
-  const { id, name, width, height, layout } = def;
-
-  if (!Array.isArray(layout) || layout.length !== height) {
-    console.error(
-      `createZoneFromDefinition: layout height mismatch for zoneId="${zoneId}". ` +
-      `Expected ${height} rows, got ${Array.isArray(layout) ? layout.length : "non-array"}.`
-    );
-    return null;
-  }
-
-  // Start with a blank walkable zone (all unexplored).
-  const zone = createZone({ id, name, width, height });
-
-  // Carry over simple metadata from the definition
-  zone.defaultWeatherState = def.defaultWeatherState || null;
-
-  for (let y = 0; y < height; y++) {
-    const rowStr = layout[y];
-
-    if (typeof rowStr !== "string" || rowStr.length !== width) {
+    if (!Array.isArray(layout) || layout.length !== height) {
       console.error(
-        `createZoneFromDefinition: layout width mismatch in row ${y} for zoneId="${zoneId}". ` +
-        `Expected string of length ${width}, got ${rowStr && rowStr.length}.`
+        `createZoneFromDefinition: layout height mismatch for zoneId="${zoneId}". ` +
+        `Expected ${height} rows, got ${Array.isArray(layout) ? layout.length : "non-array"}.`
       );
       return null;
     }
 
-    for (let x = 0; x < width; x++) {
-      const symbol = rowStr[x];
-      const template = ZONE_TILE_SYMBOLS[symbol];
+    const zone = createZone({ id, name, width, height });
 
-      if (!template) {
-        console.warn(
-          `createZoneFromDefinition: unknown tile symbol "${symbol}" at (${x}, ${y}) in zoneId="${zoneId}". ` +
-          `Defaulting to WALKABLE.`
+    // carry metadata
+    zone.defaultWeatherState = def.defaultWeatherState || null;
+
+    for (let y = 0; y < height; y++) {
+      const rowStr = layout[y];
+
+      if (typeof rowStr !== "string" || rowStr.length !== width) {
+        console.error(
+          `createZoneFromDefinition: layout width mismatch in row ${y} for zoneId="${zoneId}". ` +
+          `Expected string of length ${width}, got ${rowStr && rowStr.length}.`
         );
-        zone.tiles[y][x].kind = ZONE_TILE_KIND.WALKABLE;
-      } else {
-        zone.tiles[y][x].kind = template.kind;
+        return null;
       }
 
-      // tile.explored stays false here. The UI will render it as "?" until explored.
+      for (let x = 0; x < width; x++) {
+        const symbol = rowStr[x];
+        const template = ZONE_TILE_SYMBOLS[symbol];
+
+        if (!template) {
+          console.warn(
+            `createZoneFromDefinition: unknown tile symbol "${symbol}" at (${x}, ${y}) in zoneId="${zoneId}". ` +
+            `Defaulting to WALKABLE.`
+          );
+          zone.tiles[y][x].kind = ZONE_TILE_KIND.WALKABLE;
+        } else {
+          zone.tiles[y][x].kind = template.kind;
+        }
+      }
     }
+
+    return zone;
   }
 
-  return zone;
+  // Handle GENERATED zones (cellular automata etc.)
+  if (def.type === "generated") {
+    if (typeof generateLayoutFromDefinition !== "function") {
+      console.error("createZoneFromDefinition: generator function is not available.");
+      return null;
+    }
+
+    const layout = generateLayoutFromDefinition(def);
+    if (!Array.isArray(layout) || layout.length === 0) {
+      console.error("createZoneFromDefinition: generator returned invalid layout.");
+      return null;
+    }
+
+    const height = layout.length;
+    const width = layout[0].length;
+
+    const zone = createZone({
+      id: def.id,
+      name: def.name,
+      width,
+      height,
+    });
+
+    zone.defaultWeatherState = def.defaultWeatherState || null;
+
+    for (let y = 0; y < height; y++) {
+      const rowStr = layout[y];
+      if (typeof rowStr !== "string" || rowStr.length !== width) {
+        console.error(
+          `createZoneFromDefinition (generated): layout width mismatch in row ${y} for zoneId="${zoneId}".`
+        );
+        return null;
+      }
+
+      for (let x = 0; x < width; x++) {
+        const symbol = rowStr[x];
+        const template = ZONE_TILE_SYMBOLS[symbol];
+
+        if (!template) {
+          // In CA maps we currently only use '#' and '.', so any unknown = walkable.
+          zone.tiles[y][x].kind = ZONE_TILE_KIND.WALKABLE;
+        } else {
+          zone.tiles[y][x].kind = template.kind;
+        }
+      }
+    }
+
+    return zone;
+  }
+
+  console.error(
+    `createZoneFromDefinition: unsupported zone type "${def.type}" for zoneId="${zoneId}".`
+  );
+  return null;
 }
 
 // Simple debug zone now created from data definition.
