@@ -47,7 +47,7 @@ const ZONE_DEFINITIONS = {
     generatorConfig: {
       width: 30,
       height: 25,
-      fillChance: 0.70,       // probability a tile starts as wall
+      fillChance: 0.60,       // probability a tile starts as wall
       smoothIterations: 4,    // how many CA smoothing passes
       borderIsWall: true,     // keep solid border
     },
@@ -62,7 +62,7 @@ const ZONE_DEFINITIONS = {
     generatorConfig: {
       width: 30,
       height: 25,
-      fillChance: 0.50,
+      fillChance: 0.40,
       smoothIterations: 5,
       borderIsWall: true,
     },
@@ -77,7 +77,7 @@ const ZONE_DEFINITIONS = {
     generatorConfig: {
       width: 30,
       height: 25,
-      fillChance: 0.40,
+      fillChance: 0.30,
       smoothIterations: 4,
       borderIsWall: true,
     },
@@ -92,7 +92,7 @@ const ZONE_DEFINITIONS = {
     generatorConfig: {
       width: 30,
       height: 25,
-      fillChance: 0.60,
+      fillChance: 0.50,
       smoothIterations: 5,
       borderIsWall: true,
     },
