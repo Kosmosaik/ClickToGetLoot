@@ -8,6 +8,34 @@ const worldMapPanel = document.getElementById("worldmap-panel");
 const worldMapGridEl = document.getElementById("worldmap-grid-view");
 const worldMapStatusEl = document.getElementById("worldmap-status");
 
+function switchToWorldMapView() {
+    const worldMapPanel = document.getElementById("worldmap-panel");
+    const zonePanel = document.getElementById("zone-panel");
+
+    if (zonePanel) {
+        zonePanel.style.display = "none";
+    }
+    if (worldMapPanel) {
+        worldMapPanel.style.display = "block";
+    }
+
+    if (typeof renderWorldMapUI === "function") {
+        renderWorldMapUI();
+    }
+}
+
+function switchToZoneView() {
+    const worldMapPanel = document.getElementById("worldmap-panel");
+    const zonePanel = document.getElementById("zone-panel");
+
+    if (worldMapPanel) {
+        worldMapPanel.style.display = "none";
+    }
+    if (zonePanel) {
+        zonePanel.style.display = "block";
+    }
+}
+
 // Convert one world map tile to a single character for the ASCII map.
 function worldMapTileToChar(tile) {
   if (!tile || !tile.zoneId) {
