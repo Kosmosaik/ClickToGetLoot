@@ -13,8 +13,8 @@ const ZONE_DEFINITIONS = {
     id: "tutorial_zone",
     name: "Tutorial Zone",
     type: "static_layout",
-    width: 10,
-    height: 10,
+    width: 9,
+    height: 9,
     defaultWeatherState: "clear",
 
     // Handcrafted layout:
@@ -45,8 +45,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 30,
-      height: 25,
+      width: 25,
+      height: 20,
       fillChance: 0.60,       // probability a tile starts as wall
       smoothIterations: 4,    // how many CA smoothing passes
       borderIsWall: true,     // keep solid border
@@ -60,8 +60,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 30,
-      height: 25,
+      width: 25,
+      height: 20,
       fillChance: 0.40,
       smoothIterations: 5,
       borderIsWall: true,
@@ -75,8 +75,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 30,
-      height: 25,
+      width: 25,
+      height: 20,
       fillChance: 0.30,
       smoothIterations: 4,
       borderIsWall: true,
@@ -90,8 +90,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 30,
-      height: 25,
+      width: 25,
+      height: 20,
       fillChance: 0.50,
       smoothIterations: 5,
       borderIsWall: true,
