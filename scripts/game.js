@@ -50,7 +50,7 @@ function scheduleNextZoneExplorationTick() {
   if (!zoneExplorationActive) return;
 
   // 2–5 seconds delay (2000–5000 ms)
-  const delay = 2000 + Math.random() * 3000;
+  const delay = 500 + Math.random() * 500;
 
   zoneExplorationTimerId = setTimeout(() => {
     runZoneExplorationTick();
