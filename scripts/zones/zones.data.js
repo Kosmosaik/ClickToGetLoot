@@ -13,8 +13,8 @@ const ZONE_DEFINITIONS = {
     id: "tutorial_zone",
     name: "Tutorial Zone",
     type: "static_layout",
-    width: 9,
-    height: 9,
+    width: 10,
+    height: 10,
     defaultWeatherState: "clear",
 
     // Handcrafted layout:
