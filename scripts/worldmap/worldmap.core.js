@@ -94,3 +94,44 @@ window.WorldMapDebug = {
   createDefaultWorldMap,
   getWorldMapTile,
 };
+
+/**
+ * Find the world map tile that has the given zoneId.
+ * Returns an object { tile, x, y } or null if not found.
+ */
+function findWorldTileByZoneId(worldMap, zoneId) {
+    if (!worldMap || !worldMap.tiles) return null;
+
+    for (let y = 0; y < worldMap.height; y++) {
+        for (let x = 0; x < worldMap.width; x++) {
+            const tile = worldMap.tiles[y][x];
+            if (tile.zoneId === zoneId) {
+                return { tile, x, y };
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Mark the tile belonging to zoneId as VISITED
+ * and update worldMap.currentX/currentY accordingly.
+ */
+function markWorldTileVisited(worldMap, zoneId) {
+    const result = findWorldTileByZoneId(worldMap, zoneId);
+    if (!result) {
+        console.warn("Could not find world map tile for zoneId:", zoneId);
+        return;
+    }
+
+    const { tile, x, y } = result;
+
+    if (tile.fogState !== WORLD_FOG_STATE.VISITED) {
+        tile.fogState = WORLD_FOG_STATE.VISITED;
+    }
+
+    worldMap.currentX = x;
+    worldMap.currentY = y;
+}
+
