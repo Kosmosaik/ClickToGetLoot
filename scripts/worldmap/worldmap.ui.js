@@ -91,21 +91,34 @@ function renderWorldMapUI() {
   }
 }
 
-// Expose for other scripts
-window.renderWorldMapUI = renderWorldMapUI;
-
-// Debug helper: manually show the World Map panel and hide the Zone panel.
-// Use from browser console: WorldMapDebug.showWorldMapPanel()
-WorldMapDebug.showWorldMapPanel = function () {
+function switchToWorldMapView() {
+  const worldMapPanel = document.getElementById("worldmap-panel");
   const zonePanel = document.getElementById("zone-panel");
+
   if (zonePanel) {
     zonePanel.style.display = "none";
   }
   if (worldMapPanel) {
     worldMapPanel.style.display = "block";
   }
+
   if (typeof renderWorldMapUI === "function") {
     renderWorldMapUI();
   }
+}
+
+
+// Expose for other scripts
+window.renderWorldMapUI = renderWorldMapUI;
+
+// Debug helper: manually show the World Map panel and hide the Zone panel.
+// Use from browser console: WorldMapDebug.showWorldMapPanel()
+// Debug helper: manually show the World Map panel and hide the Zone panel.
+// Use from browser console: WorldMapDebug.showWorldMapPanel()
+WorldMapDebug.showWorldMapPanel = function () {
+  if (typeof switchToWorldMapView === "function") {
+    switchToWorldMapView();
+  }
 };
+
 
