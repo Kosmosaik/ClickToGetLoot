@@ -160,7 +160,7 @@ if (btnCreateCharacter) {
     
     // --- 0.0.70a: Enter Starting Zone automatically (exploration paused) ---
     if (typeof createDebugZone === "function") {
-      currentZone = createDebugZone();      // temporary "Starting Zone"
+      currentZone = createZoneFromDefinition("tutorial_zone");
       isInZone = true;
       console.log("Entered Starting Zone (Debug):", currentZone);
 
