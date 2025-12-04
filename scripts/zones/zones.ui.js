@@ -252,14 +252,36 @@ if (zoneFinishLeaveBtn) {
   zoneFinishLeaveBtn.addEventListener("click", () => {
     console.log("Player chose to LEAVE the zone.");
 
+    // 1) Stop any ongoing auto exploration
     if (typeof stopZoneExplorationTicks === "function") {
       stopZoneExplorationTicks();
     }
 
+    // 2) Mark the world map tile for this zone as VISITED and update currentX/currentY
+    //    (only if we have both worldMap and currentZone and the helper exists)
+    if (typeof worldMap !== "undefined" &&
+        worldMap &&
+        currentZone &&
+        typeof markWorldTileVisited === "function") {
+
+      // currentZone.id is set by createZoneFromDefinition(zoneId)
+      markWorldTileVisited(worldMap, currentZone.id);
+    }
+
+    // 3) Update main state to "not in a zone"
     isInZone = false;
     currentZone = null;
 
+    // 4) Add a message (while the zone panel is still visible)
     addZoneMessage("You leave the area behind.");
-    renderZoneUI();
+
+    // 5) Switch to the world map view if available
+    if (typeof switchToWorldMapView === "function") {
+      switchToWorldMapView();
+    } else {
+      // Fallback: at least refresh the zone UI if something is missing
+      renderZoneUI();
+    }
   });
 }
+
