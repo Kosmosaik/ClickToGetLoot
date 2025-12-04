@@ -84,6 +84,202 @@ function generateLayoutCellularAutomata(config) {
   return map.map((row) => row.join(""));
 }
 
+// ----- Region detection & post-processing helpers -----
+//
+// These helpers operate on the CA layout (array of strings, '#' or '.').
+// They will:
+//
+// 1) Find all walkable regions (connected '.' areas).
+// 2) Keep the largest region as "primary".
+// 3) Reserve the second-largest region as a future "locked subregion" candidate.
+// 4) For remaining regions:
+//    - If tiny: remove them ('.' -> '#').
+//    - If bigger: carve a simple corridor to the primary region.
+//
+// Later we can reuse the region info to create a locked subregion with an 'L' gate.
+
+// Convert ["#####", "#...#"] -> [['#','#','#','#','#'], ['#','.','.','.','#']]
+function layoutToCharGrid(layout) {
+  return layout.map((row) => row.split(""));
+}
+
+// Convert [['#','#'],['.','.']] -> ["##", ".."]
+function charGridToLayout(grid) {
+  return grid.map((row) => row.join(""));
+}
+
+// Find all connected regions of walkable ('.') tiles.
+function computeWalkableRegions(layout) {
+  const height = layout.length;
+  if (height === 0) return [];
+  const width = layout[0].length;
+
+  const visited = [];
+  for (let y = 0; y < height; y++) {
+    visited[y] = [];
+    for (let x = 0; x < width; x++) {
+      visited[y][x] = false;
+    }
+  }
+
+  const regions = [];
+  let nextRegionId = 0;
+
+  const dirs = [
+    { dx: 1, dy: 0 },
+    { dx: -1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 0, dy: -1 },
+  ];
+
+  function isWalkableChar(ch) {
+    return ch === ".";
+  }
+
+  for (let startY = 0; startY < height; startY++) {
+    const row = layout[startY];
+    for (let startX = 0; startX < width; startX++) {
+      if (visited[startY][startX]) continue;
+      const ch = row.charAt(startX);
+      if (!isWalkableChar(ch)) continue;
+
+      // BFS / flood-fill
+      const cells = [];
+      const queue = [{ x: startX, y: startY }];
+      visited[startY][startX] = true;
+
+      while (queue.length > 0) {
+        const { x, y } = queue.shift();
+        cells.push({ x, y });
+
+        for (const dir of dirs) {
+          const nx = x + dir.dx;
+          const ny = y + dir.dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          if (visited[ny][nx]) continue;
+
+          const nch = layout[ny].charAt(nx);
+          if (!isWalkableChar(nch)) continue;
+
+          visited[ny][nx] = true;
+          queue.push({ x: nx, y: ny });
+        }
+      }
+
+      regions.push({
+        id: nextRegionId++,
+        cells,
+      });
+    }
+  }
+
+  return regions;
+}
+
+// Carve a simple "L-shaped" corridor between a cell in regionA and a cell in regionB.
+// This is intentionally simple: it just draws a Manhattan path.
+function carveCorridorBetweenRegions(grid, regionA, regionB) {
+  if (!regionA || !regionB || regionA.cells.length === 0 || regionB.cells.length === 0) {
+    return;
+  }
+
+  let bestPair = null;
+  let bestDist = Infinity;
+
+  // Find the closest pair of cells between the two regions (Manhattan distance).
+  for (let i = 0; i < regionA.cells.length; i++) {
+    const a = regionA.cells[i];
+    for (let j = 0; j < regionB.cells.length; j++) {
+      const b = regionB.cells[j];
+      const dist = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestPair = { a, b };
+      }
+    }
+  }
+
+  if (!bestPair) return;
+
+  const { a, b } = bestPair;
+
+  // Draw a simple L-shaped path from a -> b.
+  let x = a.x;
+  let y = a.y;
+
+  // Step in x direction first
+  const stepX = b.x > x ? 1 : -1;
+  while (x !== b.x) {
+    if (grid[y][x] === "#") {
+      grid[y][x] = ".";
+    }
+    x += stepX;
+  }
+
+  // Then step in y direction
+  const stepY = b.y > y ? 1 : -1;
+  while (y !== b.y) {
+    if (grid[y][x] === "#") {
+      grid[y][x] = ".";
+    }
+    y += stepY;
+  }
+
+  // Make sure the end cell is also walkable
+  if (grid[y][x] === "#") {
+    grid[y][x] = ".";
+  }
+}
+
+// Post-process CA layout to clean up islands and prepare for locked subregions.
+//
+// - Keeps the largest region as the main area.
+// - Keeps the second-largest as candidate for a "locked subregion" (for future step).
+// - For all other regions:
+//   * If they are tiny -> remove (turn '.' into '#').
+//   * Otherwise -> carve a corridor to the main region.
+function postProcessCALayoutRegions(layout, config) {
+  if (!layout || layout.length === 0) return layout;
+
+  const regions = computeWalkableRegions(layout);
+  if (regions.length <= 1) {
+    return layout; // nothing to do
+  }
+
+  // Sort regions by size (descending)
+  regions.sort((a, b) => b.cells.length - a.cells.length);
+
+  const primaryRegion = regions[0];
+  const secondaryCandidate = regions.length > 1 ? regions[1] : null;
+
+  // Minimum size for a region to be worth connecting instead of just deleting.
+  const minRegionSizeToKeep = typeof config.minRegionSizeToKeep === "number"
+    ? config.minRegionSizeToKeep
+    : 12;
+
+  // Work on a mutable char grid
+  const grid = layoutToCharGrid(layout);
+
+  // Reserve primary + secondaryCandidate for now.
+  // We will only process regions from index 2 onward.
+  for (let i = 2; i < regions.length; i++) {
+    const region = regions[i];
+    const size = region.cells.length;
+
+    if (size < minRegionSizeToKeep) {
+      // Tiny island: just remove it by turning '.' into '#'
+      for (const cell of region.cells) {
+        grid[cell.y][cell.x] = "#";
+      }
+    } else {
+      // Larger side-blob: carve a corridor to the primary region
+      carveCorridorBetweenRegions(grid, primaryRegion, region);
+    }
+  }
+
+  return charGridToLayout(grid);
+}
+
 // Main entry: create a layout string array from a zone definition.
 function generateLayoutFromDefinition(def) {
   if (!def || def.type !== "generated") {
