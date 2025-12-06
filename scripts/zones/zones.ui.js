@@ -141,11 +141,7 @@ function renderZoneUI() {
 
   // Finish menu
   if (zoneFinishMenuEl) {
-    if (stats && stats.percentExplored >= 100) {
-      zoneFinishMenuEl.style.display = "block";
-    } else {
-      zoneFinishMenuEl.style.display = "none";
-    }
+    zoneFinishMenuEl.style.display = "block";
   }
 
   // Button states
