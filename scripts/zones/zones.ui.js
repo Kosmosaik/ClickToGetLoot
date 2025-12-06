@@ -24,15 +24,15 @@ const zoneFinishLeaveBtn = document.getElementById("zone-finish-leave");
 
 // ----- Helpers -----
 
-// Build a simple ASCII grid from the current zone.
+// Build an HTML grid from the current zone.
 // # = blocked, ? = unexplored walkable, . = explored walkable, L = locked
+// Each cell is a <span> so we can click on it.
 function buildZoneGridString(zone) {
   if (!zone) return "(No active zone)";
 
-  const lines = [];
+  let html = "";
 
   for (let y = 0; y < zone.height; y++) {
-    let row = "";
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
 
@@ -40,19 +40,20 @@ function buildZoneGridString(zone) {
       if (tile.kind === "blocked") {
         ch = "#";
       } else if (tile.kind === "locked") {
-        ch = "L"; // lock
+        ch = "L"; // lock gate
       } else {
         // walkable
         ch = tile.explored ? "." : "?";
       }
 
-      row += ch;
+      html += `<span class="zone-cell" data-x="${x}" data-y="${y}">${ch}</span>`;
     }
-    lines.push(row);
+    html += "<br>";
   }
 
-  return lines.join("\n");
+  return html;
 }
+
 
 function getZoneStatusText(zone, stats) {
   if (!zone || !isInZone) {
@@ -94,8 +95,9 @@ function renderZoneUI() {
     if (zoneStatsEl) {
       zoneStatsEl.textContent = "Explored: 0% (0 / 0 tiles)";
     }
+    // Grid
     if (zoneGridEl) {
-      zoneGridEl.textContent = "(No active zone)";
+      zoneGridEl.innerHTML = buildZoneGridString(zone);
     }
     if (zoneFinishMenuEl) {
       zoneFinishMenuEl.style.display = "none";
@@ -236,6 +238,54 @@ if (zoneExploreStopBtn) {
     }
     addZoneMessage("You stop to catch your breath and look around.");
     renderZoneUI();
+  });
+}
+
+// ----- Click handling on the zone grid -----
+//
+// Clicking on an 'L' tile should unlock the corresponding locked subregion.
+if (zoneGridEl) {
+  zoneGridEl.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!target || !target.classList || !target.classList.contains("zone-cell")) {
+      return;
+    }
+
+    const x = parseInt(target.getAttribute("data-x"), 10);
+    const y = parseInt(target.getAttribute("data-y"), 10);
+    if (Number.isNaN(x) || Number.isNaN(y)) return;
+    if (!currentZone) return;
+
+    const tile = currentZone.tiles[y][x];
+    if (!tile) return;
+
+    // Only handle clicks on locked gate tiles that belong to a locked region.
+    if (tile.kind !== "locked" || tile.lockedRegionId == null) {
+      return;
+    }
+
+    console.log(
+      "Clicked locked gate at",
+      x,
+      y,
+      "for lockedRegionId=",
+      tile.lockedRegionId
+    );
+
+    if (typeof unlockZoneLockedRegion === "function") {
+      unlockZoneLockedRegion(currentZone, tile.lockedRegionId);
+    }
+
+    // Mark the gate tile itself as explored so it no longer shows as '?'.
+    tile.explored = true;
+
+    if (typeof addZoneMessage === "function") {
+      addZoneMessage("You unlock a hidden passage leading deeper into the area.");
+    }
+
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
   });
 }
 
