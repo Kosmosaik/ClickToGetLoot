@@ -400,6 +400,8 @@ function getZoneExplorationStats(zone) {
   };
 }
 
+// Tracks the last tile that was revealed (for camera/scroll behavior in UI)
+let lastRevealedTileCoord = null;
 
 // Reveal ONE random unexplored explorable tile.
 // Returns true if something was revealed, false if zone is already fully explored.
@@ -420,6 +422,10 @@ function revealRandomExplorableTile(zone) {
 
   const choice = candidates[Math.floor(Math.random() * candidates.length)];
   zone.tiles[choice.y][choice.x].explored = true;
+
+    // Remember the last revealed tile for camera/scroll
+  lastRevealedTileCoord = { x: choice.x, y: choice.y };
+  
   return true;
 }
 
@@ -431,11 +437,19 @@ function revealNextExplorableTileSequential(zone) {
       const tile = zone.tiles[y][x];
       if (isTileExplorable(tile) && !tile.explored) {
         tile.explored = true;
+
+        // Remember the last revealed tile
+        lastRevealedTileCoord = { x, y };
+
         return true;
       }
     }
   }
   return false;
+}
+
+function getLastRevealedTileCoord() {
+  return lastRevealedTileCoord;
 }
 
 // Small debug helpers exposed on window so we can test in the browser console.
@@ -445,5 +459,6 @@ window.ZoneDebug = {
   getZoneExplorationStats,
   revealRandomExplorableTile,
   revealNextExplorableTileSequential,
+  getLastRevealedTileCoord,    // NEW: for camera/scroll
 };
 
