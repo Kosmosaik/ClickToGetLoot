@@ -630,7 +630,7 @@
   border: 1px solid #333;
   padding: 8px;
   border-radius: 4px;
-  max-height: 250px;
+  max-height: 300px;
   overflow: auto;
   text-align: left;
   white-space: pre;          /* keeps perfect grid alignment */
@@ -640,7 +640,7 @@
 #zone-messages-list {
   list-style-type: disc;
   padding-left: 18px;
-  max-height: 200px;
+  max-height: 150px;
   overflow-y: auto;
 }
 
