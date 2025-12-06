@@ -1,3 +1,59 @@
+# ProgressCrawl — Patch 0.0.70b  
+## **Zones Get Deeper: Introducing Locked Subregions**
+
+Patch **0.0.70b** expands the world of ProgressCrawl with a brand‑new layer of exploration.  
+Generated zones now feature **hidden subregions**, **locked passages**, and **dynamic layouts** that make every area feel more alive and mysterious.
+
+---
+
+##  **New Feature: Locked Subregions**
+Some zones now contain areas that are **cut off from the main region**.  
+You’ll notice a special **`L` tile** on the map — this marks a **locked gate**.
+
+- Exploring normally reveals the main region.  
+- Locked subregions cannot be explored until the gate is opened.  
+- Clicking the **`L` gate** unlocks the passage and opens up the hidden area.  
+- Unlocking the gate adds story moments through new zone messages.
+
+This gives every zone a sense of depth and hidden secrets waiting to be uncovered.
+
+---
+
+##  **Improved Map Generation**
+The zone generator now scans each map layout and:
+
+- Detects separate walkable regions  
+- Connects isolated regions using natural corridors  
+- Produces clearer and more dynamic shapes  
+- Reduces awkward “island” tiles and dead-ends  
+
+Exploration now feels smoother, more logical, and more fun.
+
+---
+
+##  **Exploration Improvements**
+- Exploration once again reveals **one tile at a time** (bug fix).  
+- You can now **leave any zone at any time**.  
+- The zone map is now **scrollable**, making larger areas easy to explore.  
+- Locked subregions interact correctly with both manual and auto exploring.
+
+---
+
+##  **UI & Interaction**
+- Tiles are now interactive, allowing direct clicks on locked gates.  
+- Removed camera auto-follow for a cleaner, smoother scrolling experience.  
+- Fixed layout bugs where raw HTML appeared instead of the map.
+
+---
+
+##  **Bug Fixes**
+- Fixed rare issue where an entire zone would reveal instantly.  
+- Corrected zone definition loading errors.  
+- Prevented map snaps to incorrect positions.  
+- General cleanup and improved stability across zone systems.
+
+---
+
 # v0.0.70a2 – Data‑Driven Zones (Part 1)
 
 ## Overview
