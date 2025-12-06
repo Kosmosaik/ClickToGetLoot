@@ -132,11 +132,7 @@ function renderZoneUI() {
     }
     // Grid
     if (zoneGridEl) {
-      zoneGridEl.innerHTML = buildZoneGridHTML(zone);
-      // After grid is rendered, move camera to last revealed tile
-      focusZoneViewOnLastRevealedTile();
-    }
-
+      zoneGridEl.textContent = "(No active zone)";
     }
     if (zoneFinishMenuEl) {
       zoneFinishMenuEl.style.display = "none";
@@ -173,15 +169,14 @@ function renderZoneUI() {
     zoneStatsEl.textContent = statsText;
   }
 
-  // Grid
+  // Grid (HTML + camera)
   if (zoneGridEl) {
-    zoneGridEl.innerHTML = buildZoneGridHTML(zone);
+    zoneGridEl.innerHTML = buildZoneGridString(zone);
     // After grid is rendered, move camera to last revealed tile
     focusZoneViewOnLastRevealedTile();
   }
 
-
-  // Finish menu
+  // Finish menu: always visible while in a zone
   if (zoneFinishMenuEl) {
     zoneFinishMenuEl.style.display = "block";
   }
@@ -209,6 +204,7 @@ function renderZoneUI() {
     // Stop only for auto
     zoneExploreStopBtn.disabled = !zoneExplorationActive;
   }
+}
 
 // Expose so other scripts can trigger UI refresh
 window.renderZoneUI = renderZoneUI;
