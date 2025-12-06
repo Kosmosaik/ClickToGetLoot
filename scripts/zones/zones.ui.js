@@ -81,6 +81,41 @@ function getZoneStatusText(zone, stats) {
   return "Status: Idle (Ready to explore)";
 }
 
+// Scroll the map so the last revealed tile stays in view.
+function focusZoneViewOnLastRevealedTile() {
+  if (!zoneGridEl) return;
+  if (!window.ZoneDebug || typeof ZoneDebug.getLastRevealedTileCoord !== "function") {
+    return;
+  }
+
+  const coord = ZoneDebug.getLastRevealedTileCoord();
+  if (!coord) return;
+
+  const selector = `.zone-cell[data-x="${coord.x}"][data-y="${coord.y}"]`;
+  const cell = zoneGridEl.querySelector(selector);
+  if (!cell) return;
+
+  const container = zoneGridEl;
+  const padding = 12; // extra space around the cell
+
+  const cellTop = cell.offsetTop;
+  const cellLeft = cell.offsetLeft;
+
+  // Vertical scroll
+  if (cellTop < container.scrollTop + padding) {
+    container.scrollTop = cellTop - padding;
+  } else if (cellTop > container.scrollTop + container.clientHeight - padding) {
+    container.scrollTop = cellTop - (container.clientHeight - padding);
+  }
+
+  // Horizontal scroll (in case of very wide zones)
+  if (cellLeft < container.scrollLeft + padding) {
+    container.scrollLeft = cellLeft - padding;
+  } else if (cellLeft > container.scrollLeft + container.clientWidth - padding) {
+    container.scrollLeft = cellLeft - (container.clientWidth - padding);
+  }
+}
+
 function renderZoneUI() {
   if (!zonePanel) return;
 
@@ -97,7 +132,11 @@ function renderZoneUI() {
     }
     // Grid
     if (zoneGridEl) {
-      zoneGridEl.innerHTML = buildZoneGridString(zone);
+      zoneGridEl.innerHTML = buildZoneGridHTML(zone);
+      // After grid is rendered, move camera to last revealed tile
+      focusZoneViewOnLastRevealedTile();
+    }
+
     }
     if (zoneFinishMenuEl) {
       zoneFinishMenuEl.style.display = "none";
@@ -136,8 +175,11 @@ function renderZoneUI() {
 
   // Grid
   if (zoneGridEl) {
-    zoneGridEl.innerHTML = buildZoneGridString(zone);
+    zoneGridEl.innerHTML = buildZoneGridHTML(zone);
+    // After grid is rendered, move camera to last revealed tile
+    focusZoneViewOnLastRevealedTile();
   }
+
 
   // Finish menu
   if (zoneFinishMenuEl) {
