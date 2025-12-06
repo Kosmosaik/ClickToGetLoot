@@ -209,8 +209,6 @@ function renderZoneUI() {
     // Stop only for auto
     zoneExploreStopBtn.disabled = !zoneExplorationActive;
   }
-}
-
 
 // Expose so other scripts can trigger UI refresh
 window.renderZoneUI = renderZoneUI;
