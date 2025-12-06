@@ -640,7 +640,7 @@
 #zone-messages-list {
   list-style-type: disc;
   padding-left: 18px;
-  max-height: 150px;
+  max-height: 110px;
   overflow-y: auto;
 }
 
