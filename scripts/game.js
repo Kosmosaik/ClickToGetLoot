@@ -212,7 +212,7 @@ function startZoneManualExploreOnce() {
   zoneManualExplorationActive = true;
 
   // Same 2–5s delay as auto
-  const delay = 2000 + Math.random() * 3000;
+  const delay = 50 + Math.random() * 50;
 
   zoneManualTimerId = setTimeout(() => {
     zoneManualTimerId = null;
