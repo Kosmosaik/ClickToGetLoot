@@ -293,6 +293,7 @@ if (zoneFinishStayBtn) {
 }
 
 // Finish menu: LEAVE ZONE
+// Finish menu: LEAVE ZONE
 if (zoneFinishLeaveBtn) {
   zoneFinishLeaveBtn.addEventListener("click", () => {
     console.log("Player chose to LEAVE the zone.");
