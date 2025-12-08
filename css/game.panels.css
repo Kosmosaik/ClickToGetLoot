@@ -672,3 +672,28 @@
   color: #eee;
   border-radius: 4px;
 }
+
+.worldmap-tile-info {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.6);
+  font-size: 0.9rem;
+}
+
+.worldmap-tile-info h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.worldmap-tile-info.hidden {
+  display: none;
+}
+
+#worldmap-enter-zone-button {
+  margin-top: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
