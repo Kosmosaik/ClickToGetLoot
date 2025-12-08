@@ -13,12 +13,6 @@ const worldMapEnterZoneButton = document.getElementById("worldmap-enter-zone-but
 let selectedWorldTileX = null;
 let selectedWorldTileY = null;
 
-
-// 0.0.70c — currently selected tile on the world map (for info panel + enter button)
-let selectedWorldTileX = null;
-let selectedWorldTileY = null;
-
-
 // Panel switching helpers so we can move between Zone and World Map views.
 function switchToWorldMapView() {
   const zonePanel = document.getElementById("zone-panel");
