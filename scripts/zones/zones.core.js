@@ -438,6 +438,59 @@ function revealNextExplorableTileSequential(zone) {
   return false; // nothing left to reveal
 }
 
+// 0.0.70c — Ensure we have a generated zone definition for a given world tile.
+// If ZONE_DEFINITIONS already has an entry for tile.zoneId, we reuse it.
+// Otherwise we look up tile.templateId in ZONE_TEMPLATES and create a
+// "generated" definition on the fly. Returns the definition or null.
+function ensureGeneratedZoneDefinitionForWorldTile(tile) {
+  if (!tile || !tile.zoneId) {
+    console.warn("ensureGeneratedZoneDefinitionForWorldTile: tile or zoneId missing.", tile);
+    return null;
+  }
+
+  if (typeof ZONE_DEFINITIONS === "undefined") {
+    console.error("ensureGeneratedZoneDefinitionForWorldTile: ZONE_DEFINITIONS is not defined.");
+    return null;
+  }
+
+  // If we already have a definition (e.g. tutorial zones), just return it.
+  const existing = ZONE_DEFINITIONS[tile.zoneId];
+  if (existing) {
+    return existing;
+  }
+
+  const templateId = tile.templateId || "primitive_forest_easy";
+  if (typeof ZONE_TEMPLATES === "undefined") {
+    console.warn("ensureGeneratedZoneDefinitionForWorldTile: ZONE_TEMPLATES is not defined.");
+    return null;
+  }
+
+  const template = ZONE_TEMPLATES[templateId];
+  if (!template) {
+    console.warn(
+      `ensureGeneratedZoneDefinitionForWorldTile: no template found for templateId="${templateId}".`
+    );
+    return null;
+  }
+
+  const generator = template.generator || "cellular_automata";
+  const generatorConfig = Object.assign({}, template.generatorConfig || {});
+
+  // Later we might inject difficulty/era/biome tweaks here.
+  // For now, we only ensure width/height/etc are passed through.
+
+  const def = {
+    id: tile.zoneId,
+    name: template.name || tile.zoneId,
+    type: "generated",
+    generator,
+    generatorConfig,
+    defaultWeatherState: template.defaultWeatherState || null,
+  };
+
+  ZONE_DEFINITIONS[tile.zoneId] = def;
+  return def;
+}
 
 // Small debug helpers exposed on window so we can test in the browser console.
 window.ZoneDebug = {
@@ -446,5 +499,7 @@ window.ZoneDebug = {
   getZoneExplorationStats,
   revealRandomExplorableTile,
   revealNextExplorableTileSequential,
+  ensureGeneratedZoneDefinitionForWorldTile,
 };
+
 
