@@ -42,13 +42,23 @@ function enterZoneFromWorldMap(x, y) {
     stopZoneExplorationTicks();
   }
 
-  // Create the zone instance from its definition
+  // Create the zone instance from its definition.
+  // If no static definition exists (e.g. auto_zone_x_y), we attempt to
+  // create a generated definition based on the world slot metadata.
   if (typeof createZoneFromDefinition !== "function") {
     console.error("enterZoneFromWorldMap: createZoneFromDefinition is missing.");
     return;
   }
 
-  const newZone = createZoneFromDefinition(tile.zoneId);
+  let newZone = createZoneFromDefinition(tile.zoneId);
+
+  if (!newZone && typeof ensureGeneratedZoneDefinitionForWorldTile === "function") {
+    const generatedDef = ensureGeneratedZoneDefinitionForWorldTile(tile);
+    if (generatedDef) {
+      newZone = createZoneFromDefinition(tile.zoneId);
+    }
+  }
+
   if (!newZone) {
     console.error("enterZoneFromWorldMap: failed to create zone", tile.zoneId);
     return;
