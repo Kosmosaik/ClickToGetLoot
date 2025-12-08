@@ -49,6 +49,15 @@ function initializeWorldSlotMetadata(tile, options) {
     tile.templateId = opts.templateId || "primitive_forest_easy";
   }
 
+  // Difficulty rating 1–10 (if provided by caller; else leave null for now).
+  if (typeof tile.difficultyRating !== "number") {
+    if (typeof opts.difficultyRating === "number") {
+      tile.difficultyRating = opts.difficultyRating;
+    } else {
+      tile.difficultyRating = null;
+    }
+  }
+
   // Simple seed for now. Later we can derive from a worldSeed + coords.
   if (!tile.seed) {
     tile.seed = `${tile.x}_${tile.y}_${Math.floor(Math.random() * 1e9)}`;
@@ -77,12 +86,70 @@ function pickWorldSlotTemplateForDistance(distance) {
 }
 
 /**
+ * 0.0.70c — Difficulty rating for a world slot (1–10).
+ *
+ * Rules:
+ * - Always between 1 and 10.
+ * - Every difficulty is always possible (small chance).
+ * - Further from start => more weight on higher numbers.
+ */
+function pickDifficultyForDistance(distance) {
+  // Distance 0 = starting tile; clamp negative just in case.
+  const d = Math.max(0, distance || 0);
+
+  // Base difficulty increases slowly with distance, capped at 10.
+  // Example: 0 -> 1.5, 1 -> 2.0, 4 -> 3.8, 10+ -> ~8+ etc.
+  const base = Math.min(10, 1 + d * 0.7);
+
+  const weights = [];
+  for (let level = 1; level <= 10; level++) {
+    // Baseline weight so every level is possible.
+    let w = 1;
+
+    // Bias around the base difficulty: closer to base => higher weight.
+    const diff = Math.abs(level - base);
+    w += Math.max(0, 4 - diff); // up to +4 if exactly at base
+
+    // Slight extra push for high difficulties at larger distances.
+    if (d >= 4 && level >= 7) {
+      w += 1;
+    }
+    if (d >= 8 && level >= 9) {
+      w += 2;
+    }
+
+    weights.push(w);
+  }
+
+  // Weighted random pick
+  const total = weights.reduce((sum, w) => sum + w, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < 10; i++) {
+    r -= weights[i];
+    if (r <= 0) {
+      return i + 1; // difficulty 1..10
+    }
+  }
+  return 10;
+}
+
+/**
  * Convenience wrapper: initialize slot metadata for a tile
  * based on ring distance from the starting tile.
  */
 function initializeWorldSlotFromDistance(tile, distance) {
-  const preset = pickWorldSlotTemplateForDistance(distance) || WORLD_SLOT_TEMPLATES.primitive_forest_easy;
-  initializeWorldSlotMetadata(tile, preset);
+  const preset =
+    pickWorldSlotTemplateForDistance(distance) ||
+    WORLD_SLOT_TEMPLATES.primitive_forest_easy;
+
+  const difficulty = pickDifficultyForDistance(distance);
+
+  // Merge difficulty into the options we pass to the generic initializer.
+  const options = Object.assign({}, preset, {
+    difficultyRating: difficulty,
+  });
+
+  initializeWorldSlotMetadata(tile, options);
 }
 
 // Debug helper – so you can poke this from DevTools if you want.
