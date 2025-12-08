@@ -630,7 +630,7 @@
   border: 1px solid #333;
   padding: 8px;
   border-radius: 4px;
-  max-height: 300px;
+  max-height: 280px;
   overflow: auto;
   text-align: left;
   white-space: pre;          /* keeps perfect grid alignment */
