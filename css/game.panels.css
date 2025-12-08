@@ -624,8 +624,8 @@
 .zone-grid-view {
   display: inline-block;
   font-family: "Fira Code", "Consolas", monospace;
-  font-size: 1rem;           /* emoji are smaller, slightly increase size */
-  line-height: 0.95;
+  font-size: 1.2rem;           /* emoji are smaller, slightly increase size */
+  line-height: 0.9;
   background: #000;
   border: 1px solid #333;
   padding: 8px;
