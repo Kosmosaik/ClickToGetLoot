@@ -93,7 +93,12 @@ function saveCurrentGame() {
       inventoryUnlocked: inventoryUnlocked,
       equipmentUnlocked: equipmentUnlocked,
     },
+
+    // 0.0.70c — persist world map / world slots
+    // This stores the full worldMap object (width, height, tiles and metadata).
+    worldMap: typeof worldMap !== "undefined" ? worldMap : null,
   };
+
 
   const idx = saves.findIndex(s => s.id === snapshot.id);
   if (idx === -1) {
