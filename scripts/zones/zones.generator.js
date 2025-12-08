@@ -44,6 +44,12 @@ function generateLayoutCellularAutomata(config) {
   const smoothIterations = config.smoothIterations ?? 4;
   const borderIsWall = config.borderIsWall ?? true;
 
+    // 0.0.70c — use seeded RNG if config.seed is provided
+  let rand = Math.random;
+  if (config && config.seed) {
+    rand = createSeededRandom(config.seed);
+  }
+
   // Step 1: Random initial map
   let map = [];
   for (let y = 0; y < height; y++) {
@@ -53,7 +59,7 @@ function generateLayoutCellularAutomata(config) {
           (x === 0 || y === 0 || x === width - 1 || y === height - 1)) {
         row.push("#"); // solid border
       } else {
-        row.push(randomChance(fillChance) ? "#" : ".");
+        row.push(rand() < fillChance ? "#" : ".");
       }
     }
     map.push(row);
