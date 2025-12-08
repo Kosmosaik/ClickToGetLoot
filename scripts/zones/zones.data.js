@@ -108,6 +108,7 @@ const ZONE_TEMPLATES = {
   primitive_forest_easy: {
     id: "primitive_forest_easy",
     name: "Primitive Forest",
+    difficulty: 1,
     generator: "cellular_automata",
     generatorConfig: {
       width: 42,
