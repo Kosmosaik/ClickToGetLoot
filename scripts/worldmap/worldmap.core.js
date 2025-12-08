@@ -30,8 +30,11 @@ function createWorldMapTile(x, y) {
     seed: null,         // seed used when generating the actual zone
     zoneGenerated: false, // has a zone already been generated for this slot?
 
-    // 0.0.70c – Have we already applied the adjacency unlock rule here?
+    // 0.0.70c – Adjacency unlock rule
     neighborsUnlocked: false,
+
+    // 0.0.70c – Difficulty rating for this world slot (1–10)
+    difficultyRating: null,
   };
 }
 
