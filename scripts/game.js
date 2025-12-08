@@ -42,22 +42,27 @@ function enterZoneFromWorldMap(x, y) {
     stopZoneExplorationTicks();
   }
 
-  // Create the zone instance from its definition.
-  // If no static definition exists (e.g. auto_zone_x_y), we attempt to
-  // create a generated definition based on the world slot metadata.
   if (typeof createZoneFromDefinition !== "function") {
     console.error("enterZoneFromWorldMap: createZoneFromDefinition is missing.");
     return;
   }
 
-  let newZone = createZoneFromDefinition(tile.zoneId);
+  // 0.0.70c:
+  // Make sure a definition EXISTS before we ever call createZoneFromDefinition,
+  // to avoid the "no definition found" spam for auto_zone_* ids.
+  if (typeof ZONE_DEFINITIONS !== "undefined") {
+    const existingDef = ZONE_DEFINITIONS[tile.zoneId];
 
-  if (!newZone && typeof ensureGeneratedZoneDefinitionForWorldTile === "function") {
-    const generatedDef = ensureGeneratedZoneDefinitionForWorldTile(tile);
-    if (generatedDef) {
-      newZone = createZoneFromDefinition(tile.zoneId);
+    if (!existingDef && typeof ensureGeneratedZoneDefinitionForWorldTile === "function") {
+      ensureGeneratedZoneDefinitionForWorldTile(tile);
     }
+  } else {
+    console.error("enterZoneFromWorldMap: ZONE_DEFINITIONS is not defined.");
+    return;
   }
+
+  // Now we expect there to be a definition (either static or generated).
+  const newZone = createZoneFromDefinition(tile.zoneId);
 
   if (!newZone) {
     console.error("enterZoneFromWorldMap: failed to create zone", tile.zoneId);
@@ -72,10 +77,8 @@ function enterZoneFromWorldMap(x, y) {
   if (tile.fogState !== WORLD_FOG_STATE.VISITED) {
     tile.fogState = WORLD_FOG_STATE.VISITED;
   }
-  if (worldMap) {
-    worldMap.currentX = x;
-    worldMap.currentY = y;
-  }
+  worldMap.currentX = x;
+  worldMap.currentY = y;
 
   // Switch panels: hide world map, show zone
   if (typeof switchToZoneView === "function") {
