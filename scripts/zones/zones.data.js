@@ -99,3 +99,24 @@ const ZONE_DEFINITIONS = {
     defaultWeatherState: "windy",
   },
 };
+
+// 0.0.70c — Zone templates (used by world slots / auto-generated zones).
+// These are separate from ZONE_DEFINITIONS to keep data modular.
+// World tiles carry a templateId (e.g. "primitive_forest_easy") which
+// we map to one of these templates when generating a new zone on demand.
+const ZONE_TEMPLATES = {
+  primitive_forest_easy: {
+    id: "primitive_forest_easy",
+    name: "Primitive Forest",
+    generator: "cellular_automata",
+    generatorConfig: {
+      width: 42,
+      height: 34,
+      fillChance: 0.48,
+      smoothIterations: 4,
+      borderIsWall: true,
+    },
+    defaultWeatherState: "overcast",
+  },
+};
+
