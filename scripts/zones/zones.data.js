@@ -118,6 +118,11 @@ const ZONE_TEMPLATES = {
       borderIsWall: true,
     },
     defaultWeatherState: "overcast",
+    
+    // 0.0.70d+ (not added yet, but this is what we’re aiming for)
+    // entities: { ... spawn tables ... },
+    // resources: { ... spawn tables ... },
+    // pois: { ... spawn tables ... },
   },
 };
 
