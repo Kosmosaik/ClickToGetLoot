@@ -15,7 +15,7 @@ async function loadPatchNotesFromChangelog() {
   if (patchNotesLoaded || !patchNotesContent) return;
 
   try {
-    const res = await fetch("CHANGELOG.md");
+    const res = await fetch("/docs/CHANGELOG.md");
     const text = await res.text();
 
     // Split into sections by "## " headings

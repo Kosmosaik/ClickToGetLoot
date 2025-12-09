@@ -94,9 +94,9 @@ Key goals:
 
 ## 4.1 0.0.70 Branches
 - **0.0.70a – Zone Core System (DONE)**
-- **0.0.70b – Events & Discoveries**
-- **0.0.70c – World Map Skeleton**
-- **0.0.70d – Zone Definitions**
+- **0.0.70b – Events & Discoveries (MOVED TO A FUTURE PATCH)** 
+- **0.0.70c – World Map Skeleton (DONE)** 
+- **0.0.70d – Zone Definitions** (ONGOING)
 - **0.0.70e – Tile Types & Rendering**
 
 ## 4.2 Upcoming Systems

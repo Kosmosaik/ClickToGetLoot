@@ -1,0 +1,364 @@
+Alghoul
+Alpaca
+Alpha Boar
+Alpha Wolf
+Angry Mountain Goat
+Anjanath
+Anole
+Antelope
+Aptonoth
+Arachas
+Archespore
+Armsy
+Auroch
+Badger
+Bageraset
+Bandit
+Basilisk
+Bassarisk
+Bat
+Beak Thing
+Bear
+Beaver
+Black Bear
+Black Bokoblin
+Black Lizalfos
+Black Moblin
+Black Wolf
+Bloatfly
+Bloodbug
+Blue Bokoblin
+Blue Chuchu
+Blue Crab
+Blue Lizalfos
+Blue Moblin
+Blue Slime
+Boar
+Bobcat
+Bogdog
+Bokoblin
+Bolma
+Bonedog
+Boomalope
+Boomrat
+Brahmin
+Brown Bear
+Brown Fox
+Brown Grizzly Bear
+Brown Snake
+Brown Spider
+Bruxa
+Bug
+Bull
+Canis
+Cannibal
+Cave Nymph
+Chicken
+Chipmunk
+Chort
+ChuChu
+Chuchu
+Cleaner
+Coblyn
+Cobra
+Coeurl
+Cougar
+Cow
+Cowman
+Coyote
+Crab
+Crag Lizard
+Creeper
+Cricket
+Crocodile
+Dark Wizard
+Deer
+Defias Bandit
+Deku Scrub
+Dire Bear
+Dire Wolf
+Direbear
+Direboar
+Direwolf
+Dock Horror
+Dock Stalker
+Dodore
+Doe
+Drake
+Drowner
+Dryad
+Duck
+Ekimmara
+Elder Moose
+Elder Stag
+Electric Keese
+Elk
+Elk King
+Enderman
+Endrega
+Endrega Drone
+Endrega Warrior
+Endrega Worker
+Evoker
+Ewok
+Falumpaset
+Feral Dog
+Ferocious Boar
+Field Fox
+Field Wolf
+Fiend
+Fire Keese
+Fish
+Fly
+Foglet
+Forest Ant Hill
+Forest Boar
+Forest Crawler
+Forest Elemental
+Forest Grub
+Forest Hound
+Forest Hunter
+Forest Miniblin
+Forest Mushrooms
+Forest Ostard
+Forest Recluse
+Forest Recluse Hunter
+Forest Recluse Skulker
+Forest Spider
+Forest Spirit
+Forest Stalker
+Forest Wolf
+Forester
+Fox
+Frenzied Ostard
+Frog
+Frost Slime
+Garru
+Ghoul
+Giant Boar
+Giant Centipede
+Giant Frog
+Giant Serpent
+Giant Spider
+Gnoll
+Goat
+Goblin
+Golem
+Goobbue
+Gorax
+Grave Brownie
+Grave Brownie Construct
+Grave Grub
+Gray Fox
+Gray Wolf
+Great Hart
+Great Jagras
+Greater Hill Scorpion
+Green Slime
+Green Snake
+Greydwarf
+Greydwarf Brute
+Greydwarf Shaman
+Greyling
+Griffin
+Grizzly Bear
+Grounded Raider
+Grounded Wing
+Groundhog
+Grub
+Gualama
+Gunner
+Hagraven
+Haj Mota
+Hare
+Highwayman
+Hill Scorpion
+Hind
+Hinox
+Hobgoblin
+Hodag
+Honey Badger
+Hornet
+Hornetaur
+Hunter
+Hyena
+Ibex
+Ice Keese
+Ice Wolf
+Imp
+Jagras
+Jaguar
+Jungle Spider
+Jungle Wurm
+Kaadu
+Keese
+Kelbi
+Kulu-Ya-Ku
+Ladybug
+Leafsaw Crawler
+Leshen
+Like Like
+Living Vine
+Lizalfos
+Lizard
+LMB Soldier
+Lurcher
+Lynx
+Mantis
+Marsh Dweller
+Marsh Toad
+Marten
+Masked Cannibal
+Mature Forest Spirit
+Meadow Bear
+Meadow Lurker
+Meadow Seeker
+Megasloth
+Merek
+Mernos
+Mimic
+Moas
+Moblin
+Moblins
+Molerat
+Moose
+Moth
+Mouflon
+Mountain Goat
+Mountain Wolf
+Mr Handy
+Mudcrab
+Muffalo
+Mugger
+Murkwater Frog
+Murloc
+Mutant Baby
+Mutant Girl
+Mutated Bear
+Mutated Boar
+Mutated Wolf
+Naxeen
+Neck
+Nekker
+Nekker Blood
+Nekker Warrior
+Niborian Creature
+Nightbane Worgen
+Nightwraith
+Noonwraith
+Nuna
+Oakheart
+Obsessed Archfiend
+Obsessed Aspirant
+Obsessed Champion
+Octorok
+Opo-Opo
+Otter
+Owl
+Owlbear
+Pack Beast
+Painted Cannibal
+Pale Cannibal
+Panther
+Peahat
+Pig
+Pillager
+Porcupine
+Pragmium
+Pukei-Pukei
+Pygmy Owlbear
+Pygmy Torton
+Pygmy Treant
+Rabbit
+Rabid Dog
+Raccoon
+Radroach
+Radstag
+Rat
+Rathalos
+Rathian
+Rattler Snake
+Ravager
+Raven
+Raxin
+Red Chuchu
+Red Deer
+Red Fox
+Red Slime
+Reesh
+Riker
+Rioter
+River Drake
+Rocknose
+Rot Hide Brute
+Rot Hide Gnoll
+Rotbranch
+Sabre Cat
+Satyr
+Savage Drake
+Senche Tiger
+Shambling Mound
+Shaupaut
+Sheep
+Skeever
+Skeleton
+Skeleton Wolf
+Skimmer
+Skunk
+Sludge
+Snake
+Snow Bear
+Snowy Sabre Cat
+Spider
+Spriggan
+Spriggan Matron
+Squirrel
+Stag
+Stalfos
+Stalhinox
+Stingwing
+Strangler
+Synth Strider
+The King Beneath
+Thrumbo
+Thunderbug
+Timber Wolf
+Toad
+Tortoise
+Torton
+Treant
+Treenut
+Troll
+Turkey
+Tuskgutter
+Undead Spider
+Unicorn
+Veermok
+Venom Web Spider
+Vespoid
+Vindicator
+Virginia
+Vulture
+Wamasu
+Warden Spirit
+Warg
+Water Buffalo
+Water Hag
+Weasel
+White Spider
+Wild Beehive
+Wild Boar
+Wild Bull
+Wild Dog
+Wisp
+Witch
+Wolf
+Wolfos
+Worg
+Wraith
+Wyvern
+Yao Guai
+Yellow Chuchu
+Young Brown Bear
+Ziz
+Zombie

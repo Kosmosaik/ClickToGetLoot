@@ -1,0 +1,181 @@
+Adder
+Alghoul
+Alligator
+Arachas
+Baba Deku
+Baggi
+Basilisk
+Bat
+Beaver
+Big Crab
+Black Bear
+Bloatfly
+Blob
+Blood Spider
+Bloodbug
+Blue Chuchu
+Blue Lizalfos
+Boar
+Bog Beast
+Bog Crocodile
+Bog Frog
+Bog Lord
+Bog Skeleton
+Bog Spirit
+Bog Witch
+Boggard
+Boomalope
+Boomrat
+Brown Bear
+Cannibal
+Chaurus
+Chicken
+Chuchu
+ChuChu Jelly
+Cobra
+Corrupted Shaleback
+Cow
+Crawling Hand
+Cricket
+Crocodile
+Crocolisk
+Deer
+Dragonkin
+Draugr
+Draugr Elite
+Drowner
+Dustwallow Marsh Hydra
+Electric Chuchu
+Electric Lizalfos
+Electric Wizzrobe
+Enderman
+Endrega
+Fen Ghoul
+Feral Ghoul
+Foglet
+Frog
+Frostbite Spider
+Fungal Archer
+Fungal Mage
+Fungal Wizard
+Ghast
+Ghoul
+Giant Crocodile
+Giant Frog
+Giant Leech
+Giant Locust
+Giant Marsh Frog
+Giant Serpent
+Giant Slug
+Giant Snake
+Giant Spider
+Giant Swamp Rat
+Giant Swamp Snake
+Giant Toad
+Goblin
+Goobbue
+Green Slime
+Hagraven
+Haj Mota
+Juvinate
+Juvinate Guard
+Komodo
+Large Rat
+Lava Spider
+Leech
+Leshen
+Like Like
+Lizalfos
+Lizardman
+Loar Shadow
+Locust
+Ludroth
+Marsh Drake
+Marsh Flesheater
+Marsh Giant
+Marsh Troll
+Marsh Wyvern
+Masked Cannibal
+Mirelurk
+Mirelurk Hunter
+Mirelurk Queen
+Mole
+Monkey
+Morbol
+Mudcrab
+Mudmaw
+Murloc
+Necker
+Nekker Warrior
+Ochu
+Octorok
+Ooze
+Oozer
+Painted Cannibal
+Pale Cannibal
+Panther
+Phrin Shadow
+Pig
+Plague Maiden
+Poison Spider
+Purple Slime
+Radroach
+Rat
+Red Slime
+Reptile
+Rhenoplos
+Riyl Shadow
+Rotfiend
+Royal Ludroth
+Sand Reaper
+Sand Reaper Queen
+Serpentman
+Serpentman Brute
+Shaleback
+Shambling Mound
+Skeleton
+Skulltula
+Slime
+Snake
+Snapping Turtle
+Softshell Turtle
+Spider
+Strangler
+Surtling
+Swamp Bat
+Swamp Cobra
+Swamp Frog
+Swamp Ooze
+Swamp Raptor
+Swamp Rat
+Swamp Skelk
+Swamp Snail
+Swamp Spider
+Swamp Spirit
+Swamp Tentacle
+Swamp Treant
+Swamp Troll
+Swamp Warden
+Toad
+Tortoise
+Toxic Spider
+Toxic Wurm
+Trollhound
+Turkey
+Wamasu
+Water Hag
+Water Octorok
+Water Snake
+Wild Boar
+Will-o-Wisp
+Witch
+Witch’s Henchman
+Wizzrobe
+Wolf
+Wraith
+Wroggi
+Wyvern
+Yao Guai
+Zamite
+Zamtrios
+Zombie

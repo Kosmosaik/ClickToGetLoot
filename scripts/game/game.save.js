@@ -93,7 +93,12 @@ function saveCurrentGame() {
       inventoryUnlocked: inventoryUnlocked,
       equipmentUnlocked: equipmentUnlocked,
     },
+
+    // 0.0.70c — persist world map / world slots
+    // This stores the full worldMap object (width, height, tiles and metadata).
+    worldMap: typeof worldMap !== "undefined" ? worldMap : null,
   };
+
 
   const idx = saves.findIndex(s => s.id === snapshot.id);
   if (idx === -1) {
@@ -122,6 +127,15 @@ function loadSave(id) {
   currentSaveId = save.id;
 
   loadInventoryFromSnapshot(save.inventory || {});
+
+  // 0.0.70c — Restore world map / world slots (if present in the save).
+  // For old saves that don't have worldMap, create a fresh default map.
+  if (save.worldMap) {
+    worldMap = save.worldMap;
+  } else if (typeof createDefaultWorldMap === "function") {
+    worldMap = createDefaultWorldMap("tutorial_zone");
+  }
+  
   // Restore equipped items (if present)
   if (save.equipped) {
     loadEquippedFromSnapshot(save.equipped);
@@ -162,7 +176,19 @@ function loadSave(id) {
     equipmentPanel.style.display = "none";
   }
 
+  // 0.0.70c — Re-render world map if we have it in this save.
+  if (typeof renderWorldMapUI === "function" && typeof worldMap !== "undefined" && worldMap) {
+    renderWorldMapUI();
+  }
+
+  // Show the main game screen
   setScreen("game");
+
+  // 0.0.70c — After loading a save, default to the World Map view
+  // (hide the Zone panel that says "No active zone").
+  if (typeof switchToWorldMapView === "function") {
+    switchToWorldMapView();
+  }
 }
 
 function deleteSave(id) {

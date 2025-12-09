@@ -7,6 +7,11 @@ console.log("worldmap.ui.js loaded");
 const worldMapPanel = document.getElementById("worldmap-panel");
 const worldMapGridEl = document.getElementById("worldmap-grid-view");
 const worldMapStatusEl = document.getElementById("worldmap-status");
+const worldMapEnterZoneButton = document.getElementById("worldmap-enter-zone-button");
+
+// 0.0.70c — currently selected tile on the world map (for info panel + enter button)
+let selectedWorldTileX = null;
+let selectedWorldTileY = null;
 
 // Panel switching helpers so we can move between Zone and World Map views.
 function switchToWorldMapView() {
@@ -125,6 +130,7 @@ function renderWorldMapUI() {
     worldMapStatusEl.textContent =
       "World map ready (Tutorial Zone + adjacent placeholders).";
   }
+  renderWorldMapTileInfo();
 }
 
 function switchToWorldMapView() {
@@ -140,6 +146,89 @@ function switchToWorldMapView() {
 
   if (typeof renderWorldMapUI === "function") {
     renderWorldMapUI();
+  }
+}
+
+// 0.0.70c — Select a tile on the world map and refresh UI + info panel.
+function selectWorldMapTile(x, y) {
+  selectedWorldTileX = x;
+  selectedWorldTileY = y;
+
+  if (typeof renderWorldMapUI === "function") {
+    renderWorldMapUI();
+  }
+
+  renderWorldMapTileInfo();
+}
+
+// 0.0.70c — Render the info panel for the currently selected tile.
+function renderWorldMapTileInfo() {
+  const panel = document.getElementById("worldmap-tile-info");
+  const content = document.getElementById("worldmap-tile-info-content");
+
+  if (!panel || !content) {
+    return;
+  }
+
+  if (!worldMap || selectedWorldTileX === null || selectedWorldTileY === null) {
+    panel.classList.add("hidden");
+    content.textContent = "";
+    return;
+  }
+
+  if (typeof getWorldMapTile !== "function") {
+    panel.classList.add("hidden");
+    content.textContent = "";
+    return;
+  }
+
+  const tile = getWorldMapTile(worldMap, selectedWorldTileX, selectedWorldTileY);
+  if (!tile) {
+    panel.classList.add("hidden");
+    content.textContent = "";
+    return;
+  }
+
+  panel.classList.remove("hidden");
+
+  const lines = [];
+
+  lines.push(
+    `<strong>Coordinates:</strong> (${selectedWorldTileX}, ${selectedWorldTileY})`
+  );
+
+  if (tile.zoneId) {
+    lines.push(`<strong>Zone ID:</strong> ${tile.zoneId}`);
+  }
+
+  if (tile.era) {
+    lines.push(`<strong>Era:</strong> ${tile.era}`);
+  }
+
+  if (tile.biome) {
+    lines.push(`<strong>Biome:</strong> ${tile.biome}`);
+  }
+
+  if (typeof tile.difficultyRating === "number") {
+    lines.push(
+      `<strong>Difficulty Rating:</strong> ${tile.difficultyRating} / 10`
+    );
+  }
+
+  if (tile.templateId) {
+    lines.push(`<strong>Template:</strong> ${tile.templateId}`);
+  }
+
+  lines.push(`<strong>Status:</strong> ${tile.fogState}`);
+
+  content.innerHTML = lines.join("<br>");
+
+  const enterButton = document.getElementById("worldmap-enter-zone-button");
+  if (enterButton) {
+    const canEnter =
+      tile.fogState === WORLD_FOG_STATE.DISCOVERED ||
+      tile.fogState === WORLD_FOG_STATE.VISITED;
+    enterButton.disabled = !canEnter;
   }
 }
 
@@ -168,10 +257,10 @@ function handleWorldMapTileClick(x, y) {
   }
 
   // Delegate to game logic (defined in game.js)
-  if (typeof enterZoneFromWorldMap === "function") {
-    enterZoneFromWorldMap(x, y);
+  if (typeof selectWorldMapTile === "function") {
+    selectWorldMapTile(x, y);
   } else {
-    console.warn("enterZoneFromWorldMap is not defined yet.");
+    console.warn("selectWorldMapTile is not defined yet.");
   }
 }
 
@@ -189,6 +278,43 @@ if (worldMapGridEl) {
     if (Number.isNaN(x) || Number.isNaN(y)) return;
 
     handleWorldMapTileClick(x, y);
+  });
+}
+
+// 0.0.70c — Wire up the "Enter Zone" button in the world map info panel.
+if (worldMapEnterZoneButton) {
+  worldMapEnterZoneButton.addEventListener("click", () => {
+    if (selectedWorldTileX === null || selectedWorldTileY === null) {
+      if (worldMapStatusEl) {
+        worldMapStatusEl.textContent = "Select a zone on the world map first.";
+      }
+      return;
+    }
+
+    if (typeof worldMap === "undefined" || !worldMap) return;
+    if (typeof getWorldMapTile !== "function") return;
+
+    const tile = getWorldMapTile(worldMap, selectedWorldTileX, selectedWorldTileY);
+    if (!tile || !tile.zoneId) {
+      if (worldMapStatusEl) {
+        worldMapStatusEl.textContent = "There is no zone mapped at that location.";
+      }
+      return;
+    }
+
+    // Safety: don't allow entering completely unknown tiles.
+    if (tile.fogState === WORLD_FOG_STATE.UNKNOWN) {
+      if (worldMapStatusEl) {
+        worldMapStatusEl.textContent = "You don't know what lies there yet.";
+      }
+      return;
+    }
+
+    if (typeof enterZoneFromWorldMap === "function") {
+      enterZoneFromWorldMap(selectedWorldTileX, selectedWorldTileY);
+    } else {
+      console.warn("enterZoneFromWorldMap is not defined.");
+    }
   });
 }
 

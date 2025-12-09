@@ -1,0 +1,256 @@
+Adamantoise
+Alpha Hog
+Alpha Spitter
+Alpha Stinger
+Alpha Wolf
+Ancient Dragon
+Arctic Fox
+Armsy
+Badger
+Barioth
+Barnos
+Basilisk
+Bat
+Beak Thing
+Bear
+Beotodus
+Bighorn Sheep
+Black Bear
+Black Spider
+Black Wolf
+Bloatfly
+Bloodbug
+Blue Slime
+Blue Tektite
+Boar
+Bokoblin
+Bonedog
+Boomalope
+Boomrat
+Brown Bear
+Bull
+Canis
+Caribou
+Cave Bat
+Cave Crocodile
+Cave Spider
+Cave Swallow
+Chort
+Coeurl
+Cold Spirit
+Cortos
+Cougar
+Cowman
+Crab Hatchling
+Crag Lizard
+Creeper
+Crocodile
+Cultist
+Cyclops
+Deathclaw
+Deer
+Dire Bear
+Dire Wolf
+Direwolf
+Dodongo
+Dolyak
+Dragon
+Drake
+Duggy
+Dust Sprite
+Eagle
+Eagle Spirit
+Earth Elemental
+Elder Direwolf
+Elder Frost Ram
+Elder Mountain Boar
+Elder Winter Bear
+Elk
+Enderman
+Fenring
+Feral Dog
+Fiend
+Fire Keese
+Forest Stalker
+Forktail
+Fox
+Frost Bat
+Frost Dragon
+Frost Giant
+Frost Golem
+Frost Ooze
+Frost Pebblit
+Frost Ram
+Frost Rat
+Frost Talus
+Frost Troll
+Frost Wizzrobe
+Frost Wolf
+Frost Wurm
+Frostmane Troll
+Frostmaul Giant
+Frostmaul Preserver
+Frostsabers
+Frostwolf
+Garru
+Ghost
+Giant
+Giant Bat
+Giant Cave Spider
+Giant Slug
+Giant Spider
+Gigantoad
+Goat
+Goblin
+Gorax
+Goron Enemy
+Greater Sabretooth
+Green Slime
+Griffin
+Grizzly Bear
+Gronda
+Hagraven
+Hill Giant
+Hog
+Ibex
+Ice Beetle
+Ice Bomb
+Ice Chuchu
+Ice Dragon
+Ice Drake
+Ice Elemental
+Ice Fiend
+Ice Giant
+Ice Keese
+Ice Serpent
+Ice Spider
+Ice Sprite
+Ice Thistle Yeti
+Ice Troll
+Ice Warrior
+Ice Wizzrobe
+Ice Wolf
+Ice Wraith
+Ice Wurm
+Icebrood
+Icebrood Goliath
+Icemane Yeti
+Icetusk
+Keese
+Leshen
+Lynel
+Lynx
+Mammoth
+Manticore
+Megasloth
+Minotaur
+Mirelurk
+Mirelurk Hunter
+Moblin
+Molerat
+Mountain Bear
+Mountain Boar
+Mountain Goat
+Mountain Lion
+Mountain Stalker
+Mountain Troll
+Mountain Warg
+Mountain Wolf
+Muffalo
+Mutant Baby
+Mutant Girl
+Naxeen
+Owl
+Pack Beast
+Pikobi
+Polar Bear
+Popo
+Proto-Drake
+Rabbit
+Radroach
+Radscorpion
+Raptor
+Raven
+Raxin
+Razor Cat
+Red Slime
+Red Tektite
+Reindeer
+Rill
+Rock Crab
+Rock Elemental
+Rock Troll
+Rocknose
+Rocknose King
+Royal Griffin
+Sabre Cat
+Sabretooth
+Shadow Brute
+Shadow Shaman
+Shardtooth Bear
+Silver Lynel
+Skeleton
+Skelk
+Snow Bear
+Snow Cannibal
+Snow Elemental
+Snow Fox
+Snow Leopard
+Snow Lion
+Snow Troll
+Snow Wolf
+Snowcat
+Snowcoat Fox
+Snowhare
+Snowy Hunter Bird
+Snowy Owl
+Snowy Owlbear
+Snowy Owlbear Cub
+Snowy Sabre Cat
+Spider
+Spitter
+Spriggan
+Spriggan Matron
+Stinger
+Stone Golem
+Stone Talus
+Storm Giant
+Stray
+Stygian Zinogre
+Super Mutant
+Tektite
+Thrower Troll
+Thrower Troll General
+Timber Wolf
+Troll
+Troll Spectre
+Ulv
+Velkhana
+Virginia
+Warg
+Wasteland Coyote
+Wendigo
+White Dragon
+White Painted Cannibal
+White Spider
+White Wolf
+White Wyrm
+White-Maned Lynel
+Wild Boar
+Wind Sprite
+Winter Bear
+Winter Wolf
+Winterspring Owl
+Wolf
+Wolverine
+Wooly Yeti
+Worg
+Wulg
+Wyrm
+Wyvern
+Yak
+Yak Cow
+Yao Guai
+Yeti
+Zinogre
+Zombie

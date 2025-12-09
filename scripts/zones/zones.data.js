@@ -46,7 +46,7 @@ const ZONE_DEFINITIONS = {
     generator: "cellular_automata",
     generatorConfig: {
       width: 38,
-      height: 20,
+      height: 24,
       fillChance: 0.57,       // probability a tile starts as wall
       smoothIterations: 4,    // how many CA smoothing passes
       borderIsWall: true,     // keep solid border
@@ -60,8 +60,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 35,
-      height: 22,
+      width: 38,
+      height: 24,
       fillChance: 0.46,
       smoothIterations: 5,
       borderIsWall: true,
@@ -75,8 +75,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 32,
-      height: 23,
+      width: 38,
+      height: 24,
       fillChance: 0.40,
       smoothIterations: 4,
       borderIsWall: true,
@@ -90,8 +90,8 @@ const ZONE_DEFINITIONS = {
     type: "generated",
     generator: "cellular_automata",
     generatorConfig: {
-      width: 36,
-      height: 21,
+      width: 38,
+      height: 24,
       fillChance: 0.51,
       smoothIterations: 5,
       borderIsWall: true,
@@ -99,3 +99,30 @@ const ZONE_DEFINITIONS = {
     defaultWeatherState: "windy",
   },
 };
+
+// 0.0.70c — Zone templates (used by world slots / auto-generated zones).
+// These are separate from ZONE_DEFINITIONS to keep data modular.
+// World tiles carry a templateId (e.g. "primitive_forest_easy") which
+// we map to one of these templates when generating a new zone on demand.
+const ZONE_TEMPLATES = {
+  primitive_forest_easy: {
+    id: "primitive_forest_easy",
+    name: "Primitive Forest",
+    difficulty: 1,
+    generator: "cellular_automata",
+    generatorConfig: {
+      width: 38,
+      height: 24,
+      fillChance: 0.48,
+      smoothIterations: 4,
+      borderIsWall: true,
+    },
+    defaultWeatherState: "overcast",
+    
+    // 0.0.70d+ (not added yet, but this is what we’re aiming for)
+    // entities: { ... spawn tables ... },
+    // resources: { ... spawn tables ... },
+    // pois: { ... spawn tables ... },
+  },
+};
+

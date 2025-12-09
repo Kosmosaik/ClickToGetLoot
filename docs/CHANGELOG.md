@@ -1,3 +1,120 @@
+## v0.0.70c — The World Expansion Update
+
+This update introduces the foundation of ProgressCrawl’s world exploration system.  
+Zones now exist inside a larger overworld where players can gradually uncover new areas,  
+see their connected regions, and enter newly discovered zones at will.  
+World progression is now structured, persistent, and fully integrated with exploration.
+
+### New: World Map System
+A brand-new world map now exists beyond the Tutorial Zone.
+
+Features:
+- Displays all discovered and visited zones
+- Shows fog-covered unknown territories
+- Zones are marked clearly as:
+  - `?` Unknown
+  - `o` Discovered
+  - `X` Fully Explored (100%)
+
+You can now navigate the world strategically based on your progress.
+
+### New: Zone Selection Window
+Clicking a zone on the world map now opens a detailed Zone Info panel.
+
+Information shown:
+- Zone name
+- Coordinates
+- Biome and Era
+- Template type
+- Difficulty Rating (1–10)
+- Current exploration status
+
+Zones are no longer entered immediately by clicking the map —  
+you must now press **Enter Zone** from the info panel.
+
+### New: World Slot Templates
+Every zone on the world map now uses a world-slot template that defines:
+- Biome
+- Era
+- Difficulty
+- Layout generator type
+- Zone behavior foundation
+
+This system allows the world to grow with meaningful structure and variety.
+
+### New: Distance-Based World Generation
+As you explore outward from the Tutorial Zone:
+- World tiles are initialized with appropriate biome/era templates
+- Zone difficulty adjusts based on distance from the start
+- Each world tile maintains its own metadata, such as:
+  - Template ID
+  - Biome
+  - Era
+  - Difficulty Rating
+  - World position
+  - Unique seed
+
+This lays the groundwork for future biome diversity.
+
+### New: Deterministic Zone Generation
+Zones now generate consistently using a unique per-zone seed.
+
+This means:
+- A zone’s layout is always the same each time you enter it
+- Saves and reloads do not alter previously generated zones
+- World exploration feels stable and reliable
+
+### New: Exploration-Based World Unlocking
+Exploration now matters more than ever.
+
+- Zones unlock new adjacent world tiles **only** when you fully explore them (100%)
+- World Exploration progress auto-saves on completion (Not implemented for zone exploration yet)
+- World expansion now follows a predictable and rewarding progression loop
+
+### New: Zone Persistence Improvements
+The world map is now saved as part of your game file.
+
+Saved data includes:
+- All discovered/visited zones
+- All world tile metadata (biome, difficulty, template, seed)
+- All adjacency unlocks
+- The position of your character on the world map
+
+Reloading a game restores the world exactly as you left it.
+
+### Updated: Zone Generation Pipeline
+Generated zones now include:
+- Proper layout generation using seeded Cellular Automata
+- Locked sub-region detection
+- Future-ready content scaffolding (`resourceNodes`, `entities`, `pois`)
+
+While zones are still empty in 0.0.70c, the underlying system is now ready for  
+the full ecosystem of creatures, materials, and points of interest coming in 0.0.70d.
+
+### UI Improvements
+- World Map now has a dedicated view outside the zone screen
+- Better separation between Zone View and World Map View
+- Improved clarity for exploration and world progression flow
+- Entering the world map on game load prevents the “No active zone” issue
+
+### Fixes and General Improvements
+- Fixed issues where generated zones logged unnecessary warnings
+- Improved save/load reliability for world exploration
+- Exploration auto-saving now triggers correctly on 100% completion
+- Cleaned and organized zone creation code to prepare for future content
+- Updated templates system to support difficulty, biome, and era metadata
+
+### Known Issues
+- Completed zones and visited zones use similar map symbols —  
+  a clearer distinction will be added in a future update.
+- The "L" tile is always visible on the map. This will be changed so the tile only appears
+  when the player has explored adjacent tiles.
+- The "L" tile is always clickable. This will be changed to "click only when in idle state and "L" tile is discovered".
+- "Zone Completed" text is always visible even when you've not completed the zone.
+- Overview header in world map has no function (will be removed in future QoL update to save height space).
+
+---
+
 # ProgressCrawl - Patch 0.0.70b  
 ## **Introducing Locked Subregions**
 

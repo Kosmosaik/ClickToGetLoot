@@ -4,6 +4,31 @@
 
 console.log("zones.generator.js loaded");
 
+// 0.0.70c — Simple seeded PRNG (mulberry32-style) for deterministic layouts.
+function createSeededRandom(seedValue) {
+  // Convert a string seed into a 32-bit integer
+  let seed = 0;
+  const str = String(seedValue || "");
+  for (let i = 0; i < str.length; i++) {
+    seed = (seed * 31 + str.charCodeAt(i)) | 0;
+  }
+
+  if (seed === 0) {
+    seed = 1;
+  }
+
+  let t = seed >>> 0;
+
+  return function random() {
+    // mulberry32-ish
+    t += 0x6d2b79f5;
+    let x = t;
+    x = Math.imul(x ^ (x >>> 15), x | 1);
+    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 // Utility: random boolean with a given probability (0.0–1.0)
 function randomChance(prob) {
   return Math.random() < prob;
@@ -19,6 +44,12 @@ function generateLayoutCellularAutomata(config) {
   const smoothIterations = config.smoothIterations ?? 4;
   const borderIsWall = config.borderIsWall ?? true;
 
+    // 0.0.70c — use seeded RNG if config.seed is provided
+  let rand = Math.random;
+  if (config && config.seed) {
+    rand = createSeededRandom(config.seed);
+  }
+
   // Step 1: Random initial map
   let map = [];
   for (let y = 0; y < height; y++) {
@@ -28,7 +59,7 @@ function generateLayoutCellularAutomata(config) {
           (x === 0 || y === 0 || x === width - 1 || y === height - 1)) {
         row.push("#"); // solid border
       } else {
-        row.push(randomChance(fillChance) ? "#" : ".");
+        row.push(rand() < fillChance ? "#" : ".");
       }
     }
     map.push(row);

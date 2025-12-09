@@ -42,13 +42,28 @@ function enterZoneFromWorldMap(x, y) {
     stopZoneExplorationTicks();
   }
 
-  // Create the zone instance from its definition
   if (typeof createZoneFromDefinition !== "function") {
     console.error("enterZoneFromWorldMap: createZoneFromDefinition is missing.");
     return;
   }
 
+  // 0.0.70c:
+  // Make sure a definition EXISTS before we ever call createZoneFromDefinition,
+  // to avoid the "no definition found" spam for auto_zone_* ids.
+  if (typeof ZONE_DEFINITIONS !== "undefined") {
+    const existingDef = ZONE_DEFINITIONS[tile.zoneId];
+
+    if (!existingDef && typeof ensureGeneratedZoneDefinitionForWorldTile === "function") {
+      ensureGeneratedZoneDefinitionForWorldTile(tile);
+    }
+  } else {
+    console.error("enterZoneFromWorldMap: ZONE_DEFINITIONS is not defined.");
+    return;
+  }
+
+  // Now we expect there to be a definition (either static or generated).
   const newZone = createZoneFromDefinition(tile.zoneId);
+
   if (!newZone) {
     console.error("enterZoneFromWorldMap: failed to create zone", tile.zoneId);
     return;
@@ -62,10 +77,8 @@ function enterZoneFromWorldMap(x, y) {
   if (tile.fogState !== WORLD_FOG_STATE.VISITED) {
     tile.fogState = WORLD_FOG_STATE.VISITED;
   }
-  if (worldMap) {
-    worldMap.currentX = x;
-    worldMap.currentY = y;
-  }
+  worldMap.currentX = x;
+  worldMap.currentY = y;
 
   // Switch panels: hide world map, show zone
   if (typeof switchToZoneView === "function") {
@@ -141,6 +154,14 @@ function revealNextTileWithMessageAndUI() {
     renderZoneUI();
   }
 
+  // 0.0.70c — after revealing a tile, check if we just completed the zone.
+  if (window.ZoneDebug && typeof ZoneDebug.getZoneExplorationStats === "function") {
+    const stats = ZoneDebug.getZoneExplorationStats(currentZone);
+    if (stats && stats.isComplete && typeof onZoneFullyExplored === "function") {
+      onZoneFullyExplored();
+    }
+  }
+
   return changed;
 }
 
@@ -158,6 +179,11 @@ function runZoneExplorationTick() {
     // Zone already done, stop ticking
     console.log("Zone fully explored. Stopping exploration ticks.");
     stopZoneExplorationTicks();
+
+    // 0.0.70c — world map adjacency unlock
+    if (typeof onZoneFullyExplored === "function") {
+      onZoneFullyExplored();
+    }
 
     if (typeof renderZoneUI === "function") {
       renderZoneUI();
@@ -192,6 +218,36 @@ function stopZoneExplorationTicks() {
   console.log("Zone exploration ticks stopped.");
 }
 
+// 0.0.70c — Called once when a zone becomes fully explored.
+function onZoneFullyExplored() {
+  console.log("Zone fully explored. Unlocking adjacent world tiles (0.0.70c).");
+
+  // Need a world map + helper to do anything.
+  if (!worldMap) return;
+  if (typeof unlockAdjacentWorldTiles !== "function") return;
+
+  const x = worldMap.currentX;
+  const y = worldMap.currentY;
+
+  if (typeof x !== "number" || typeof y !== "number") {
+    return;
+  }
+
+  // Apply the world rule: reveal neighbors around this world tile.
+  unlockAdjacentWorldTiles(worldMap, x, y);
+
+  // Optional player feedback.
+  if (typeof addZoneMessage === "function") {
+    addZoneMessage(
+      "You feel the world open up. New areas are now visible on the world map."
+    );
+  }
+    // 0.0.70c — Auto-save after world expansion so unlocked zones persist
+  if (typeof saveCurrentGame === "function") {
+    saveCurrentGame();
+  }
+}
+
 function startZoneManualExploreOnce() {
   if (zoneManualExplorationActive) return;
   if (zoneExplorationActive) return;
@@ -200,6 +256,11 @@ function startZoneManualExploreOnce() {
 
   const stats = ZoneDebug.getZoneExplorationStats(currentZone);
   if (stats.isComplete || stats.exploredTiles >= stats.totalExplorableTiles) {
+    // 0.0.70c — in case the player fully explored manually
+    if (typeof onZoneFullyExplored === "function") {
+      onZoneFullyExplored();
+    }
+
     if (typeof addZoneMessage === "function") {
       addZoneMessage("There is nothing left to explore here.");
     }
@@ -212,7 +273,7 @@ function startZoneManualExploreOnce() {
   zoneManualExplorationActive = true;
 
   // Same 2–5s delay as auto
-  const delay = 2000 + Math.random() * 3000;
+  const delay = 50 + Math.random() * 50;
 
   zoneManualTimerId = setTimeout(() => {
     zoneManualTimerId = null;
