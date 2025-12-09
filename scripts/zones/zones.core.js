@@ -447,6 +447,22 @@ function getZoneExplorationStats(zone) {
   };
 }
 
+// Helper: clear the "currently being explored" flag on all tiles.
+// We call this right before we mark a new active exploration tile,
+// so only ONE tile can blink at a time.
+function clearTileActiveExploreFlags(zone) {
+  if (!zone || !zone.tiles) return;
+
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const t = zone.tiles[y][x];
+      if (t && t.isActiveExplore) {
+        t.isActiveExplore = false;
+      }
+    }
+  }
+}
+
 // Reveal ONE random unexplored explorable tile.
 // Returns true if something was revealed, false if zone is already fully explored.
 function revealRandomExplorableTile(zone) {
@@ -464,28 +480,46 @@ function revealRandomExplorableTile(zone) {
     return false;
   }
 
-  const choice = candidates[Math.floor(Math.random() * candidates.length)];
-  zone.tiles[choice.y][choice.x].explored = true;
+  // Only one tile should blink as "currently exploring"
+  clearTileActiveExploreFlags(zone);
 
-  // 0.0.70c-qol — move the "player" marker to this newly explored tile.
-  zone.playerX = choice.x;
-  zone.playerY = choice.y;
-  
+  const choice = candidates[Math.floor(Math.random() * candidates.length)];
+  const tile = zone.tiles[choice.y][choice.x];
+
+  tile.explored = true;
+  tile.isActiveExplore = true;
+
+  // If you've added a player marker (☺) using zone.playerX / playerY,
+  // keep it in sync here too. If not, these lines are harmless.
+  if (zone) {
+    zone.playerX = choice.x;
+    zone.playerY = choice.y;
+  }
+
   return true;
 }
 
 // Reveal ONE unexplored explorable tile in a fixed order (top-left to bottom-right).
 // Returns true if something was revealed, false if zone is fully explored.
 function revealNextExplorableTileSequential(zone) {
+  // Clear any previous "blinking" tile first.
+  clearTileActiveExploreFlags(zone);
+
   for (let y = 0; y < zone.height; y++) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
       if (isTileExplorable(tile) && !tile.explored) {
+        // Mark it as explored from the logic point of view
         tile.explored = true;
 
-        // 0.0.70c-qol — update the player marker to this tile.
-        zone.playerX = x;
-        zone.playerY = y;
+        // Mark this tile as "currently being explored" so UI can blink it.
+        tile.isActiveExplore = true;
+
+        // If you added the ☺ marker earlier, keep it in sync here too.
+        if (zone) {
+          zone.playerX = x;
+          zone.playerY = y;
+        }
 
         return true; // <-- stop after revealing ONE tile
       }
