@@ -68,7 +68,7 @@ This means:
 Exploration now matters more than ever.
 
 - Zones unlock new adjacent world tiles **only** when you fully explore them (100%)
-- Exploration progress auto-saves on completion
+- World Exploration progress auto-saves on completion (Not implemented for zone exploration yet)
 - World expansion now follows a predictable and rewarding progression loop
 
 ### New: Zone Persistence Improvements
