@@ -62,7 +62,22 @@ Zones feel full and alive even before adding dynamic systems.
 
 ---
 
-## **0.0.70e — Dynamic Events System**  
+## **0.0.70e — Resource Interaction Layer**  
+**Goal:** Let the player interact with discovered resources.
+
+### Includes:
+- Harvesting resource nodes  
+- Marking depleted nodes  
+- Respawn timers (2–4 days)  
+- Resource node info in discovery list  
+- First pass of the “Interaction Menu”
+
+### **Deliverable:**  
+Players can begin gathering resources inside each zone.
+
+---
+
+## **0.0.70f — Dynamic Events System**  
 **Goal:** Add unpredictable encounters and environmental changes.
 
 ### Includes:
@@ -79,21 +94,6 @@ Zones feel full and alive even before adding dynamic systems.
 
 ### **Deliverable:**  
 Exploration becomes dynamic, reactive, and surprising.
-
----
-
-## **0.0.70f — Resource Interaction Layer**  
-**Goal:** Let the player interact with discovered resources.
-
-### Includes:
-- Harvesting resource nodes  
-- Marking depleted nodes  
-- Respawn timers (2–4 days)  
-- Resource node info in discovery list  
-- First pass of the “Interaction Menu”
-
-### **Deliverable:**  
-Players can begin gathering resources inside each zone.
 
 ---
 
