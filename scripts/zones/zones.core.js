@@ -447,6 +447,20 @@ function getZoneExplorationStats(zone) {
   };
 }
 
+// Clear the "player is standing here" marker on all tiles in this zone.
+function clearZonePlayerMarker(zone) {
+  if (!zone || !zone.tiles) return;
+
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const t = zone.tiles[y][x];
+      if (t && t.hasPlayer) {
+        t.hasPlayer = false;
+      }
+    }
+  }
+}
+
 // Helper: clear the "currently being explored" flag on all tiles.
 // We call this right before we mark a new active exploration tile,
 // so only ONE tile can blink at a time.
