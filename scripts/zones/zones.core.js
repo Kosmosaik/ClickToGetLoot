@@ -463,42 +463,6 @@ function clearTileActiveExploreFlags(zone) {
   }
 }
 
-// Reveal ONE random unexplored explorable tile.
-// Returns true if something was revealed, false if zone is already fully explored.
-function revealRandomExplorableTile(zone) {
-  const candidates = [];
-  for (let y = 0; y < zone.height; y++) {
-    for (let x = 0; x < zone.width; x++) {
-      const tile = zone.tiles[y][x];
-      if (isTileExplorable(tile) && !tile.explored) {
-        candidates.push({ x, y });
-      }
-    }
-  }
-
-  if (candidates.length === 0) {
-    return false;
-  }
-
-  // Only one tile should blink as "currently exploring"
-  clearTileActiveExploreFlags(zone);
-
-  const choice = candidates[Math.floor(Math.random() * candidates.length)];
-  const tile = zone.tiles[choice.y][choice.x];
-
-  tile.explored = true;
-  tile.isActiveExplore = true;
-
-  // If you've added a player marker (☺) using zone.playerX / playerY,
-  // keep it in sync here too. If not, these lines are harmless.
-  if (zone) {
-    zone.playerX = choice.x;
-    zone.playerY = choice.y;
-  }
-
-  return true;
-}
-
 // Clear the "this tile will be explored next" flag on all tiles.
 function clearTileActiveExploreFlags(zone) {
   if (!zone || !zone.tiles) return;
@@ -547,7 +511,7 @@ function revealPreparedExplorationTile(zone) {
   for (let y = 0; y < zone.height; y++) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
-      if (tile && tile.isActiveExplore) {
+      if (tile && tile.isActiveExplore && !tile.explored) {
         target = { x, y };
         break;
       }
@@ -555,7 +519,7 @@ function revealPreparedExplorationTile(zone) {
     if (target) break;
   }
 
-  // If nothing was prepared (safety / fallback), use the older behaviour.
+  // If nothing was prepared, fall back to the old sequential reveal.
   if (!target) {
     return revealNextExplorableTileSequential(zone);
   }
@@ -566,36 +530,31 @@ function revealPreparedExplorationTile(zone) {
   tile.isActiveExplore = false;
   tile.explored = true;
 
-  // If you have player position fields, keep them in sync.
-  if (typeof zone.playerX === "number" || typeof zone.playerX === "undefined") {
-    zone.playerX = target.x;
-    zone.playerY = target.y;
-  }
+  // Move the player marker to this tile.
+  clearZonePlayerMarker(zone);
+  tile.hasPlayer = true;
 
   return true;
 }
 
+
 // Reveal ONE unexplored explorable tile in a fixed order (top-left to bottom-right).
 // Returns true if something was revealed, false if zone is fully explored.
 function revealNextExplorableTileSequential(zone) {
-  // Clear any previous "blinking" tile first.
+  if (!zone || !zone.tiles) return false;
+
+  // Clear any previous "blinking" and player marker.
   clearTileActiveExploreFlags(zone);
+  clearZonePlayerMarker(zone);
 
   for (let y = 0; y < zone.height; y++) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
       if (isTileExplorable(tile) && !tile.explored) {
-        // Mark it as explored from the logic point of view
         tile.explored = true;
 
-        // Mark this tile as "currently being explored" so UI can blink it.
-        tile.isActiveExplore = true;
-
-        // If you added the ☺ marker earlier, keep it in sync here too.
-        if (zone) {
-          zone.playerX = x;
-          zone.playerY = y;
-        }
+        // Move the player marker onto this tile.
+        tile.hasPlayer = true;
 
         return true; // <-- stop after revealing ONE tile
       }
@@ -672,12 +631,12 @@ window.ZoneDebug = {
   createDebugZone,
   createZoneFromDefinition,
   getZoneExplorationStats,
-  revealRandomExplorableTile,
-  revealNextExplorableTileSequential, // old direct reveal (still available)
-  prepareNextExplorationTile,         // NEW: pre-mark next tile (for blinking)
-  revealPreparedExplorationTile,      // NEW: reveal the pre-marked tile
+  revealNextExplorableTileSequential, // still exposed
+  prepareNextExplorationTile,         // NEW
+  revealPreparedExplorationTile,      // NEW
   ensureGeneratedZoneDefinitionForWorldTile,
 };
+
 
 
 
