@@ -230,6 +230,21 @@ function startZoneExplorationTicks() {
   scheduleNextZoneExplorationTick();
 }
 
+// Clear the "this tile will be explored next" flag for the current zone.
+// This is used when stopping auto exploration so no "?" keeps blinking.
+function clearZoneActiveExploreFlags() {
+  if (!currentZone || !currentZone.tiles) return;
+
+  for (let y = 0; y < currentZone.height; y++) {
+    for (let x = 0; x < currentZone.width; x++) {
+      const t = currentZone.tiles[y][x];
+      if (t && t.isActiveExplore) {
+        t.isActiveExplore = false;
+      }
+    }
+  }
+}
+
 function stopZoneExplorationTicks() {
   if (!zoneExplorationActive) return;
 
@@ -238,6 +253,15 @@ function stopZoneExplorationTicks() {
     clearTimeout(zoneExplorationTimerId);
     zoneExplorationTimerId = null;
   }
+
+  // 0.0.70c-qol — when we stop exploring, also clear the "blinking" tile
+  // so no ? keeps flashing as if it's still being processed.
+  clearZoneActiveExploreFlags();
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+
   console.log("Zone exploration ticks stopped.");
 }
 
