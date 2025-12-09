@@ -14,11 +14,11 @@ ProgressCrawl is a long-term survival RPG project that blends:
 - Procedural exploration  
 - Zone-based progression  
 - Crafting / resource systems (future expansions)
-- Survival Mechanics
+- Survival Mechanics (hunger, thirst, disease, injuries)
 - Combat / Looting
 - Life Skills
 - World map navigation  
-- Era-based advancement (primitive → fantasy → industrial → sci-fi)  
+- Era-based advancement (primitive → fantasy → industrial → sci-fi (by looting puzzle pieces to complete puzzles that unlocks new eras and biomes)  
 
 The player journey is built around **zones**—self-contained maps with unique layouts, challenges, and hidden areas—progressed one tile at a time. The world map ties zones together and represents the player's overland exploration.
 
