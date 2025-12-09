@@ -46,6 +46,17 @@ function buildZoneGridString(zone) {
         ch = tile.explored ? "." : "?";
       }
 
+      // 0.0.70c-qol — draw the "player" marker on the latest explored tile.
+      // We only override the character if we actually have a player position.
+      if (
+        typeof zone.playerX === "number" &&
+        typeof zone.playerY === "number" &&
+        zone.playerX === x &&
+        zone.playerY === y
+      ) {
+        ch = "☺"; // You can also use '&#9786;' if encoding gives trouble.
+      }
+
       html += `<span class="zone-cell" data-x="${x}" data-y="${y}">${ch}</span>`;
     }
     html += "<br>";
@@ -53,7 +64,6 @@ function buildZoneGridString(zone) {
 
   return html;
 }
-
 
 function getZoneStatusText(zone, stats) {
   if (!zone || !isInZone) {
