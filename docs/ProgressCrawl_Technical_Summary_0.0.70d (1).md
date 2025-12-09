@@ -7,6 +7,19 @@
 
 This document guides the next GPT assistant in implementing **ProgressCrawl v0.0.70d**, following directly after 0.0.70c.
 
+# Project Purpose & Vision
+
+ProgressCrawl is a long-term survival RPG project that blends:
+
+- Procedural exploration  
+- Zone-based progression  
+- Crafting / resource systems (future expansions)  
+- World map navigation  
+- Era-based advancement (primitive → fantasy → industrial → sci-fi)  
+
+The player journey is built around **zones**—self-contained maps with unique layouts, challenges, and hidden areas—progressed one tile at a time. The world map ties zones together and represents the player's overland exploration.
+
+The 0.0.70 milestone focuses heavily on **zone exploration**, **procedural generation**, and **locked subregion mechanics**, forming the backbone of future gameplay.
 **0.0.70c introduced:**
 - World slot templates
 - ERA / BIOME / TEMPLATE metadata
