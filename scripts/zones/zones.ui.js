@@ -65,7 +65,7 @@ function buildZoneGridString(zone) {
       // --- 4) Player marker ☺ on the latest explored tile ---
       // We now track the player directly on the tile as tile.hasPlayer.
       if (tile.hasPlayer) {
-        ch = "☺";
+        ch = "☻";
       }
 
       html += `<span class="${classes}" data-x="${x}" data-y="${y}">${ch}</span>`;
