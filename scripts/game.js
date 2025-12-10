@@ -533,7 +533,7 @@ function startZoneExploreDelay(onReveal) {
   }
 
   // Exploration delay (ms). You can tune these or move to GAME_CONFIG later.
-  const delay = 1000 + Math.random() * 2000; // 1–3 seconds
+  const delay = 200 + Math.random() * 200; // 1–3 seconds
 
   zoneExploreDelayTimerId = setTimeout(() => {
     zoneExploreDelayTimerId = null;
