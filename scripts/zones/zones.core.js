@@ -631,13 +631,6 @@ function prepareNextExplorationTile(zone) {
   return true;
 }
 
-  const targetTile = zone.tiles[choice.y][choice.x];
-  targetTile.isActiveExplore = true;
-  zone.preparedTargetX = choice.x;
-  zone.preparedTargetY = choice.y;
-  return true;
-}
-
 // Reveal the tile that was previously marked by prepareNextExplorationTile.
 // If none is marked, falls back to the old sequential reveal.
 // Returns true if something was revealed, false if there was nothing to do.
