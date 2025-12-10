@@ -549,7 +549,7 @@ function tileHasExploredOrPlayerNeighbor(zone, x, y) {
 function prepareNextExplorationTile(zone) {
   if (!zone || !zone.tiles) return false;
 
-  // Only one tile should ever be marked as "next".
+  // Only one tile should ever be considered "next".
   clearTileActiveExploreFlags(zone);
 
   // Clear any previous target metadata.
@@ -578,7 +578,6 @@ function prepareNextExplorationTile(zone) {
       const tile = zone.tiles[ny][nx];
       if (!tile) continue;
 
-      // Only consider tiles that *could* be explored and are not yet explored.
       if (isTileExplorable(tile) && !tile.explored) {
         neighborCandidates.push({ x: nx, y: ny });
       }
@@ -587,18 +586,13 @@ function prepareNextExplorationTile(zone) {
     if (neighborCandidates.length > 0) {
       const choice =
         neighborCandidates[Math.floor(Math.random() * neighborCandidates.length)];
-      const targetTile = zone.tiles[choice.y][choice.x];
-
-      targetTile.isActiveExplore = true;
       zone.preparedTargetX = choice.x;
       zone.preparedTargetY = choice.y;
       return true;
     }
   }
 
-  // --- STEP 2: If no direct neighbor from the player is available,
-  //             fall back to a frontier / fallback tile. ---
-
+  // --- STEP 2: Frontier / fallback logic ---
   const frontier = [];
   const fallback = [];
 
@@ -629,9 +623,13 @@ function prepareNextExplorationTile(zone) {
   }
 
   if (!choice) {
-    // Nothing left to explore.
     return false;
   }
+
+  zone.preparedTargetX = choice.x;
+  zone.preparedTargetY = choice.y;
+  return true;
+}
 
   const targetTile = zone.tiles[choice.y][choice.x];
   targetTile.isActiveExplore = true;
