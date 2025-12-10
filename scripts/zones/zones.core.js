@@ -542,15 +542,58 @@ function tileHasExploredOrPlayerNeighbor(zone, x, y) {
 // Mark the next explorable tile as "pending exploration" (for blinking).
 // Does NOT set tile.explored; it just marks tile.isActiveExplore = true.
 // Returns true if a tile was marked, false if none were found.
+// Mark the next explorable tile as "pending exploration" (for blinking).
+// Priority:
+//   1) An unexplored neighbor directly next to the player (4-dir).
+//   2) Otherwise, a "frontier" tile next to explored/player area.
+//   3) Otherwise, any unexplored explorable tile.
+// Returns true if a tile was marked, false if none were found.
 function prepareNextExplorationTile(zone) {
   if (!zone || !zone.tiles) return false;
 
   // Only one tile should ever be marked as "next".
   clearTileActiveExploreFlags(zone);
 
-  // 1) Try to base exploration around the current player position,
-  // so it feels like a "walk" instead of random teleports.
+  // --- STEP 1: Try to pick a tile directly next to the player (1-tile move) ---
   const playerPos = findZonePlayerPosition(zone);
+  if (playerPos) {
+    const neighborCandidates = [];
+    const dirs = [
+      { dx:  1, dy:  0 },
+      { dx: -1, dy:  0 },
+      { dx:  0, dy:  1 },
+      { dx:  0, dy: -1 },
+    ];
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = playerPos.x + dirs[i].dx;
+      const ny = playerPos.y + dirs[i].dy;
+
+      if (ny < 0 || ny >= zone.height || nx < 0 || nx >= zone.width) {
+        continue;
+      }
+
+      const tile = zone.tiles[ny][nx];
+      if (!tile) continue;
+
+      // Only consider tiles that *could* be explored and are not yet explored.
+      if (isTileExplorable(tile) && !tile.explored) {
+        neighborCandidates.push({ x: nx, y: ny });
+      }
+    }
+
+    if (neighborCandidates.length > 0) {
+      // Pick a random neighbor tile around the player.
+      const choice =
+        neighborCandidates[Math.floor(Math.random() * neighborCandidates.length)];
+      const targetTile = zone.tiles[choice.y][choice.x];
+      targetTile.isActiveExplore = true;
+      return true;
+    }
+  }
+
+  // --- STEP 2: If no direct neighbor from the player is available,
+  //             fall back to the frontier / fallback logic. ---
 
   const frontier = [];
   const fallback = [];
@@ -559,21 +602,13 @@ function prepareNextExplorationTile(zone) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
 
-      // Only consider tiles that *could* be explored.
       if (!isTileExplorable(tile) || tile.explored) {
         continue;
       }
 
-      // Tiles that are directly adjacent to explored/player tiles
-      // are "frontier" candidates.
       if (tileHasExploredOrPlayerNeighbor(zone, x, y)) {
-        let dist = 0;
-        if (playerPos) {
-          dist = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
-        }
-        frontier.push({ x, y, dist });
+        frontier.push({ x, y });
       } else {
-        // Still remember them as a fallback in case the frontier is empty.
         fallback.push({ x, y });
       }
     }
@@ -582,27 +617,12 @@ function prepareNextExplorationTile(zone) {
   let choice = null;
 
   if (frontier.length > 0) {
-    // Prefer tiles that are close to the player, but keep a bit of randomness.
-    if (playerPos) {
-      let minDist = frontier[0].dist;
-      for (let i = 1; i < frontier.length; i++) {
-        if (frontier[i].dist < minDist) {
-          minDist = frontier[i].dist;
-        }
-      }
-
-      // Allow a small "band" around the closest distance so the path
-      // doesn't look like a perfect straight line.
-      const band = frontier.filter(f => f.dist <= minDist + 1);
-      choice = band[Math.floor(Math.random() * band.length)];
-    } else {
-      // No player yet (first tile): just pick a random frontier tile.
-      const idx = Math.floor(Math.random() * frontier.length);
-      choice = frontier[idx];
-    }
+    // Random frontier tile (close to explored area, but we don't care
+    // about exact distance here because we're not teleporting from player
+    // anymore – this only kicks in when playerPos is missing or stuck).
+    const idx = Math.floor(Math.random() * frontier.length);
+    choice = frontier[idx];
   } else if (fallback.length > 0) {
-    // No frontier tiles (this mainly happens at the very start of a zone).
-    // Fall back to "any unexplored explorable tile", but choose randomly.
     const idx = Math.floor(Math.random() * fallback.length);
     choice = fallback[idx];
   }
