@@ -113,6 +113,161 @@ let zoneMovementOnArrival = null;
 const ZONE_MOVEMENT_TILES_PER_SECOND =
   (GAME_CONFIG.zone && GAME_CONFIG.zone.movementTilesPerSecond) || 4;
 
+function findPlayerPositionInZone(zone) {
+  if (!zone || !zone.tiles) return null;
+
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const t = zone.tiles[y][x];
+      if (t && t.hasPlayer) {
+        return { x, y };
+      }
+    }
+  }
+
+  return null;
+}
+
+function findPathToPreparedTile(zone) {
+  if (!zone || !zone.tiles) return null;
+
+  const tx = zone.preparedTargetX;
+  const ty = zone.preparedTargetY;
+  if (typeof tx !== "number" || typeof ty !== "number") {
+    return null;
+  }
+
+  const start = findPlayerPositionInZone(zone);
+  if (!start) {
+    // No player marker yet: just "jump" to the target in one step.
+    return [{ x: tx, y: ty }];
+  }
+
+  const width = zone.width;
+  const height = zone.height;
+
+  const visited = [];
+  for (let y = 0; y < height; y++) {
+    visited[y] = [];
+  }
+
+  const queue = [];
+  queue.push({ x: start.x, y: start.y, prev: null });
+  visited[start.y][start.x] = true;
+
+  const dirs = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
+
+  let endNode = null;
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    if (node.x === tx && node.y === ty) {
+      endNode = node;
+      break;
+    }
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = node.x + dirs[i].dx;
+      const ny = node.y + dirs[i].dy;
+
+      if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+      if (visited[ny][nx]) continue;
+
+      const tile = zone.tiles[ny][nx];
+      if (!tile) continue;
+
+      // Only allow moving through non-blocked tiles.
+      if (tile.kind === "blocked") continue;
+
+      visited[ny][nx] = true;
+      queue.push({ x: nx, y: ny, prev: node });
+    }
+  }
+
+  if (!endNode) {
+    // No path found; as a fallback, just step directly to target.
+    return [{ x: tx, y: ty }];
+  }
+
+  // Reconstruct path from end to start
+  const revPath = [];
+  let cur = endNode;
+  while (cur) {
+    revPath.push({ x: cur.x, y: cur.y });
+    cur = cur.prev;
+  }
+  revPath.reverse();
+
+  // First element is the player's current position; we want only the steps AFTER that.
+  if (revPath.length > 0 && start) {
+    if (revPath[0].x === start.x && revPath[0].y === start.y) {
+      revPath.shift();
+    }
+  }
+
+  return revPath;
+}
+
+function startZoneMovement(path, onArrival) {
+  if (!currentZone || !isInZone) {
+    if (typeof onArrival === "function") onArrival();
+    return;
+  }
+  if (!path || path.length === 0) {
+    if (typeof onArrival === "function") onArrival();
+    return;
+  }
+
+  zoneMovementActive = true;
+  zoneMovementPath = path.slice(); // copy
+  zoneMovementOnArrival = typeof onArrival === "function" ? onArrival : null;
+
+  const stepDelayMs = Math.max(50, 1000 / ZONE_MOVEMENT_TILES_PER_SECOND);
+
+  function step() {
+    if (!zoneMovementActive || !currentZone || !isInZone) {
+      zoneMovementTimerId = null;
+      return;
+    }
+
+    if (!zoneMovementPath || zoneMovementPath.length === 0) {
+      zoneMovementActive = false;
+      zoneMovementTimerId = null;
+      const cb = zoneMovementOnArrival;
+      zoneMovementOnArrival = null;
+      if (typeof cb === "function") cb();
+      return;
+    }
+
+    const next = zoneMovementPath.shift();
+    setZonePlayerPosition(currentZone, next.x, next.y);
+
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+
+    zoneMovementTimerId = setTimeout(step, stepDelayMs);
+  }
+
+  // Kick off the first movement step
+  step();
+}
+
+function stopZoneMovement() {
+  if (zoneMovementTimerId) {
+    clearTimeout(zoneMovementTimerId);
+    zoneMovementTimerId = null;
+  }
+  zoneMovementActive = false;
+  zoneMovementPath = null;
+  zoneMovementOnArrival = null;
+}
+
 // Shared generic messages for exploration
 const ZONE_GENERIC_MESSAGES = [
   "You uncover a patch of ground.",
@@ -123,6 +278,18 @@ const ZONE_GENERIC_MESSAGES = [
   "You smell fart in the air, but decide to continue anyway.",
   "You slipped on a piece of shit."
 ];
+
+function setZonePlayerPosition(zone, x, y) {
+  if (!zone || !zone.tiles) return;
+
+  for (let yy = 0; yy < zone.height; yy++) {
+    for (let xx = 0; xx < zone.width; xx++) {
+      const t = zone.tiles[yy][xx];
+      if (!t) continue;
+      t.hasPlayer = (xx === x && yy === y);
+    }
+  }
+}
 
 function addRandomZoneMessage() {
   if (typeof addZoneMessage !== "function") return;
@@ -136,24 +303,13 @@ function addRandomZoneMessage() {
 function scheduleNextZoneExplorationTick() {
   if (!zoneExplorationActive || !isInZone || !currentZone) return;
 
-  // Mark which tile will be explored next so the UI can show the blinking "?".
-  if (
-    window.ZoneDebug &&
-    typeof ZoneDebug.prepareNextExplorationTile === "function"
-  ) {
-    ZoneDebug.prepareNextExplorationTile(currentZone);
-  }
-
-  if (typeof renderZoneUI === "function") {
-    renderZoneUI();
-  }
-
-  // 2–5 seconds delay (comment), currently tuned to 50–100 ms.
-  const delay = 200 + Math.random() * 800;
+  // Small idle delay between finishing one tile and starting the next movement.
+  const idleDelay = 200;
 
   zoneExplorationTimerId = setTimeout(() => {
-    runZoneExplorationTick();
-  }, delay);
+    zoneExplorationTimerId = null;
+    beginZoneExplorationCycle();
+  }, idleDelay);
 }
 
 // Reveal the next explorable tile (sequential), add a random message, update UI.
@@ -199,6 +355,58 @@ function revealNextTileWithMessageAndUI() {
   return changed;
 }
 
+function beginZoneExplorationCycle() {
+  if (!zoneExplorationActive || !isInZone || !currentZone) return;
+  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
+
+  const stats = ZoneDebug.getZoneExplorationStats(currentZone);
+  if (stats.isComplete || stats.exploredTiles >= stats.totalExplorableTiles) {
+    console.log("Zone fully explored. Stopping exploration ticks.");
+    stopZoneExplorationTicks();
+    if (typeof onZoneFullyExplored === "function") {
+      onZoneFullyExplored();
+    }
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
+
+  if (
+    !window.ZoneDebug ||
+    typeof ZoneDebug.prepareNextExplorationTile !== "function"
+  ) {
+    return;
+  }
+
+  const prepared = ZoneDebug.prepareNextExplorationTile(currentZone);
+  if (!prepared) {
+    console.log("No more tiles to prepare in this zone.");
+    stopZoneExplorationTicks();
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+
+  const path = findPathToPreparedTile(currentZone);
+
+  if (!path || path.length === 0) {
+    // Already on the tile (or we fall back to no movement): reveal immediately.
+    runZoneExplorationTick();
+    return;
+  }
+
+  startZoneMovement(path, () => {
+    // After walking to the prepared tile, reveal it + schedule next.
+    runZoneExplorationTick();
+  });
+}
+
 function runZoneExplorationTick() {
   if (!zoneExplorationActive || !isInZone || !currentZone) {
     return;
@@ -235,6 +443,7 @@ function runZoneExplorationTick() {
 function startZoneExplorationTicks() {
   if (zoneExplorationActive) return;
   if (!isInZone || !currentZone) return;
+  if (zoneMovementActive) return; // don't conflict with ongoing movement
 
   console.log("Starting zone exploration ticks.");
   zoneExplorationActive = true;
@@ -264,6 +473,8 @@ function stopZoneExplorationTicks() {
     clearTimeout(zoneExplorationTimerId);
     zoneExplorationTimerId = null;
   }
+
+  stopZoneMovement();
 
   // 0.0.70c-qol — when we stop exploring, also clear the "blinking" tile
   // so no ? keeps flashing as if it's still being processed.
@@ -309,6 +520,7 @@ function onZoneFullyExplored() {
 function startZoneManualExploreOnce() {
   if (zoneManualExplorationActive) return;
   if (zoneExplorationActive) return;
+  if (zoneMovementActive) return;
   if (!isInZone || !currentZone) return;
   if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
 
@@ -328,43 +540,49 @@ function startZoneManualExploreOnce() {
     return;
   }
 
-  // Pick the tile that WILL be explored after the delay, so it can blink as "?"
   if (
-    window.ZoneDebug &&
-    typeof ZoneDebug.prepareNextExplorationTile === "function"
+    !window.ZoneDebug ||
+    typeof ZoneDebug.prepareNextExplorationTile !== "function"
   ) {
-    const prepared = ZoneDebug.prepareNextExplorationTile(currentZone);
-    if (!prepared) {
-      // Safety: no tile found even though stats said there should be one.
-      if (typeof addZoneMessage === "function") {
-        addZoneMessage("There is nothing left to explore here.");
-      }
-      if (typeof renderZoneUI === "function") {
-        renderZoneUI();
-      }
-      return;
-    }
+    return;
   }
 
+  const prepared = ZoneDebug.prepareNextExplorationTile(currentZone);
+  if (!prepared) {
+    if (typeof addZoneMessage === "function") {
+      addZoneMessage("There is nothing left to explore here.");
+    }
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+
+  const path = findPathToPreparedTile(currentZone);
   zoneManualExplorationActive = true;
 
-  // Same 2–5s delay as auto
-  const delay = 1000 + Math.random() * 2000;
-
-  zoneManualTimerId = setTimeout(() => {
-    zoneManualTimerId = null;
+  if (!path || path.length === 0) {
+    // Already on that tile, or no path: reveal immediately.
     zoneManualExplorationActive = false;
+    revealNextTileWithMessageAndUI();
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+    return;
+  }
 
+  startZoneMovement(path, () => {
+    zoneManualExplorationActive = false;
     revealNextTileWithMessageAndUI();
 
     if (typeof renderZoneUI === "function") {
       renderZoneUI();
     }
-  }, delay);
-
-  if (typeof renderZoneUI === "function") {
-    renderZoneUI();
-  }
+  });
 }
 
 // Expose for UI
