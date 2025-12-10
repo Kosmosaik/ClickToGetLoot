@@ -138,7 +138,7 @@ function scheduleNextZoneExplorationTick() {
   }
 
   // 2–5 seconds delay (comment), currently tuned to 50–100 ms.
-  const delay = 1000 + Math.random() * 2000;
+  const delay = 200 + Math.random() * 800;
 
   zoneExplorationTimerId = setTimeout(() => {
     runZoneExplorationTick();
