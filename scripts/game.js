@@ -139,12 +139,49 @@ function findPathToPreparedTile(zone) {
 
   const start = findPlayerPositionInZone(zone);
   if (!start) {
-    // No player marker yet: just "jump" to the target in one step.
-    return [{ x: tx, y: ty }];
+    // No player marker yet (e.g. very first exploration) – let exploration
+    // handle revealing and placing the player instead of moving first.
+    return null;
   }
 
   const width = zone.width;
   const height = zone.height;
+
+  // 1) Build list of "stance" positions: tiles adjacent to the target that
+  //    are not blocked AND are already explored OR currently have the player.
+  const stanceTargets = [];
+  const dirs = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
+
+  for (let i = 0; i < dirs.length; i++) {
+    const sx = tx + dirs[i].dx;
+    const sy = ty + dirs[i].dy;
+
+    if (sy < 0 || sy >= height || sx < 0 || sx >= width) continue;
+
+    const t = zone.tiles[sy][sx];
+    if (!t) continue;
+
+    if (t.kind === "blocked") continue;
+
+    // Must be known ground to stand on: explored or already has the player.
+    if (!t.explored && !t.hasPlayer) continue;
+
+    stanceTargets.push({ x: sx, y: sy });
+  }
+
+  // No valid stance tile: either we're already adjacent in a weird edge case,
+  // or this target is isolated from known ground. In that case, don't move.
+  if (stanceTargets.length === 0) {
+    return null;
+  }
+
+  // Treat stance targets as BFS goals.
+  const targetSet = new Set(stanceTargets.map(p => `${p.x},${p.y}`));
 
   const visited = [];
   for (let y = 0; y < height; y++) {
@@ -155,18 +192,12 @@ function findPathToPreparedTile(zone) {
   queue.push({ x: start.x, y: start.y, prev: null });
   visited[start.y][start.x] = true;
 
-  const dirs = [
-    { dx:  1, dy:  0 },
-    { dx: -1, dy:  0 },
-    { dx:  0, dy:  1 },
-    { dx:  0, dy: -1 },
-  ];
-
   let endNode = null;
 
   while (queue.length > 0) {
     const node = queue.shift();
-    if (node.x === tx && node.y === ty) {
+    const key = `${node.x},${node.y}`;
+    if (targetSet.has(key)) {
       endNode = node;
       break;
     }
@@ -181,22 +212,24 @@ function findPathToPreparedTile(zone) {
       const tile = zone.tiles[ny][nx];
       if (!tile) continue;
 
-      const isTarget = (nx === tx && ny === ty);
-
-      // Only allow moving through:
+      // Only move through:
       //  - non-blocked tiles
-      //  - that are already explored OR are the target tile.
+      //  - that are already explored OR have the player (start tile)
       if (tile.kind === "blocked") continue;
-      if (!tile.explored && !tile.hasPlayer && !isTarget) continue;
+      if (!tile.explored && !tile.hasPlayer) continue;
+
+      visited[ny][nx] = true;
+      queue.push({ x: nx, y: ny, prev: node });
     }
   }
 
   if (!endNode) {
-    // No path found; as a fallback, just step directly to target.
-    return [{ x: tx, y: ty }];
+    // No path from current player position to any stance tile using known ground.
+    // In that case, don't move – exploration will still happen, but from afar.
+    return null;
   }
 
-  // Reconstruct path from end to start
+  // Reconstruct path from end to start.
   const revPath = [];
   let cur = endNode;
   while (cur) {
@@ -205,8 +238,8 @@ function findPathToPreparedTile(zone) {
   }
   revPath.reverse();
 
-  // First element is the player's current position; we want only the steps AFTER that.
-  if (revPath.length > 0 && start) {
+  // First element is the player's current position; we only need the steps AFTER that.
+  if (revPath.length > 0) {
     if (revPath[0].x === start.x && revPath[0].y === start.y) {
       revPath.shift();
     }
