@@ -398,16 +398,19 @@ function beginZoneExplorationCycle() {
   const path = findPathToPreparedTile(currentZone);
 
   if (!path || path.length === 0) {
-    // Already on the tile (or we fall back to no movement): reveal immediately.
-    runZoneExplorationTick();
+    // Already on that tile: just run the explore delay + reveal.
+    startZoneExploreDelay(() => {
+      runZoneExplorationTick();
+    });
     return;
   }
 
   startZoneMovement(path, () => {
-    // After walking to the prepared tile, reveal it + schedule next.
-    runZoneExplorationTick();
+    // After walking to the prepared tile, start the explore timer.
+    startZoneExploreDelay(() => {
+      runZoneExplorationTick();
+    });
   });
-}
 
 function runZoneExplorationTick() {
   if (!zoneExplorationActive || !isInZone || !currentZone) {
@@ -467,6 +470,49 @@ function clearZoneActiveExploreFlags() {
   }
 }
 
+function startZoneExploreDelay(onReveal) {
+  if (!currentZone || !currentZone.tiles) {
+    if (typeof onReveal === "function") onReveal();
+    return;
+  }
+
+  const tx = currentZone.preparedTargetX;
+  const ty = currentZone.preparedTargetY;
+  if (typeof tx !== "number" || typeof ty !== "number") {
+    if (typeof onReveal === "function") onReveal();
+    return;
+  }
+
+  // Clear any previous blinking flag.
+  clearZoneActiveExploreFlags();
+
+  const tile = currentZone.tiles[ty][tx];
+  if (tile) {
+    tile.isActiveExplore = true; // this makes the tile blink
+  }
+
+  if (typeof renderZoneUI === "function") {
+    renderZoneUI();
+  }
+
+  // Exploration delay (ms). You can tune these or move to GAME_CONFIG later.
+  const delay = 1000 + Math.random() * 2000; // 1–3 seconds
+
+  zoneExploreDelayTimerId = setTimeout(() => {
+    zoneExploreDelayTimerId = null;
+    if (typeof onReveal === "function") {
+      onReveal();
+    }
+  }, delay);
+}
+
+function cancelZoneExploreDelay() {
+  if (zoneExploreDelayTimerId) {
+    clearTimeout(zoneExploreDelayTimerId);
+    zoneExploreDelayTimerId = null;
+  }
+}
+
 function stopZoneExplorationTicks() {
   if (!zoneExplorationActive) return;
 
@@ -476,10 +522,13 @@ function stopZoneExplorationTicks() {
     zoneExplorationTimerId = null;
   }
 
+  // Also stop any movement in progress
   stopZoneMovement();
 
-  // 0.0.70c-qol — when we stop exploring, also clear the "blinking" tile
-  // so no ? keeps flashing as if it's still being processed.
+  // Cancel any pending explore delay
+  cancelZoneExploreDelay();
+
+  // Clear the "blinking" tile so no ? keeps flashing.
   clearZoneActiveExploreFlags();
 
   if (typeof renderZoneUI === "function") {
@@ -528,7 +577,6 @@ function startZoneManualExploreOnce() {
 
   const stats = ZoneDebug.getZoneExplorationStats(currentZone);
   if (stats.isComplete || stats.exploredTiles >= stats.totalExplorableTiles) {
-    // 0.0.70c — in case the player fully explored manually
     if (typeof onZoneFullyExplored === "function") {
       onZoneFullyExplored();
     }
@@ -567,23 +615,22 @@ function startZoneManualExploreOnce() {
   const path = findPathToPreparedTile(currentZone);
   zoneManualExplorationActive = true;
 
-  if (!path || path.length === 0) {
-    // Already on that tile, or no path: reveal immediately.
+  const finishManualExplore = () => {
     zoneManualExplorationActive = false;
     revealNextTileWithMessageAndUI();
     if (typeof renderZoneUI === "function") {
       renderZoneUI();
     }
+  };
+
+  if (!path || path.length === 0) {
+    // Already on the tile: just run the explore delay + reveal.
+    startZoneExploreDelay(finishManualExplore);
     return;
   }
 
   startZoneMovement(path, () => {
-    zoneManualExplorationActive = false;
-    revealNextTileWithMessageAndUI();
-
-    if (typeof renderZoneUI === "function") {
-      renderZoneUI();
-    }
+    startZoneExploreDelay(finishManualExplore);
   });
 }
 
