@@ -242,7 +242,7 @@ function createZoneFromDefinition(zoneId) {
     pickZoneEntrySpawn(zone, def);  
     
     // After building tiles, prepare content scaffolding.
-    initializeZoneContent(zone, def);,
+    initializeZoneContent(zone, def);
     
     return zone;
   }
