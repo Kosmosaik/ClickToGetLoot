@@ -650,6 +650,73 @@ function tileHasExploredOrPlayerNeighbor(zone, x, y) {
   return false;
 }
 
+// Ensure explored tiles form a single connected region around the player.
+// Any explored tile that is not reachable from the player's position
+// through explored ground is reset back to unexplored.
+function normalizeZoneExploredConnectivity(zone) {
+  if (!zone || !zone.tiles) return;
+
+  const playerPos = findZonePlayerPosition(zone);
+  if (!playerPos) return;
+
+  const width = zone.width;
+  const height = zone.height;
+
+  const visited = [];
+  for (let y = 0; y < height; y++) {
+    visited[y] = [];
+  }
+
+  const queue = [];
+  queue.push({ x: playerPos.x, y: playerPos.y });
+  visited[playerPos.y][playerPos.x] = true;
+
+  const dirs = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = node.x + dirs[i].dx;
+      const ny = node.y + dirs[i].dy;
+
+      if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+      if (visited[ny][nx]) continue;
+
+      const tile = zone.tiles[ny][nx];
+      if (!tile) continue;
+
+      // We only traverse:
+      // - non-blocked tiles
+      // - that are already explored OR currently have the player marker.
+      if (tile.kind === "blocked") continue;
+      if (!tile.explored && !tile.hasPlayer) continue;
+
+      visited[ny][nx] = true;
+      queue.push({ x: nx, y: ny });
+    }
+  }
+
+  // Any explored tile that was NOT visited by this flood fill
+  // is an unreachable "island": reset it back to unexplored.
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const tile = zone.tiles[y][x];
+      if (!tile) continue;
+      if (!tile.explored) continue;
+
+      if (!visited[y][x]) {
+        tile.explored = false;
+      }
+    }
+  }
+}
+
 // Compute which explored tiles are reachable from the player's current position,
 // and their distance (number of steps) using 4-direction movement.
 function computeReachableExploredFromPlayer(zone) {
