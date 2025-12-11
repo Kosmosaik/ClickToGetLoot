@@ -158,11 +158,42 @@ if (btnCreateCharacter) {
     saveCurrentGame();
     updateCharacterSummary();
     
-    // --- 0.0.70a: Enter Starting Zone automatically (exploration paused) ---
+    // --- 0.0.70a / 0.0.70c+: Enter Starting Zone automatically (exploration paused) ---
     if (typeof createDebugZone === "function") {
+      // Build the tutorial zone via the normal definition pipeline.
       currentZone = createZoneFromDefinition("tutorial_zone");
       isInZone = true;
       console.log("Entered Starting Zone (Debug):", currentZone);
+
+      // Place the player on the zone's entry spawn tile, same as world map entry.
+      if (currentZone && currentZone.entrySpawn && currentZone.tiles) {
+        const sx = currentZone.entrySpawn.x;
+        const sy = currentZone.entrySpawn.y;
+        if (
+          typeof sx === "number" && typeof sy === "number" &&
+          sy >= 0 && sy < currentZone.height &&
+          sx >= 0 && sx < currentZone.width
+        ) {
+          const spawnTile = currentZone.tiles[sy][sx];
+          if (spawnTile) {
+            // Reveal the spawn tile and set the player marker.
+            spawnTile.explored = true;
+            setZonePlayerPosition(currentZone, sx, sy);
+            currentZone.playerX = sx;
+            currentZone.playerY = sy;
+          }
+        } else {
+          console.warn(
+            "game.creation: entrySpawn out of bounds for tutorial_zone",
+            currentZone.entrySpawn
+          );
+        }
+      }
+
+      // Clean up any legacy explored islands (probably empty here, but safe).
+      if (typeof normalizeZoneExploredConnectivity === "function") {
+        normalizeZoneExploredConnectivity(currentZone);
+      }
 
       if (typeof renderZoneUI === "function") {
         renderZoneUI();                     // show the zone immediately
@@ -170,6 +201,7 @@ if (btnCreateCharacter) {
       // Do NOT start auto exploration here.
       // The player will start it with "Explore Auto" later.
     }
+
     // Create the default world map for this new game.
     // We know our starting zone is the tutorial zone.
     if (typeof createDefaultWorldMap === "function") {
