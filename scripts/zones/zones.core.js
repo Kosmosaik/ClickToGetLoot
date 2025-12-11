@@ -650,6 +650,65 @@ function tileHasExploredOrPlayerNeighbor(zone, x, y) {
   return false;
 }
 
+// Compute which explored tiles are reachable from the player's current position,
+// and their distance (number of steps) using 4-direction movement.
+function computeReachableExploredFromPlayer(zone) {
+  if (!zone || !zone.tiles) return null;
+
+  const playerPos = findZonePlayerPosition(zone);
+  if (!playerPos) return null;
+
+  const width = zone.width;
+  const height = zone.height;
+
+  const visited = [];
+  const dist = [];
+  for (let y = 0; y < height; y++) {
+    visited[y] = [];
+    dist[y] = [];
+  }
+
+  const queue = [];
+  queue.push({ x: playerPos.x, y: playerPos.y });
+  visited[playerPos.y][playerPos.x] = true;
+  dist[playerPos.y][playerPos.x] = 0;
+
+  const dirs = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    const baseDist = dist[node.y][node.x];
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = node.x + dirs[i].dx;
+      const ny = node.y + dirs[i].dy;
+
+      if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+      if (visited[ny][nx]) continue;
+
+      const tile = zone.tiles[ny][nx];
+      if (!tile) continue;
+
+      // We only walk through:
+      //  - non-blocked tiles
+      //  - that are already explored OR currently have the player marker.
+      if (tile.kind === "blocked") continue;
+      if (!tile.explored && !tile.hasPlayer) continue;
+
+      visited[ny][nx] = true;
+      dist[ny][nx] = baseDist + 1;
+      queue.push({ x: nx, y: ny });
+    }
+  }
+
+  return { visited, dist };
+}
+
 // Mark the next explorable tile as "pending exploration" (for blinking).
 // Priority:
 //   1) An unexplored neighbor directly next to the player (4-dir).
@@ -667,6 +726,9 @@ function prepareNextExplorationTile(zone) {
   zone.preparedTargetX = undefined;
   zone.preparedTargetY = undefined;
 
+  const width = zone.width;
+  const height = zone.height;
+
   // --- STEP 1: Try to pick a tile directly next to the player (1-tile move) ---
   const playerPos = findZonePlayerPosition(zone);
   if (playerPos) {
@@ -682,7 +744,7 @@ function prepareNextExplorationTile(zone) {
       const nx = playerPos.x + dirs[i].dx;
       const ny = playerPos.y + dirs[i].dy;
 
-      if (ny < 0 || ny >= zone.height || nx < 0 || nx >= zone.width) {
+      if (ny < 0 || ny >= height || nx < 0 || nx >= width) {
         continue;
       }
 
@@ -703,35 +765,97 @@ function prepareNextExplorationTile(zone) {
     }
   }
 
-  // --- STEP 2: Frontier / fallback logic ---
+  // --- STEP 2: Connectivity-aware frontier selection ---
+  // We only want to consider unexplored tiles that are adjacent to tiles
+  // that are actually reachable from the player's current explored blob.
+  const reachable = computeReachableExploredFromPlayer(zone);
+  if (!reachable || !reachable.visited) {
+    return false;
+  }
+
+  const visited = reachable.visited;
+  const dist = reachable.dist;
+
+  // For each reachable explored tile, look at its neighbors and collect
+  // unexplored explorable tiles as "frontier" tiles. We also remember the
+  // distance from the player so we can bias our choice.
   const frontier = [];
-  const fallback = [];
+  const frontierBestDist = [];
+  for (let y = 0; y < height; y++) {
+    frontierBestDist[y] = [];
+    for (let x = 0; x < width; x++) {
+      frontierBestDist[y][x] = Infinity;
+    }
+  }
 
-  for (let y = 0; y < zone.height; y++) {
-    for (let x = 0; x < zone.width; x++) {
-      const tile = zone.tiles[y][x];
+  const dirs4 = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
 
-      if (!isTileExplorable(tile) || tile.explored) {
-        continue;
-      }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!visited[y][x]) continue;
 
-      if (tileHasExploredOrPlayerNeighbor(zone, x, y)) {
-        frontier.push({ x, y });
-      } else {
-        fallback.push({ x, y });
+      const baseDist = dist[y][x] || 0;
+
+      for (let i = 0; i < dirs4.length; i++) {
+        const nx = x + dirs4[i].dx;
+        const ny = y + dirs4[i].dy;
+
+        if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+
+        const tile = zone.tiles[ny][nx];
+        if (!tile) continue;
+        if (!isTileExplorable(tile)) continue;
+        if (tile.explored) continue;
+
+        // Approximate distance from player to this frontier tile as the
+        // distance to the explored tile plus one.
+        const candidateDist = baseDist + 1;
+
+        if (candidateDist < frontierBestDist[ny][nx]) {
+          frontierBestDist[ny][nx] = candidateDist;
+
+          // First time we see this tile, push it into the list.
+          if (!frontier.some(p => p.x === nx && p.y === ny)) {
+            frontier.push({ x: nx, y: ny });
+          }
+        }
       }
     }
   }
 
-  let choice = null;
-
-  if (frontier.length > 0) {
-    const idx = Math.floor(Math.random() * frontier.length);
-    choice = frontier[idx];
-  } else if (fallback.length > 0) {
-    const idx = Math.floor(Math.random() * fallback.length);
-    choice = fallback[idx];
+  if (frontier.length === 0) {
+    // No reachable frontier tiles – zone is probably fully explored for this blob.
+    return false;
   }
+
+  // --- STEP 3: Distance-biased choice among frontier tiles ---
+  let minDist = Infinity;
+  for (let i = 0; i < frontier.length; i++) {
+    const p = frontier[i];
+    const d = frontierBestDist[p.y][p.x];
+    if (d < minDist) {
+      minDist = d;
+    }
+  }
+
+  // Build a pool of tiles that are among the closest ones.
+  const band = [];
+  const maxBandDist = minDist + 1; // allow a small "band" around the closest
+  for (let i = 0; i < frontier.length; i++) {
+    const p = frontier[i];
+    const d = frontierBestDist[p.y][p.x];
+    if (d <= maxBandDist) {
+      band.push(p);
+    }
+  }
+
+  const pool = band.length > 0 ? band : frontier;
+  const choice = pool[Math.floor(Math.random() * pool.length)];
 
   if (!choice) {
     return false;
