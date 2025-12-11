@@ -77,7 +77,7 @@ function enterZoneFromWorldMap(x, y) {
     console.error("enterZoneFromWorldMap: failed to create zone", tile.zoneId);
     return;
   }
-
+  
   // Switch state to the new zone
   currentZone = newZone;
   isInZone = true;
@@ -105,12 +105,18 @@ function enterZoneFromWorldMap(x, y) {
         currentZone.entrySpawn
       );
     }
-  }  
+  }
+
+  // 0.0.70c+ — cleanup: remove unreachable explored islands created by old logic.
+  if (typeof normalizeZoneExploredConnectivity === "function") {
+    normalizeZoneExploredConnectivity(currentZone);
+  }
 
   // Update fog and current position on the world map
   if (tile.fogState !== WORLD_FOG_STATE.VISITED) {
     tile.fogState = WORLD_FOG_STATE.VISITED;
   }
+
   worldMap.currentX = x;
   worldMap.currentY = y;
 
