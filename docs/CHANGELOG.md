@@ -1,3 +1,48 @@
+# 0.0.70d – Exploration Behavior Improvements (QoL Update)
+
+This update focuses entirely on making exploration feel smarter, smoother, and less random. The goal was to reduce strange pathing choices, cut down unnecessary walking, and make the explorer behave more like a real adventurer instead of bouncing around the map.
+
+## Exploration Improvements
+
+• **Smarter target selection**  
+  The explorer now chooses tiles based on what is closest and most natural to clear next, reducing long detours and awkward choices.
+
+• **Better local awareness**  
+  When several frontier tiles are available, the explorer focuses on clearing around the area he’s currently in instead of sprinting to distant lone tiles.
+
+• **Smoother edge clearing**  
+  Tiles bordering explored areas are prioritized more often, reducing the number of stray “?” tiles left behind.
+
+• **Reduced backtracking**  
+  Late-exploration behavior is much cleaner, with fewer cases of running across the zone for one tile and then running all the way back again.
+
+• **Immediate neighbor priority**  
+  If an unexplored tile is directly next to the player, it is always selected first for fast, responsive exploration.
+
+## Other Fixes & Adjustments
+
+• **Correct target marking**  
+  Fixed rare cases where the explorer could pick the wrong fallback tile or appear to teleport.
+
+• **More stable pathfinding**  
+  Target paths are chosen more safely and consistently.
+
+• **Improved zone entry behavior**  
+  New characters now spawn correctly in freshly generated zones without needing to re-enter.
+
+## Result
+
+Exploration is now:
+- More logical  
+- More local  
+- Less random  
+- Far less wasteful in movement  
+- Still lightly unpredictable in a natural way
+
+Overall, clearing a zone should feel smoother, faster, and much more intentional than before.
+
+---
+
 # Patch Notes 0.0.70d – Exploration Quality Update
 
 This update focuses on making zone exploration feel more natural, readable, and satisfying. Movement, tile discovery, and general exploration flow have all been improved.
