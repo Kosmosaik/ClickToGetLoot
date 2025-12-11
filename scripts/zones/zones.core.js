@@ -776,12 +776,92 @@ function computeReachableExploredFromPlayer(zone) {
   return { visited, dist };
 }
 
+// Compute (and cache) distance in steps from the zone.entrySpawn tile
+// across walkable tiles. Used to prefer "inner" tiles before expanding outward.
+function ensureEntryDistanceMap(zone) {
+  if (!zone || !zone.tiles) return null;
+  if (!zone.entrySpawn) return null;
+
+  const width = zone.width;
+  const height = zone.height;
+
+  // Reuse cached map if size matches.
+  if (
+    zone._entryDistanceMap &&
+    zone._entryDistanceMapWidth === width &&
+    zone._entryDistanceMapHeight === height
+  ) {
+    return zone._entryDistanceMap;
+  }
+
+  const dist = [];
+  for (let y = 0; y < height; y++) {
+    dist[y] = [];
+    for (let x = 0; x < width; x++) {
+      dist[y][x] = Infinity;
+    }
+  }
+
+  const startX = zone.entrySpawn.x;
+  const startY = zone.entrySpawn.y;
+  if (
+    typeof startX !== "number" || typeof startY !== "number" ||
+    startX < 0 || startX >= width ||
+    startY < 0 || startY >= height
+  ) {
+    return null;
+  }
+
+  const startTile = zone.tiles[startY][startX];
+  if (!startTile) return null;
+
+  const queue = [];
+  dist[startY][startX] = 0;
+  queue.push({ x: startX, y: startY });
+
+  const dirs = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    const baseDist = dist[node.y][node.x];
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = node.x + dirs[i].dx;
+      const ny = node.y + dirs[i].dy;
+
+      if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+      if (dist[ny][nx] !== Infinity) continue;
+
+      const tile = zone.tiles[ny][nx];
+      if (!tile) continue;
+
+      // We only walk through tiles that are not BLOCKED and not LOCKED.
+      if (tile.kind === ZONE_TILE_KIND.BLOCKED) continue;
+      if (tile.kind === ZONE_TILE_KIND.LOCKED) continue;
+
+      dist[ny][nx] = baseDist + 1;
+      queue.push({ x: nx, y: ny });
+    }
+  }
+
+  zone._entryDistanceMap = dist;
+  zone._entryDistanceMapWidth = width;
+  zone._entryDistanceMapHeight = height;
+  return dist;
+}
+
 // Mark the next explorable tile as "pending exploration" (for blinking).
 // Priority:
 //   1) An unexplored neighbor directly next to the player (4-dir).
-//   2) Otherwise, ANY "gap" tile (unexplored tile with 2+ explored neighbors)
-//      reachable from the player – we fill holes BEFORE expanding.
-//   3) Otherwise, a frontier tile, with strong bias for nearby ones.
+//   2) Otherwise, ANY "gap" tile (unexplored tile with 2+ explored neighbors),
+//      chosen from the *innermost* ring first (smallest distance from entrySpawn).
+//   3) Otherwise, a frontier tile chosen from the innermost ring, with a small
+//      local bias around the player.
 // Also records the chosen coordinates on the zone as preparedTargetX/Y.
 // Returns true if a tile was marked, false if none were found.
 function prepareNextExplorationTile(zone) {
@@ -840,7 +920,8 @@ function prepareNextExplorationTile(zone) {
   }
 
   const visited = reachable.visited;
-  const dist = reachable.dist;
+  const distFromPlayer = reachable.dist;
+  const distFromEntry = ensureEntryDistanceMap(zone); // can be null
 
   const frontier = [];
   const frontierBestDist = [];
@@ -862,7 +943,7 @@ function prepareNextExplorationTile(zone) {
     for (let x = 0; x < width; x++) {
       if (!visited[y][x]) continue;
 
-      const baseDist = dist[y][x] || 0;
+      const baseDist = distFromPlayer[y][x] || 0;
 
       for (let i = 0; i < dirs4.length; i++) {
         const nx = x + dirs4[i].dx;
@@ -893,13 +974,11 @@ function prepareNextExplorationTile(zone) {
     return false;
   }
 
-  // --- STEP 3: HARD GAP-FILL PRIORITY ---
-
-  // Build info for each frontier tile: distance + how many explored neighbors.
+  // --- STEP 3: Build info about each frontier tile ---
   const frontierInfo = [];
   for (let i = 0; i < frontier.length; i++) {
     const p = frontier[i];
-    const d = frontierBestDist[p.y][p.x];
+    const dPlayer = frontierBestDist[p.y][p.x];
 
     let exploredNeighbors = 0;
     for (let j = 0; j < dirs4.length; j++) {
@@ -913,60 +992,81 @@ function prepareNextExplorationTile(zone) {
       }
     }
 
+    const entryDist =
+      distFromEntry && distFromEntry[p.y] && distFromEntry[p.y][p.x] !== undefined
+        ? distFromEntry[p.y][p.x]
+        : Infinity;
+
     frontierInfo.push({
       x: p.x,
       y: p.y,
-      dist: d,
+      distFromPlayer: dPlayer,
+      distFromEntry: entryDist,
       exploredNeighbors,
     });
   }
 
-  // 3a) Gap tiles = unexplored tiles with 2+ explored neighbors.
-  // We fill ALL such gaps before expanding the frontier further away.
-  const HOLE_RADIUS = 12; // only care about holes within a reasonable range
-  const holeTiles = frontierInfo.filter(info =>
-    info.exploredNeighbors >= 1 && info.dist <= HOLE_RADIUS
-  );
+  // --- STEP 4: HARD GAP-FILL PRIORITY (inner ring first) ---
+
+  // Gap tiles: unexplored tiles with 2+ explored neighbors.
+  const holeTiles = frontierInfo.filter(info => info.exploredNeighbors >= 2);
 
   if (holeTiles.length > 0) {
-    // Among hole tiles, pick the nearest band (closest distances).
-    let minHoleDist = Infinity;
+    // Among hole tiles, pick those with the smallest distance from entry spawn.
+    let minEntry = Infinity;
     for (let i = 0; i < holeTiles.length; i++) {
-      if (holeTiles[i].dist < minHoleDist) {
-        minHoleDist = holeTiles[i].dist;
+      if (holeTiles[i].distFromEntry < minEntry) {
+        minEntry = holeTiles[i].distFromEntry;
       }
     }
-    const band = holeTiles.filter(h => h.dist <= minHoleDist + 1);
-    const choice = band[Math.floor(Math.random() * band.length)];
 
+    let band = holeTiles.filter(h => h.distFromEntry <= minEntry + 1);
+
+    // Within that ring, bias toward the ones closest to the player.
+    let minPlayerDist = Infinity;
+    for (let i = 0; i < band.length; i++) {
+      if (band[i].distFromPlayer < minPlayerDist) {
+        minPlayerDist = band[i].distFromPlayer;
+      }
+    }
+    const band2 = band.filter(h => h.distFromPlayer <= minPlayerDist + 1);
+    if (band2.length > 0) {
+      band = band2;
+    }
+
+    const choice = band[Math.floor(Math.random() * band.length)];
     zone.preparedTargetX = choice.x;
     zone.preparedTargetY = choice.y;
     return true;
   }
 
-  // --- STEP 4: Normal frontier expansion (when no holes exist) ---
+  // --- STEP 5: Normal frontier expansion (inner rings first) ---
 
-  // Local radius bias: stay near the player if possible.
-  const LOCAL_RADIUS = 5;
-  let candidates = frontierInfo.filter(info => info.dist <= LOCAL_RADIUS);
-  if (candidates.length === 0) {
-    candidates = frontierInfo;
-  }
-
-  // Prefer closest frontier tiles.
-  let minDist = Infinity;
-  for (let i = 0; i < candidates.length; i++) {
-    if (candidates[i].dist < minDist) {
-      minDist = candidates[i].dist;
+  // 1) Prefer frontier tiles that are closest to the entry spawn.
+  let minEntry = Infinity;
+  for (let i = 0; i < frontierInfo.length; i++) {
+    if (frontierInfo[i].distFromEntry < minEntry) {
+      minEntry = frontierInfo[i].distFromEntry;
     }
   }
-  const maxBandDist = minDist + 1;
-  candidates = candidates.filter(info => info.dist <= maxBandDist);
+  let candidates = frontierInfo.filter(info => info.distFromEntry <= minEntry + 1);
   if (candidates.length === 0) {
     candidates = frontierInfo;
   }
 
-  // Within that, slightly prefer tiles with more explored neighbors (smoother edges).
+  // 2) Within that ring, prefer tiles closest to the player (keeps motion local).
+  let minPlayerDist = Infinity;
+  for (let i = 0; i < candidates.length; i++) {
+    if (candidates[i].distFromPlayer < minPlayerDist) {
+      minPlayerDist = candidates[i].distFromPlayer;
+    }
+  }
+  candidates = candidates.filter(info => info.distFromPlayer <= minPlayerDist + 1);
+  if (candidates.length === 0) {
+    candidates = frontierInfo;
+  }
+
+  // 3) And finally, prefer smoother edges (more explored neighbors).
   let best = candidates.filter(info => info.exploredNeighbors >= 3);
   if (best.length === 0) {
     best = candidates.filter(info => info.exploredNeighbors >= 2);
