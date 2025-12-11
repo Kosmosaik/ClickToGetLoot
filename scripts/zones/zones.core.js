@@ -779,8 +779,9 @@ function computeReachableExploredFromPlayer(zone) {
 // Mark the next explorable tile as "pending exploration" (for blinking).
 // Priority:
 //   1) An unexplored neighbor directly next to the player (4-dir).
-//   2) Otherwise, a "frontier" tile next to explored/player area.
-//   3) Otherwise, any unexplored explorable tile.
+//   2) Otherwise, ANY "gap" tile (unexplored tile with 2+ explored neighbors)
+//      reachable from the player – we fill holes BEFORE expanding.
+//   3) Otherwise, a frontier tile, with strong bias for nearby ones.
 // Also records the chosen coordinates on the zone as preparedTargetX/Y.
 // Returns true if a tile was marked, false if none were found.
 function prepareNextExplorationTile(zone) {
@@ -892,11 +893,9 @@ function prepareNextExplorationTile(zone) {
     return false;
   }
 
-  // --- STEP 3: Strong local + "gap-filling" bias ---
+  // --- STEP 3: HARD GAP-FILL PRIORITY ---
 
-  // 1) Build info for each frontier tile:
-  //    - distance from player (from frontierBestDist)
-  //    - how many explored neighbors it already has (holes will have 2–4).
+  // Build info for each frontier tile: distance + how many explored neighbors.
   const frontierInfo = [];
   for (let i = 0; i < frontier.length; i++) {
     const p = frontier[i];
@@ -922,32 +921,52 @@ function prepareNextExplorationTile(zone) {
     });
   }
 
-  // 2) First, restrict to tiles reasonably close to the player.
-  const LOCAL_RADIUS = 4; // tiles within this BFS distance are "nearby"
+  // 3a) Gap tiles = unexplored tiles with 2+ explored neighbors.
+  // We fill ALL such gaps before expanding the frontier further away.
+  const HOLE_RADIUS = 12; // only care about holes within a reasonable range
+  const holeTiles = frontierInfo.filter(info =>
+    info.exploredNeighbors >= 2 && info.dist <= HOLE_RADIUS
+  );
+
+  if (holeTiles.length > 0) {
+    // Among hole tiles, pick the nearest band (closest distances).
+    let minHoleDist = Infinity;
+    for (let i = 0; i < holeTiles.length; i++) {
+      if (holeTiles[i].dist < minHoleDist) {
+        minHoleDist = holeTiles[i].dist;
+      }
+    }
+    const band = holeTiles.filter(h => h.dist <= minHoleDist + 1);
+    const choice = band[Math.floor(Math.random() * band.length)];
+
+    zone.preparedTargetX = choice.x;
+    zone.preparedTargetY = choice.y;
+    return true;
+  }
+
+  // --- STEP 4: Normal frontier expansion (when no holes exist) ---
+
+  // Local radius bias: stay near the player if possible.
+  const LOCAL_RADIUS = 4;
   let candidates = frontierInfo.filter(info => info.dist <= LOCAL_RADIUS);
   if (candidates.length === 0) {
-    // If nothing is nearby, use the whole frontier.
     candidates = frontierInfo;
   }
 
-  // 3) Among candidates, prefer the ones that are closest in distance.
+  // Prefer closest frontier tiles.
   let minDist = Infinity;
   for (let i = 0; i < candidates.length; i++) {
     if (candidates[i].dist < minDist) {
       minDist = candidates[i].dist;
     }
   }
-
   const maxBandDist = minDist + 1;
   candidates = candidates.filter(info => info.dist <= maxBandDist);
-
   if (candidates.length === 0) {
     candidates = frontierInfo;
   }
 
-  // 4) "Gap filling" preference:
-  //    - First try tiles with 3+ explored neighbors (almost surrounded).
-  //    - Then 2+. If none, fall back to whatever we have.
+  // Within that, slightly prefer tiles with more explored neighbors (smoother edges).
   let best = candidates.filter(info => info.exploredNeighbors >= 3);
   if (best.length === 0) {
     best = candidates.filter(info => info.exploredNeighbors >= 2);
