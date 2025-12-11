@@ -1,4 +1,4 @@
-# 0.0.70d – Exploration Behavior Improvements (QoL Update)
+# 0.0.70d2 – Exploration Behavior Improvements (QoL Update)
 
 This update focuses entirely on making exploration feel smarter, smoother, and less random. The goal was to reduce strange pathing choices, cut down unnecessary walking, and make the explorer behave more like a real adventurer instead of bouncing around the map.
 
