@@ -874,6 +874,23 @@ function ensureEntryDistanceMap(zone) {
 // This guarantees:
 //   - We never explore a tile farther from spawn while a closer tile is still ?.
 //   - When only a few tiles are left, we don't ping-pong across the zone.
+// Mark the next explorable tile as "pending exploration" (for blinking).
+// New strategy: always pick the *nearest frontier tile* from the player's
+// current position, with a small preference for smoother edges.
+// Frontier tile = explorable, unexplored, and touching at least one
+// explored/hasPlayer tile.
+//
+// Priority:
+//   1) An unexplored neighbor directly next to the player (4-dir).
+//   2) Otherwise, among all frontier tiles, choose the one with the
+//      smallest walking distance from the player (stance cost).
+//      If there are multiple, prefer tiles that already have more
+//      explored neighbors (smoother edge), then break ties randomly.
+//
+// Records chosen coords as preparedTargetX/Y and sets isActiveExplore=true,
+// so revealPreparedExplorationTile() will reveal it and move the player.
+//
+// Returns true if a tile was marked, false if none were found.
 function prepareNextExplorationTile(zone) {
   if (!zone || !zone.tiles) return false;
 
@@ -887,47 +904,59 @@ function prepareNextExplorationTile(zone) {
   const width = zone.width;
   const height = zone.height;
 
-  // --- STEP 0: Distance-from-entry map (ring structure) ---
-  if (typeof ensureEntryDistanceMap !== "function") {
-    return false;
-  }
-  const entryDist = ensureEntryDistanceMap(zone);
-  if (!entryDist) {
-    return false;
-  }
+  // --- STEP 1: Try to pick a tile directly next to the player (1-tile move) ---
+  const playerPos = findZonePlayerPosition(zone);
+  if (playerPos) {
+    const neighborCandidates = [];
+    const dirs = [
+      { dx:  1, dy:  0 },
+      { dx: -1, dy:  0 },
+      { dx:  0, dy:  1 },
+      { dx:  0, dy: -1 },
+    ];
 
-  // --- STEP 1: Find the innermost ring that still has unexplored tiles ---
-  let currentRing = Infinity;
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = playerPos.x + dirs[i].dx;
+      const ny = playerPos.y + dirs[i].dy;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const tile = zone.tiles[y][x];
+      if (ny < 0 || ny >= height || nx < 0 || nx >= width) {
+        continue;
+      }
+
+      const tile = zone.tiles[ny][nx];
       if (!tile) continue;
-      if (!isTileExplorable(tile)) continue;
-      if (tile.explored) continue;
 
-      const d = entryDist[y] && entryDist[y][x];
-      if (typeof d !== "number" || !isFinite(d)) continue;
-
-      if (d < currentRing) {
-        currentRing = d;
+      if (isTileExplorable(tile) && !tile.explored) {
+        neighborCandidates.push({ x: nx, y: ny });
       }
     }
+
+    if (neighborCandidates.length > 0) {
+      const choice =
+        neighborCandidates[Math.floor(Math.random() * neighborCandidates.length)];
+
+      const chosenTile = zone.tiles[choice.y][choice.x];
+      if (chosenTile) {
+        chosenTile.isActiveExplore = true;
+      }
+
+      zone.preparedTargetX = choice.x;
+      zone.preparedTargetY = choice.y;
+      return true;
+    }
   }
 
-  if (!isFinite(currentRing)) {
-    // No unexplored explorable tiles left.
+  // --- STEP 2: Distances from the current player position (for stance cost) ---
+  if (typeof computeReachableExploredFromPlayer !== "function") {
+    return false;
+  }
+  const reachable = computeReachableExploredFromPlayer(zone);
+  if (!reachable || !reachable.dist || !reachable.visited) {
     return false;
   }
 
-  // --- STEP 2: Distances from the current player position (for cost) ---
-  let distFromPlayer = null;
-  if (typeof computeReachableExploredFromPlayer === "function") {
-    const reachable = computeReachableExploredFromPlayer(zone);
-    if (reachable && reachable.dist) {
-      distFromPlayer = reachable.dist;
-    }
-  }
+  const distFromPlayer = reachable.dist;
+  const visited = reachable.visited;
 
   const dirs4 = [
     { dx:  1, dy:  0 },
@@ -936,7 +965,7 @@ function prepareNextExplorationTile(zone) {
     { dx:  0, dy: -1 },
   ];
 
-  // --- STEP 3: Collect candidates in this ring and estimate stance cost ---
+  // --- STEP 3: Collect all frontier candidates with stance cost ---
   const candidates = [];
 
   for (let y = 0; y < height; y++) {
@@ -946,10 +975,49 @@ function prepareNextExplorationTile(zone) {
       if (!isTileExplorable(tile)) continue;
       if (tile.explored) continue;
 
-      const dEntry = entryDist[y] && entryDist[y][x];
-      if (dEntry !== currentRing) continue; // only tiles in the current ring
+      // Must be a frontier tile: touching explored or player tile.
+      let hasExploredNeighbor = false;
+      for (let i = 0; i < dirs4.length; i++) {
+        const nx = x + dirs4[i].dx;
+        const ny = y + dirs4[i].dy;
+        if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+        const nTile = zone.tiles[ny][nx];
+        if (!nTile) continue;
+        if (nTile.explored || nTile.hasPlayer) {
+          hasExploredNeighbor = true;
+          break;
+        }
+      }
+      if (!hasExploredNeighbor) continue;
 
-      // Count explored neighbors for smoothing preference.
+      // Estimate stance cost: minimum distance from player to any explored/hasPlayer
+      // neighbor of this tile, using distFromPlayer.
+      let stanceCost = Infinity;
+      for (let i = 0; i < dirs4.length; i++) {
+        const nx = x + dirs4[i].dx;
+        const ny = y + dirs4[i].dy;
+        if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
+
+        if (!visited[ny][nx]) continue;
+
+        const nTile = zone.tiles[ny][nx];
+        if (!nTile) continue;
+        if (!nTile.explored && !nTile.hasPlayer) continue;
+
+        const dPlayer =
+          distFromPlayer[ny] && distFromPlayer[ny][nx] !== undefined
+            ? distFromPlayer[ny][nx]
+            : Infinity;
+
+        if (typeof dPlayer === "number" && dPlayer < stanceCost) {
+          stanceCost = dPlayer;
+        }
+      }
+
+      // If we can't reach any stance tile yet, skip this candidate for now.
+      if (!isFinite(stanceCost)) continue;
+
+      // Count explored neighbors (for smoother edge preference).
       let exploredNeighbors = 0;
       for (let i = 0; i < dirs4.length; i++) {
         const nx = x + dirs4[i].dx;
@@ -959,33 +1027,6 @@ function prepareNextExplorationTile(zone) {
         if (!nTile) continue;
         if (nTile.explored || nTile.hasPlayer) {
           exploredNeighbors++;
-        }
-      }
-
-      // Estimate how far the player would need to walk to stand next to this tile.
-      // We look at the neighbor tiles that are already explored / havePlayer,
-      // and take the smallest distanceFromPlayer among them.
-      let stanceCost = Infinity;
-      if (distFromPlayer) {
-        for (let i = 0; i < dirs4.length; i++) {
-          const nx = x + dirs4[i].dx;
-          const ny = y + dirs4[i].dy;
-          if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
-
-          const nTile = zone.tiles[ny][nx];
-          if (!nTile) continue;
-
-          // Must be known ground we can stand on:
-          if (!nTile.explored && !nTile.hasPlayer) continue;
-
-          const dPlayer =
-            distFromPlayer[ny] && distFromPlayer[ny][nx] !== undefined
-              ? distFromPlayer[ny][nx]
-              : Infinity;
-
-          if (typeof dPlayer === "number" && dPlayer < stanceCost) {
-            stanceCost = dPlayer;
-          }
         }
       }
 
@@ -999,45 +1040,34 @@ function prepareNextExplorationTile(zone) {
   }
 
   if (candidates.length === 0) {
-    // Should be rare: ring has no reachable frontier; fall back to "no tile".
+    // No reachable frontier tiles – likely fully explored.
     return false;
   }
 
-  // --- STEP 4: Prefer candidates that are actually reachable cheaply ---
+  // --- STEP 4: Choose nearest candidates by stance cost ---
 
-  let usable = candidates;
-
-  // If we have stance cost info, drop obviously unreachable ones first.
-  if (distFromPlayer) {
-    const reachableCandidates = candidates.filter(c => isFinite(c.stanceCost));
-    if (reachableCandidates.length > 0) {
-      usable = reachableCandidates;
+  let minCost = Infinity;
+  for (let i = 0; i < candidates.length; i++) {
+    if (candidates[i].stanceCost < minCost) {
+      minCost = candidates[i].stanceCost;
     }
   }
 
-  // Among usable, prefer the ones with the smallest stanceCost (closest walk).
-  if (distFromPlayer) {
-    let minCost = Infinity;
-    for (let i = 0; i < usable.length; i++) {
-      if (usable[i].stanceCost < minCost) {
-        minCost = usable[i].stanceCost;
-      }
-    }
+  // Keep a small band so behavior isn't too rigid.
+  const COST_BAND = 1;
+  let cheapest = candidates.filter(c => c.stanceCost <= minCost + COST_BAND);
 
-    if (isFinite(minCost)) {
-      // Small band to avoid overly rigid behavior.
-      usable = usable.filter(c => c.stanceCost <= minCost + 1);
+  // --- STEP 5: Within cheapest, prefer smoother edges (more explored neighbors) ---
+
+  let maxNeighbors = -1;
+  for (let i = 0; i < cheapest.length; i++) {
+    if (cheapest[i].exploredNeighbors > maxNeighbors) {
+      maxNeighbors = cheapest[i].exploredNeighbors;
     }
   }
-
-  // --- STEP 5: Smoothing preference: fill edges / gaps first in this ring ---
-
-  let best = usable.filter(c => c.exploredNeighbors >= 3);
+  let best = cheapest.filter(c => c.exploredNeighbors === maxNeighbors);
   if (best.length === 0) {
-    best = usable.filter(c => c.exploredNeighbors >= 2);
-  }
-  if (best.length === 0) {
-    best = usable;
+    best = cheapest;
   }
 
   const choice = best[Math.floor(Math.random() * best.length)];
@@ -1047,7 +1077,7 @@ function prepareNextExplorationTile(zone) {
 
   const chosenTile = zone.tiles[choice.y][choice.x];
   if (chosenTile) {
-    chosenTile.isActiveExplore = true; // mark for blinking + revealPreparedExplorationTile
+    chosenTile.isActiveExplore = true;
   }
 
   zone.preparedTargetX = choice.x;
