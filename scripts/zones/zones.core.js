@@ -51,7 +51,10 @@ function createZone({ id, name, width, height }) {
     // 0.0.70c+ — where the player should spawn when entering this zone.
     // This is chosen after the layout is built (see pickZoneEntrySpawn).
     entrySpawn: null,
-
+    // 0.0.70c+ — "focus" center for exploration. When set, we try to
+    // finish tiles around this point before jumping to another area.
+    exploreFocusX: null,
+    exploreFocusY: null,
     // 0.0.70d+ — content / state scaffolding
     // (will be filled from templates later)
     content: {
@@ -859,10 +862,12 @@ function ensureEntryDistanceMap(zone) {
 // Priority:
 //   1) An unexplored neighbor directly next to the player (4-dir).
 //   2) Otherwise, ANY "gap" tile (unexplored tile with 2+ explored neighbors),
-//      chosen from the *innermost* ring first (smallest distance from entrySpawn).
-//   3) Otherwise, a frontier tile chosen from the innermost ring, with a small
-//      local bias around the player.
-// Also records the chosen coordinates on the zone as preparedTargetX/Y.
+//      chosen from the *innermost* ring first (smallest distance from entrySpawn),
+//      and preferably inside the current focus region.
+//   3) Otherwise, a frontier tile chosen from the innermost ring, preferably
+//      inside the current focus region.
+// Also records the chosen coordinates on the zone as preparedTargetX/Y and
+// marks that tile with isActiveExplore = true so it can blink.
 // Returns true if a tile was marked, false if none were found.
 function prepareNextExplorationTile(zone) {
   if (!zone || !zone.tiles) return false;
@@ -907,8 +912,21 @@ function prepareNextExplorationTile(zone) {
     if (neighborCandidates.length > 0) {
       const choice =
         neighborCandidates[Math.floor(Math.random() * neighborCandidates.length)];
+
+      const chosenTile = zone.tiles[choice.y][choice.x];
+      if (chosenTile) {
+        chosenTile.isActiveExplore = true;
+      }
+
       zone.preparedTargetX = choice.x;
       zone.preparedTargetY = choice.y;
+
+      // If we don't have a focus yet, start one at this tile.
+      if (zone.exploreFocusX == null || zone.exploreFocusY == null) {
+        zone.exploreFocusX = choice.x;
+        zone.exploreFocusY = choice.y;
+      }
+
       return true;
     }
   }
@@ -921,7 +939,10 @@ function prepareNextExplorationTile(zone) {
 
   const visited = reachable.visited;
   const distFromPlayer = reachable.dist;
-  const distFromEntry = ensureEntryDistanceMap(zone); // can be null
+  const distFromEntry =
+    typeof ensureEntryDistanceMap === "function"
+      ? ensureEntryDistanceMap(zone)
+      : null;
 
   const frontier = [];
   const frontierBestDist = [];
@@ -997,22 +1018,56 @@ function prepareNextExplorationTile(zone) {
         ? distFromEntry[p.y][p.x]
         : Infinity;
 
+    let focusDist = Infinity;
+    if (
+      typeof zone.exploreFocusX === "number" &&
+      typeof zone.exploreFocusY === "number"
+    ) {
+      focusDist =
+        Math.abs(p.x - zone.exploreFocusX) + Math.abs(p.y - zone.exploreFocusY);
+    }
+
     frontierInfo.push({
       x: p.x,
       y: p.y,
       distFromPlayer: dPlayer,
       distFromEntry: entryDist,
+      distFromFocus: focusDist,
       exploredNeighbors,
     });
   }
 
-  // --- STEP 4: HARD GAP-FILL PRIORITY (inner ring first) ---
+  // --- STEP 4: Focus filter (stick to current area if possible) ---
 
-  // Gap tiles: unexplored tiles with 2+ explored neighbors.
-  const holeTiles = frontierInfo.filter(info => info.exploredNeighbors >= 2);
+  const FOCUS_RADIUS = 8; // tiles within this manhattan distance of the focus
+
+  let baseList = frontierInfo;
+
+  const hasFocus =
+    typeof zone.exploreFocusX === "number" &&
+    typeof zone.exploreFocusY === "number";
+
+  if (hasFocus) {
+    const insideFocus = frontierInfo.filter(
+      info => info.distFromFocus <= FOCUS_RADIUS
+    );
+
+    if (insideFocus.length > 0) {
+      // We still have work to do near the current focus area: stay here.
+      baseList = insideFocus;
+    } else {
+      // Focus area is exhausted: clear it and allow selecting a new region.
+      zone.exploreFocusX = null;
+      zone.exploreFocusY = null;
+      baseList = frontierInfo;
+    }
+  }
+
+  // --- STEP 5: HARD GAP-FILL PRIORITY (inner ring first, within baseList) ---
+
+  const holeTiles = baseList.filter(info => info.exploredNeighbors >= 2);
 
   if (holeTiles.length > 0) {
-    // Among hole tiles, pick those with the smallest distance from entry spawn.
     let minEntry = Infinity;
     for (let i = 0; i < holeTiles.length; i++) {
       if (holeTiles[i].distFromEntry < minEntry) {
@@ -1022,7 +1077,6 @@ function prepareNextExplorationTile(zone) {
 
     let band = holeTiles.filter(h => h.distFromEntry <= minEntry + 1);
 
-    // Within that ring, bias toward the ones closest to the player.
     let minPlayerDist = Infinity;
     for (let i = 0; i < band.length; i++) {
       if (band[i].distFromPlayer < minPlayerDist) {
@@ -1035,26 +1089,37 @@ function prepareNextExplorationTile(zone) {
     }
 
     const choice = band[Math.floor(Math.random() * band.length)];
+
+    const chosenTile = zone.tiles[choice.y][choice.x];
+    if (chosenTile) {
+      chosenTile.isActiveExplore = true;
+    }
+
     zone.preparedTargetX = choice.x;
     zone.preparedTargetY = choice.y;
+
+    // If we don't have a focus yet, start one at this tile.
+    if (zone.exploreFocusX == null || zone.exploreFocusY == null) {
+      zone.exploreFocusX = choice.x;
+      zone.exploreFocusY = choice.y;
+    }
+
     return true;
   }
 
-  // --- STEP 5: Normal frontier expansion (inner rings first) ---
+  // --- STEP 6: Normal frontier expansion (inner rings first, within baseList) ---
 
-  // 1) Prefer frontier tiles that are closest to the entry spawn.
   let minEntry = Infinity;
-  for (let i = 0; i < frontierInfo.length; i++) {
-    if (frontierInfo[i].distFromEntry < minEntry) {
-      minEntry = frontierInfo[i].distFromEntry;
+  for (let i = 0; i < baseList.length; i++) {
+    if (baseList[i].distFromEntry < minEntry) {
+      minEntry = baseList[i].distFromEntry;
     }
   }
-  let candidates = frontierInfo.filter(info => info.distFromEntry <= minEntry + 1);
+  let candidates = baseList.filter(info => info.distFromEntry <= minEntry + 1);
   if (candidates.length === 0) {
-    candidates = frontierInfo;
+    candidates = baseList;
   }
 
-  // 2) Within that ring, prefer tiles closest to the player (keeps motion local).
   let minPlayerDist = Infinity;
   for (let i = 0; i < candidates.length; i++) {
     if (candidates[i].distFromPlayer < minPlayerDist) {
@@ -1063,10 +1128,9 @@ function prepareNextExplorationTile(zone) {
   }
   candidates = candidates.filter(info => info.distFromPlayer <= minPlayerDist + 1);
   if (candidates.length === 0) {
-    candidates = frontierInfo;
+    candidates = baseList;
   }
 
-  // 3) And finally, prefer smoother edges (more explored neighbors).
   let best = candidates.filter(info => info.exploredNeighbors >= 3);
   if (best.length === 0) {
     best = candidates.filter(info => info.exploredNeighbors >= 2);
@@ -1080,8 +1144,20 @@ function prepareNextExplorationTile(zone) {
     return false;
   }
 
+  const chosenTile = zone.tiles[choice.y][choice.x];
+  if (chosenTile) {
+    chosenTile.isActiveExplore = true;
+  }
+
   zone.preparedTargetX = choice.x;
   zone.preparedTargetY = choice.y;
+
+  // If we don't have a focus yet, start one at this tile.
+  if (zone.exploreFocusX == null || zone.exploreFocusY == null) {
+    zone.exploreFocusX = choice.x;
+    zone.exploreFocusY = choice.y;
+  }
+
   return true;
 }
 
