@@ -27,6 +27,9 @@ const zoneFinishLeaveBtn = document.getElementById("zone-finish-leave");
 // Build an HTML grid from the current zone.
 // # = blocked, ? = unexplored walkable, . = explored walkable, L = locked
 // Each cell is a <span> so we can click on it.
+// Build an HTML grid from the current zone.
+// # = blocked, ? = unexplored walkable, . = explored walkable, L = locked
+// Each cell is a <span> so we can click on it.
 function buildZoneGridString(zone) {
   if (!zone) return "(No active zone)";
 
@@ -36,6 +39,7 @@ function buildZoneGridString(zone) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
 
+      // --- 1) Base character based on tile kind + explored ---
       let ch;
       if (tile.kind === "blocked") {
         ch = "#";
@@ -46,20 +50,31 @@ function buildZoneGridString(zone) {
         ch = tile.explored ? "." : "?";
       }
 
-      let extraClass = "";
-      if (tile.isActiveExplore && ch === "?") {
-        extraClass = " exploring-blink";
-      }
-      
-      html += `<span class="zone-cell${extraClass}" data-x="${x}" data-y="${y}">${ch}</span>`;
+      // --- 2) Base CSS class for the cell ---
+      let classes = "zone-cell";
 
+      // --- 3) Blinking for the tile that WILL be explored next ---
+      // This is the "pending" tile (during the delay) and should:
+      // - show as "?"
+      // - have a special CSS class so it can blink
+      if (tile.isActiveExplore && !tile.explored) {
+        ch = "?";
+        classes += " zone-cell-exploring";
+      }
+
+      // --- 4) Player marker ☺ on the latest explored tile ---
+      // We now track the player directly on the tile as tile.hasPlayer.
+      if (tile.hasPlayer) {
+        ch = "☻";
+      }
+
+      html += `<span class="${classes}" data-x="${x}" data-y="${y}">${ch}</span>`;
     }
     html += "<br>";
   }
 
   return html;
 }
-
 
 function getZoneStatusText(zone, stats) {
   if (!zone || !isInZone) {

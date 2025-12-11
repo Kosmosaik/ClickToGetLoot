@@ -44,6 +44,11 @@ function createZone({ id, name, width, height }) {
     height,
     tiles,
 
+    // 0.0.70c-qol — track the current "player" position in this zone.
+    // Null means "no position yet" (e.g. nothing explored so far).
+    playerX: null,
+    playerY: null,
+
     // 0.0.70d+ — content / state scaffolding
     // (will be filled from templates later)
     content: {
@@ -442,38 +447,233 @@ function getZoneExplorationStats(zone) {
   };
 }
 
-// Reveal ONE random unexplored explorable tile.
-// Returns true if something was revealed, false if zone is already fully explored.
-function revealRandomExplorableTile(zone) {
-  const candidates = [];
+// Clear the "player is standing here" marker on all tiles in this zone.
+function clearZonePlayerMarker(zone) {
+  if (!zone || !zone.tiles) return;
+
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const t = zone.tiles[y][x];
+      if (t && t.hasPlayer) {
+        t.hasPlayer = false;
+      }
+    }
+  }
+}
+
+// Helper: clear the "currently being explored" flag on all tiles.
+// We call this right before we mark a new active exploration tile,
+// so only ONE tile can blink at a time.
+function clearTileActiveExploreFlags(zone) {
+  if (!zone || !zone.tiles) return;
+
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const t = zone.tiles[y][x];
+      if (t && t.isActiveExplore) {
+        t.isActiveExplore = false;
+      }
+    }
+  }
+}
+
+// Find the current player position in this zone based on tile.hasPlayer.
+// Returns { x, y } or null if not found yet.
+function findZonePlayerPosition(zone) {
+  if (!zone || !zone.tiles) return null;
+
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const t = zone.tiles[y][x];
+      if (t && t.hasPlayer) {
+        return { x, y };
+      }
+    }
+  }
+  return null;
+}
+
+// Check if tile at (x, y) has at least one 4-direction neighbor
+// that is already explored or currently has the player on it.
+// Used to build a "frontier" of natural expansion tiles.
+function tileHasExploredOrPlayerNeighbor(zone, x, y) {
+  if (!zone || !zone.tiles) return false;
+
+  const dirs = [
+    { dx:  1, dy:  0 },
+    { dx: -1, dy:  0 },
+    { dx:  0, dy:  1 },
+    { dx:  0, dy: -1 },
+  ];
+
+  for (let i = 0; i < dirs.length; i++) {
+    const nx = x + dirs[i].dx;
+    const ny = y + dirs[i].dy;
+
+    if (ny < 0 || ny >= zone.height || nx < 0 || nx >= zone.width) {
+      continue;
+    }
+
+    const neighbor = zone.tiles[ny][nx];
+    if (!neighbor) continue;
+
+    if (neighbor.explored || neighbor.hasPlayer) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Mark the next explorable tile as "pending exploration" (for blinking).
+// Priority:
+//   1) An unexplored neighbor directly next to the player (4-dir).
+//   2) Otherwise, a "frontier" tile next to explored/player area.
+//   3) Otherwise, any unexplored explorable tile.
+// Also records the chosen coordinates on the zone as preparedTargetX/Y.
+// Returns true if a tile was marked, false if none were found.
+function prepareNextExplorationTile(zone) {
+  if (!zone || !zone.tiles) return false;
+
+  // Only one tile should ever be considered "next".
+  clearTileActiveExploreFlags(zone);
+
+  // Clear any previous target metadata.
+  zone.preparedTargetX = undefined;
+  zone.preparedTargetY = undefined;
+
+  // --- STEP 1: Try to pick a tile directly next to the player (1-tile move) ---
+  const playerPos = findZonePlayerPosition(zone);
+  if (playerPos) {
+    const neighborCandidates = [];
+    const dirs = [
+      { dx:  1, dy:  0 },
+      { dx: -1, dy:  0 },
+      { dx:  0, dy:  1 },
+      { dx:  0, dy: -1 },
+    ];
+
+    for (let i = 0; i < dirs.length; i++) {
+      const nx = playerPos.x + dirs[i].dx;
+      const ny = playerPos.y + dirs[i].dy;
+
+      if (ny < 0 || ny >= zone.height || nx < 0 || nx >= zone.width) {
+        continue;
+      }
+
+      const tile = zone.tiles[ny][nx];
+      if (!tile) continue;
+
+      if (isTileExplorable(tile) && !tile.explored) {
+        neighborCandidates.push({ x: nx, y: ny });
+      }
+    }
+
+    if (neighborCandidates.length > 0) {
+      const choice =
+        neighborCandidates[Math.floor(Math.random() * neighborCandidates.length)];
+      zone.preparedTargetX = choice.x;
+      zone.preparedTargetY = choice.y;
+      return true;
+    }
+  }
+
+  // --- STEP 2: Frontier / fallback logic ---
+  const frontier = [];
+  const fallback = [];
+
   for (let y = 0; y < zone.height; y++) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
-      if (isTileExplorable(tile) && !tile.explored) {
-        candidates.push({ x, y });
+
+      if (!isTileExplorable(tile) || tile.explored) {
+        continue;
+      }
+
+      if (tileHasExploredOrPlayerNeighbor(zone, x, y)) {
+        frontier.push({ x, y });
+      } else {
+        fallback.push({ x, y });
       }
     }
   }
 
-  if (candidates.length === 0) {
+  let choice = null;
+
+  if (frontier.length > 0) {
+    const idx = Math.floor(Math.random() * frontier.length);
+    choice = frontier[idx];
+  } else if (fallback.length > 0) {
+    const idx = Math.floor(Math.random() * fallback.length);
+    choice = fallback[idx];
+  }
+
+  if (!choice) {
     return false;
   }
 
-  const choice = candidates[Math.floor(Math.random() * candidates.length)];
-  zone.tiles[choice.y][choice.x].explored = true;
-  
+  zone.preparedTargetX = choice.x;
+  zone.preparedTargetY = choice.y;
   return true;
 }
+
+// Reveal the tile that was previously marked by prepareNextExplorationTile.
+// If none is marked, falls back to the old sequential reveal.
+// Returns true if something was revealed, false if there was nothing to do.
+function revealPreparedExplorationTile(zone) {
+  if (!zone || !zone.tiles) return false;
+
+  let target = null;
+
+  // Find the tile that was marked as "will be explored".
+  for (let y = 0; y < zone.height; y++) {
+    for (let x = 0; x < zone.width; x++) {
+      const tile = zone.tiles[y][x];
+      if (tile && tile.isActiveExplore && !tile.explored) {
+        target = { x, y };
+        break;
+      }
+    }
+    if (target) break;
+  }
+
+  // If nothing was prepared, fall back to the old sequential reveal.
+  if (!target) {
+    return revealNextExplorableTileSequential(zone);
+  }
+
+  const tile = zone.tiles[target.y][target.x];
+
+  // Stop blinking — it's no longer "pending", it's being revealed now.
+  tile.isActiveExplore = false;
+  tile.explored = true;
+
+  // Move the player marker to this tile.
+  clearZonePlayerMarker(zone);
+  tile.hasPlayer = true;
+
+  return true;
+}
+
 
 // Reveal ONE unexplored explorable tile in a fixed order (top-left to bottom-right).
 // Returns true if something was revealed, false if zone is fully explored.
 function revealNextExplorableTileSequential(zone) {
+  if (!zone || !zone.tiles) return false;
+
+  // Clear any previous "blinking" and player marker.
+  clearTileActiveExploreFlags(zone);
+  clearZonePlayerMarker(zone);
+
   for (let y = 0; y < zone.height; y++) {
     for (let x = 0; x < zone.width; x++) {
       const tile = zone.tiles[y][x];
       if (isTileExplorable(tile) && !tile.explored) {
         tile.explored = true;
-        tile.isActiveExplore = false;
+
+        // Move the player marker onto this tile.
+        tile.hasPlayer = true;
+
         return true; // <-- stop after revealing ONE tile
       }
     }
@@ -549,9 +749,12 @@ window.ZoneDebug = {
   createDebugZone,
   createZoneFromDefinition,
   getZoneExplorationStats,
-  revealRandomExplorableTile,
-  revealNextExplorableTileSequential,
+  revealNextExplorableTileSequential, // still exposed
+  prepareNextExplorationTile,         // NEW
+  revealPreparedExplorationTile,      // NEW
   ensureGeneratedZoneDefinitionForWorldTile,
 };
+
+
 
 

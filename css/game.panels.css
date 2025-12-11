@@ -701,14 +701,22 @@
   font-size: 0.85rem;
 }
 
-@keyframes blinkExplore {
-  0%   { color: white; }
-  50%  { color: black; }
-  100% { color: white; }
-}
-
-.zone-cell.exploring-blink {
-  animation: blinkExplore 0.6s infinite;
+/* === Zone exploration: blinking tile === */
+.zone-cell-exploring {
+  animation: zoneExploringBlink 0.6s infinite;
   font-weight: bold;
 }
+
+/* === Zone exploration: blinking "about to be explored" tile === */
+.zone-cell-exploring {
+  animation: zoneExploringBlink 0.6s infinite;
+  font-weight: bold;
+}
+
+@keyframes zoneExploringBlink {
+  0%   { color: #ffffff; }
+  50%  { color: #000000; }
+  100% { color: #ffffff; }
+}
+
 
