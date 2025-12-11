@@ -925,7 +925,7 @@ function prepareNextExplorationTile(zone) {
   // We fill ALL such gaps before expanding the frontier further away.
   const HOLE_RADIUS = 12; // only care about holes within a reasonable range
   const holeTiles = frontierInfo.filter(info =>
-    info.exploredNeighbors >= 2 && info.dist <= HOLE_RADIUS
+    info.exploredNeighbors >= 1 && info.dist <= HOLE_RADIUS
   );
 
   if (holeTiles.length > 0) {
