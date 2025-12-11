@@ -82,6 +82,31 @@ function enterZoneFromWorldMap(x, y) {
   currentZone = newZone;
   isInZone = true;
 
+  // 0.0.70c+ — place the player on the zone's entry spawn tile immediately.
+  if (currentZone.entrySpawn && currentZone.tiles) {
+    const sx = currentZone.entrySpawn.x;
+    const sy = currentZone.entrySpawn.y;
+    if (
+      typeof sx === "number" && typeof sy === "number" &&
+      sy >= 0 && sy < currentZone.height &&
+      sx >= 0 && sx < currentZone.width
+    ) {
+      const spawnTile = currentZone.tiles[sy][sx];
+      if (spawnTile) {
+        // Reveal the spawn tile and set the player marker.
+        spawnTile.explored = true;
+        setZonePlayerPosition(currentZone, sx, sy);
+        currentZone.playerX = sx;
+        currentZone.playerY = sy;
+      }
+    } else {
+      console.warn(
+        "enterZoneFromWorldMap: entrySpawn out of bounds",
+        currentZone.entrySpawn
+      );
+    }
+  }  
+
   // Update fog and current position on the world map
   if (tile.fogState !== WORLD_FOG_STATE.VISITED) {
     tile.fogState = WORLD_FOG_STATE.VISITED;
