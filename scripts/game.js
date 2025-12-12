@@ -8,30 +8,31 @@ const saveListContainer = document.getElementById("save-list");
 // Source of truth is PC.state.
 // These helpers avoid direct globals and make refactors safe.
 
-const S = PC.state;
+// Authoritative state access lives in pc.api.js via STATE()/EXP()/MOV()
+const S = () => STATE();
 
 // Initialize fields (these are DATA fields, not functions)
-S.currentHP = S.currentHP ?? 0;
-S.characterComputed = S.characterComputed ?? null;
-S.currentZone = S.currentZone ?? null;
-S.isInZone = S.isInZone ?? false;
-S.worldMap = S.worldMap ?? null;
+S().currentHP = S().currentHP ?? 0;
+S().characterComputed = S().characterComputed ?? null;
+S().currentZone = S().currentZone ?? null;
+S().isInZone = S().isInZone ?? false;
+S().worldMap = S().worldMap ?? null;
 
 // Getters / setters
-function getCurrentHP() { return S.currentHP; }
-function setCurrentHP(v) { S.currentHP = v; }
+function getCurrentHP() { return S().currentHP; }
+function setCurrentHP(v) { S().currentHP = v; }
 
-function getCharacterComputed() { return S.characterComputed; }
-function setCharacterComputed(v) { S.characterComputed = v; }
+function getCharacterComputed() { return S().characterComputed; }
+function setCharacterComputed(v) { S().characterComputed = v; }
 
-function getCurrentZone() { return S.currentZone; }
-function setCurrentZone(z) { S.currentZone = z; }
+function getCurrentZone() { return S().currentZone; }
+function setCurrentZone(z) { S().currentZone = z; }
 
-function getIsInZone() { return S.isInZone; }
-function setIsInZone(v) { S.isInZone = v; }
+function getIsInZone() { return S().isInZone; }
+function setIsInZone(v) { S().isInZone = v; }
 
-function getWorldMap() { return S.worldMap; }
-function setWorldMap(m) { S.worldMap = m; }
+function getWorldMap() { return S().worldMap; }
+function setWorldMap(m) { S().worldMap = m; }
 
 
 function clearActiveExplorationFlag(zone) {
@@ -184,7 +185,7 @@ function unequipSlotToInventory(slotKey) {
 
 function changeWeaponSkill(key, delta) {
   if (!currentCharacter) return;
-  const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skills.weapon) || {};
+  const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skillS().weapon) || {};
   const min = cfg.minLevel ?? 0;
   const max = cfg.maxLevel ?? 200;
 
@@ -237,7 +238,7 @@ function updateHPBar() {
     return;
   }
 
-  const max = cc.derivedStats.maxHP || 0;
+  const max = cc.derivedStatS().maxHP || 0;
   if (max <= 0) {
     hpBarContainer.style.display = "none";
     return;
@@ -316,7 +317,7 @@ function updateEquipmentPanel() {
   ];
 
   // ---- Slot rows ----
-  slotDefs.forEach((def) => {
+  slotDefS().forEach((def) => {
     const row = document.createElement("div");
     row.className = "equipment-slot-row";
 
@@ -370,8 +371,8 @@ function updateEquipmentPanel() {
   attrsTitle.textContent = "Attributes";
   attrsSection.appendChild(attrsTitle);
 
-  const total = attrs.total;
-  const bonus = attrs.bonus;
+  const total = attrS().total;
+  const bonus = attrS().bonus;
 
   function makeAttrRow(label, key) {
     const row = document.createElement("div");
@@ -468,7 +469,7 @@ function updateEquipmentPanel() {
 }
 
 /**
- * Render the Skills panel: weapon skills with dev +/- controls.
+ * Render the Skills panel: weapon skills with dev +/- controlS().
  */
 function updateSkillsPanel() {
   if (!skillsPanel || !skillsListContainer) return;
@@ -477,7 +478,7 @@ function updateSkillsPanel() {
 
   if (!currentCharacter) return;
 
-  const skillsCfg = GAME_CONFIG.skills && GAME_CONFIG.skills.weapon;
+  const skillsCfg = GAME_CONFIG.skills && GAME_CONFIG.skillS().weapon;
   const skills = currentCharacter.skills;
 
   if (!skillsCfg || !skills) {
@@ -493,7 +494,7 @@ function updateSkillsPanel() {
   title.textContent = "Weapon Skills";
   skillsListContainer.appendChild(title);
 
-  skillKeys.forEach((key) => {
+  skillKeyS().forEach((key) => {
     const row = document.createElement("div");
     row.className = "equipment-summary-row";
 
@@ -543,7 +544,7 @@ function updateCharacterSummary() {
   // Only show the character name in the header; all stats are in the equipment view.
   if (!currentCharacter) {
     if (charSummaryName) charSummaryName.textContent = "";
-    if (charSummaryStats) charSummaryStats.textContent = "";
+    if (charSummaryStats) charSummaryStatS().textContent = "";
     return;
   }
 
@@ -552,7 +553,7 @@ function updateCharacterSummary() {
   }
 
   if (charSummaryStats) {
-    charSummaryStats.textContent = "";
+    charSummaryStatS().textContent = "";
   }
 }
 
