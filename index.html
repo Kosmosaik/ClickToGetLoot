@@ -234,49 +234,37 @@
   </div>
 </div>
 
-<script src="scripts/config.js"></script>
-<script src="scripts/core/pc.core.js"></script>
-<script src="scripts/core/pc.api.js"></script>
-<script src="scripts/quality.js"></script>
-<script src="scripts/items.js"></script>
-  
-<script src="scripts/inventory/inventory.state.js"></script>
-<script src="scripts/inventory/inventory.data.js"></script>
-<script src="scripts/inventory/inventory.core.js"></script>
-<script src="scripts/inventory/inventory.sort.js"></script>
-<script src="scripts/inventory/inventory.render.category.js"></script>
-<script src="scripts/inventory/inventory.persistence.js"></script>
-<script src="scripts/inventory.js"></script>
-  
-<script src="scripts/equipment/equipment.core.js"></script>
-<script src="scripts/equipment/equipment.tooltip.js"></script>
-<script src="scripts/equipment.js"></script>
-  
-<script src="scripts/character/character.core.js"></script>
-<script src="scripts/character/character.skills.js"></script>
-<script src="scripts/character/character.derived.js"></script>
-<script src="scripts/character/character.compute.js"></script>
-  <script src="scripts/character.js"></script>
-
-<script src="scripts/ui/ui.tooltip.js"></script>
-<script src="scripts/ui/ui.draggablePanels.js"></script>
-<script src="scripts/ui.js"></script>
-
 <script src="scripts/zones/zones.data.js"></script>
 <script src="scripts/zones/zones.generator.js"></script>
+
 <script src="scripts/worldmap/worldmap.slots.js"></script>
 <script src="scripts/worldmap/worldmap.core.js"></script>
 <script src="scripts/worldmap/worldmap.ui.js"></script>
+
 <script src="scripts/zones/zones.core.js"></script>
+
+<!-- game.js must come BEFORE modules that rely on its state helpers -->
+<script src="scripts/game.js"></script>
+
+<!-- movement must exist before exploration + UI that may call it -->
+<script src="scripts/zones/zones.movement.js"></script>
+
+<!-- exploration defines startZoneExplorationTicks/manual explore -->
+<script src="scripts/zones/zones.exploration.js"></script>
+
+<!-- zones UI binds buttons to the now-defined functions -->
 <script src="scripts/zones/zones.ui.js"></script>
 
+<!-- game modules that depend on game.js state helpers -->
 <script src="scripts/game/game.loot.js"></script>
 <script src="scripts/game/game.save.js"></script>
 <script src="scripts/game/game.patchnotes.js"></script>
-<script src="scripts/game/game.creation.js"></script>
 <script src="scripts/game/game.screens.js"></script>
 <script src="scripts/game/game.ui.panels.js"></script>
-<script src="scripts/game.js"></script>
+
+<!-- creation often calls setCurrentZone/setIsInZone, so it must be AFTER game.js -->
+<script src="scripts/game/game.creation.js"></script>
+
 <script src="scripts/bootstrap.js"></script>
 
 </body>
