@@ -125,9 +125,9 @@
       return;
     }
 
-    MOV().zoneMovementActive = true;
-    MOV().zoneMovementPath = path.slice();
-    MOV().zoneMovementOnArrival = (typeof onArrival === "function") ? onArrival : null;
+    PC.api.mov().zoneMovementActive = true;
+    PC.api.mov().zoneMovementPath = path.slice();
+    PC.api.mov().zoneMovementOnArrival = (typeof onArrival === "function") ? onArrival : null;
 
     const stepDelayMs = Math.max(50, 1000 / ZONE_MOVEMENT_TILES_PER_SECOND);
 
@@ -135,39 +135,39 @@
       const z = (typeof getCurrentZone === "function") ? getCurrentZone() : null;
       const inZ = (typeof getIsInZone === "function") ? getIsInZone() : false;
 
-      if (!MOV().zoneMovementActive || !z || !inZ) {
-        MOV().zoneMovementTimerId = null;
+      if (!PC.api.mov().zoneMovementActive || !z || !inZ) {
+        PC.api.mov().zoneMovementTimerId = null;
         return;
       }
 
-      if (!MOV().zoneMovementPath || MOV().zoneMovementPath.length === 0) {
-        MOV().zoneMovementActive = false;
-        MOV().zoneMovementTimerId = null;
-        const cb = MOV().zoneMovementOnArrival;
-        MOV().zoneMovementOnArrival = null;
+      if (!PC.api.mov().zoneMovementPath || PC.api.mov().zoneMovementPath.length === 0) {
+        PC.api.mov().zoneMovementActive = false;
+        PC.api.mov().zoneMovementTimerId = null;
+        const cb = PC.api.mov().zoneMovementOnArrival;
+        PC.api.mov().zoneMovementOnArrival = null;
         if (typeof cb === "function") cb();
         return;
       }
 
-      const next = MOV().zoneMovementPath.shift();
+      const next = PC.api.mov().zoneMovementPath.shift();
       setZonePlayerPosition(z, next.x, next.y);
 
       if (typeof renderZoneUI === "function") renderZoneUI();
 
-      MOV().zoneMovementTimerId = setTimeout(step, stepDelayMs);
+      PC.api.mov().zoneMovementTimerId = setTimeout(step, stepDelayMs);
     }
 
     step();
   }
 
   function stopZoneMovement() {
-    if (MOV().zoneMovementTimerId) {
-      clearTimeout(MOV().zoneMovementTimerId);
-      MOV().zoneMovementTimerId = null;
+    if (PC.api.mov().zoneMovementTimerId) {
+      clearTimeout(PC.api.mov().zoneMovementTimerId);
+      PC.api.mov().zoneMovementTimerId = null;
     }
-    MOV().zoneMovementActive = false;
-    MOV().zoneMovementPath = null;
-    MOV().zoneMovementOnArrival = null;
+    PC.api.mov().zoneMovementActive = false;
+    PC.api.mov().zoneMovementPath = null;
+    PC.api.mov().zoneMovementOnArrival = null;
   }
 
   // Preserve existing global names (so we don’t have to update every file right now)
