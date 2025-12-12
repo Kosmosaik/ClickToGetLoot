@@ -1,9 +1,6 @@
 // scripts/game.js
 console.log(`game.js loaded v${GAME_CONFIG.version}`);
 
-// ----- Screen elements -----
-const saveListContainer = document.getElementById("save-list");
-
 // ---- State bridge (temporary) ----
 // Source of truth is PC.state.
 // These helpers avoid direct globals and make refactors safe.
