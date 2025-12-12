@@ -19,4 +19,16 @@
     (typeof GAME_CONFIG !== "undefined") ? GAME_CONFIG : window.GAME_CONFIG;
 
   console.log(`Bootstrap OK — ProgressCrawl v${cfg.version}`);
+
+  // ---- App startup (single entrypoint) ----
+  // These functions live in other scripts; since bootstrap.js loads last,
+  // they should exist by now.
+  if (typeof setScreen === "function") setScreen("start");
+  else console.error("Bootstrap startup failed: setScreen() missing.");
+
+  if (typeof resetCharacterCreation === "function") resetCharacterCreation();
+  else console.error("Bootstrap startup failed: resetCharacterCreation() missing.");
+
+  if (typeof renderSaveList === "function") renderSaveList();
+  else console.error("Bootstrap startup failed: renderSaveList() missing.");
 })();
