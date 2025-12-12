@@ -11,6 +11,7 @@ Perfect! What do you think of the projects code structure? Is it good? Anything 
 Rules: 
 
 NEVER guess file contents
+
 Never duplicate state access
 Make sure to check all relevant scripts
 Never refactor structure without approval
