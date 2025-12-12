@@ -191,7 +191,10 @@ if (typeof createDebugZone === "function") {
         zone.playerY = sy;
       }
     } else {
-      console.warn("game.creation: entrySpawn out of bounds for tutorial_zone", zone.entrySpawn);
+      console.warn(
+        "game.creation: entrySpawn out of bounds for tutorial_zone",
+        zone.entrySpawn
+      );
     }
   }
 
@@ -199,21 +202,22 @@ if (typeof createDebugZone === "function") {
     normalizeZoneExploredConnectivity(zone);
   }
 
+  // Create the default world map for this new game.
+  // We know our starting zone is the tutorial zone.
+  if (typeof createDefaultWorldMap === "function") {
+    const wm = createDefaultWorldMap("tutorial_zone");
+    setWorldMap(wm);
+    console.log("World map created:", wm);
+
+    if (typeof renderWorldMapUI === "function") {
+      renderWorldMapUI();
+    }
+  }
+
   if (typeof renderZoneUI === "function") {
     renderZoneUI();
   }
+
+  setScreen("game");
 }
-    // Create the default world map for this new game.
-    // We know our starting zone is the tutorial zone.
-    if (typeof createDefaultWorldMap === "function") {
-      const wm = createDefaultWorldMap("tutorial_zone");
-      setWorldMap(wm);
-      console.log("World map created:", wm);
-    
-      if (typeof renderWorldMapUI === "function") {
-        renderWorldMapUI();
-      }
-    }
-    setScreen("game");
-  };
-}
+
