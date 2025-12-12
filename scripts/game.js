@@ -556,11 +556,6 @@ function updateCharacterSummary() {
   }
 }
 
-// ----- Initial screen -----
-setScreen("start");
-resetCharacterCreation();
-renderSaveList();
-
 // ----- Inventory / Loot / Equipment logic -----
 
 let inventoryUnlocked = false;
