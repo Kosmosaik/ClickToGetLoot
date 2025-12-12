@@ -1,4 +1,4 @@
-# ProgressCrawl – Technical Summary for Version 0.0.70d
+# ProgressCrawl – Technical Summary for Version 0.0.70e
 ### World Content Generation Systems + Initial Content Population
 
 ---
