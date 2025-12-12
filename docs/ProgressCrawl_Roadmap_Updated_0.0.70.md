@@ -19,7 +19,11 @@ A stable, persistent overworld ready to host dynamic and static content.
 
 ---
 
-## **0.0.70d — Static Zone Content Generation (Current Phase)**  
+## ** 0.0.70d - QoL updates (Improve Zone Generation, Exploration logic, UI/UX etc (ONGOING) ** ##
+
+---
+
+## **0.0.70e — Static Zone Content Generation (Current Phase)**  
 **Goal:** Populate zones with pre-generated content using the new template and scaffolding systems.
 
 ### Includes:
