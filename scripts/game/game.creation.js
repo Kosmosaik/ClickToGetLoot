@@ -147,7 +147,7 @@ if (btnCreateCharacter) {
         int: creationStats.int,
         vit: creationStats.vit,
       },
-      // New: weapon skills
+      // Weapon skills
       skills: createDefaultSkills(),
     };
 
@@ -157,67 +157,58 @@ if (btnCreateCharacter) {
     // Fresh save for this character (empty inventory)
     saveCurrentGame();
     updateCharacterSummary();
-    
-    // --- 0.0.70a / 0.0.70c+: Enter Starting Zone automatically (exploration paused) ---
-    if (typeof createDebugZone === "function") {
-      // Build the tutorial zone via the normal definition pipeline.
-      currentZone = createZoneFromDefinition("tutorial_zone");
-      isInZone = true;
-      console.log("Entered Starting Zone (Debug):", currentZone);
 
-// --- 0.0.70a / 0.0.70c+: Enter Starting Zone automatically (exploration paused) ---
-if (typeof createDebugZone === "function") {
-  const zone = createZoneFromDefinition("tutorial_zone");
-  setCurrentZone(zone);
-  setIsInZone(true);
+    // --- Enter Starting Zone automatically (exploration paused) ---
+    const zone = createZoneFromDefinition("tutorial_zone");
+    setCurrentZone(zone);
+    setIsInZone(true);
 
-  console.log("Entered Starting Zone (Debug):", zone);
+    console.log("Entered Starting Zone (Debug):", zone);
 
-  // Place the player on the zone's entry spawn tile, same as world map entry.
-  if (zone && zone.entrySpawn && zone.tiles) {
-    const sx = zone.entrySpawn.x;
-    const sy = zone.entrySpawn.y;
+    // Place the player on the zone's entry spawn tile, same as world map entry.
+    if (zone && zone.entrySpawn && zone.tiles) {
+      const sx = zone.entrySpawn.x;
+      const sy = zone.entrySpawn.y;
 
-    if (
-      typeof sx === "number" && typeof sy === "number" &&
-      sy >= 0 && sy < zone.height &&
-      sx >= 0 && sx < zone.width
-    ) {
-      const spawnTile = zone.tiles[sy][sx];
-      if (spawnTile) {
-        spawnTile.explored = true;
-        setZonePlayerPosition(zone, sx, sy);
-        zone.playerX = sx;
-        zone.playerY = sy;
+      if (
+        typeof sx === "number" && typeof sy === "number" &&
+        sy >= 0 && sy < zone.height &&
+        sx >= 0 && sx < zone.width
+      ) {
+        const spawnTile = zone.tiles[sy][sx];
+        if (spawnTile) {
+          spawnTile.explored = true;
+          setZonePlayerPosition(zone, sx, sy);
+          zone.playerX = sx;
+          zone.playerY = sy;
+        }
+      } else {
+        console.warn(
+          "game.creation: entrySpawn out of bounds for tutorial_zone",
+          zone.entrySpawn
+        );
       }
-    } else {
-      console.warn(
-        "game.creation: entrySpawn out of bounds for tutorial_zone",
-        zone.entrySpawn
-      );
     }
-  }
 
-  if (typeof normalizeZoneExploredConnectivity === "function") {
-    normalizeZoneExploredConnectivity(zone);
-  }
-
-  // Create the default world map for this new game.
-  // We know our starting zone is the tutorial zone.
-  if (typeof createDefaultWorldMap === "function") {
-    const wm = createDefaultWorldMap("tutorial_zone");
-    setWorldMap(wm);
-    console.log("World map created:", wm);
-
-    if (typeof renderWorldMapUI === "function") {
-      renderWorldMapUI();
+    if (typeof normalizeZoneExploredConnectivity === "function") {
+      normalizeZoneExploredConnectivity(zone);
     }
-  }
 
-  if (typeof renderZoneUI === "function") {
-    renderZoneUI();
-  }
+    // Create the default world map for this new game.
+    if (typeof createDefaultWorldMap === "function") {
+      const wm = createDefaultWorldMap("tutorial_zone");
+      setWorldMap(wm);
+      console.log("World map created:", wm);
 
-  setScreen("game");
+      if (typeof renderWorldMapUI === "function") {
+        renderWorldMapUI();
+      }
+    }
+
+    if (typeof renderZoneUI === "function") {
+      renderZoneUI();
+    }
+
+    setScreen("game");
+  });
 }
-
