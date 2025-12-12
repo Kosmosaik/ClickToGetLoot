@@ -148,11 +148,6 @@ function enterZoneFromWorldMap(x, y) {
   console.log(`Entered zone from world map: ${tile.zoneId}`, newZone);
 }
 
-// ---- Runtime state (authoritative) ----
-// IMPORTANT: avoid global const collisions across scripts.
-const exp = EXP();
-const mov = MOV();
-
 exp.zoneExplorationActive = exp.zoneExplorationActive ?? false;
 exp.zoneExplorationTimerId = exp.zoneExplorationTimerId ?? null;
 exp.zoneManualExplorationActive = exp.zoneManualExplorationActive ?? false;
