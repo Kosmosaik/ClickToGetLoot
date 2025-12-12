@@ -849,7 +849,7 @@ function updateHPBar() {
  */
 function recomputeCharacterComputedState() {
   if (!currentCharacter) {
-    characterComputed = null;
+    setCharacterComputed(null);
     updateEquipmentPanel();
     console.warn("recomputeCharacterComputedState: no currentCharacter yet");
     return;
@@ -859,9 +859,8 @@ function recomputeCharacterComputedState() {
   const equipmentSummary = summarizeEquipmentForCharacter();
 
   // Ask character.js to build the full computed state
-  characterComputed = buildCharacterComputedState(
-    currentCharacter,
-    equipmentSummary
+  setCharacterComputed(
+    buildCharacterComputedState(currentCharacter, equipmentSummary)
   );
 
   updateEquipmentPanel();
@@ -870,7 +869,7 @@ function recomputeCharacterComputedState() {
   updateSkillsPanel(); // NEW
 
   // For debugging:
-  console.log("Character computed state:", characterComputed);
+  console.log("Character computed state:", getCharacterComputed());
 }
 
 /**
@@ -884,14 +883,15 @@ function updateEquipmentPanel() {
   equipmentSlotsContainer.innerHTML = "";
   equipmentSummaryContainer.innerHTML = "";
 
-  // No character? show nothing but early exit
-  if (!currentCharacter || !characterComputed) {
+  // No character or no computed state? show nothing but early exit
+  const cc = getCharacterComputed();
+  if (!currentCharacter || !cc) {
     return;
   }
 
   const equippedState = getEquippedState(); // from equipment.js
-  const attrs = characterComputed.attributeTotals;
-  const derived = characterComputed.derivedStats;
+  const attrs = cc.attributeTotals;
+  const derived = cc.derivedStats;
 
   const slotDefs = [
     { key: "weapon",  label: "Weapon" },
@@ -1153,8 +1153,8 @@ let inventoryUnlocked = false;
 let equipmentUnlocked = false;
 
 window.debugCharacterComputed = () => {
-  console.log("Character computed state:", characterComputed);
-  return characterComputed;
+  console.log("Character computed state:", getCharacterComputed());
+  return getCharacterComputed();
 };
 
 window.debugZoneState = () => {
