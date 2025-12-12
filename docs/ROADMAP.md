@@ -15,9 +15,9 @@ Unlocks real gameplay beyond clicking “Loot”. Exploring
 - Each zone has:
   - Level range / Difficulty system (we need to discuss this a lot to find a good balance), a specific biome, Points of interests (small interactable objects/areas), locations (stage-transitioning areas where new exploration progress starts with its oen POIs and entities), enemies etc. Not all of this will be implemented in 0.0.70, but it till be discussed and a lot of decisions will be made here to set the foundation going forward.
 - Zone unlock progression (unlocks adjacent/neighbouring zones to "finished" zones)
-- A Starting Zone that the player will begin in. This zone will contain all the tutorials and we will focus on expanding this zone first after the world map and starting zone has been implemented. This zone will have predefined quests/tasks that the player will have to complete before 100%-ing the zone and continue to the next zone, while future zones will have optional/randomly generated quests and progress will be more time based.
-- Generate Resource Nodes and POIs (Locations and Entities will come later).
-- Make resource nodes contain resources (item/loot table) - No interaction/gathering system yet.
+- A Starting Zone that the player will begin in. This zone will in the future have predefined quests/tasks that the player will have to complete before 100%-ing the zone and continue to the next zone, while future zones     will have optional/randomly generated quests and progress will be more time based.
+- Generate Resource Nodes, Entities, POIs and Locations.
+- Make resource nodes contain resources (item/loot table) - Simple click and harvest interaction for now.
 
 
 ### UI:
