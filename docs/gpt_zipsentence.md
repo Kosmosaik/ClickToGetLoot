@@ -13,3 +13,9 @@ Rules:
 Create new scripts if we're working on new modules to keep the project modular already from the beginning.
 
 2. Never guess what's in my scripts and write hypothetical code. Always read the scripts from the .zip or ask me to send the code in the chat.
+
+3. I want changes ONLY based on the exact contents of this file. If something is missing, ask me to paste it.
+
+4. Give me the FULL function to replace instead of small lines of code.
+
+5. Stop. Summarize exactly what changed, what files were touched, and what behavior should be tested.
