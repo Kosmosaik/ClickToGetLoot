@@ -182,13 +182,15 @@ function unequipSlotToInventory(slotKey) {
 
 function changeWeaponSkill(key, delta) {
   if (!currentCharacter) return;
-  const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skills().weapon) || {};
+
+  const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skills.weapon) || {};
   const min = cfg.minLevel ?? 0;
   const max = cfg.maxLevel ?? 200;
 
-  if (!currentCharacter.skills) {
+  if (!currentCharacter.skills && typeof createDefaultSkills === "function") {
     currentCharacter.skills = createDefaultSkills();
   }
+  if (!currentCharacter.skills) return;
 
   const oldVal = currentCharacter.skills[key] ?? 0;
   let next = oldVal + delta;
@@ -199,8 +201,9 @@ function changeWeaponSkill(key, delta) {
 
   currentCharacter.skills[key] = next;
 
-  // Recompute + autosave
-  recomputeCharacterComputedState();
+  if (typeof recomputeCharacterComputedState === "function") {
+    recomputeCharacterComputedState();
+  }
   if (typeof saveCurrentGame === "function") {
     saveCurrentGame();
   }
@@ -235,13 +238,12 @@ function updateHPBar() {
     return;
   }
 
-  const max = cc.derivedStats().maxHP || 0;
+  const max = cc.derivedStats.maxHP || 0;
   if (max <= 0) {
     hpBarContainer.style.display = "none";
     return;
   }
 
-  // For now, always full HP (no damage system yet)
   let hp = getCurrentHP();
   if (!hp || hp > max) {
     hp = max;
@@ -314,7 +316,7 @@ function updateEquipmentPanel() {
   ];
 
   // ---- Slot rows ----
-  slotDefs().forEach((def) => {
+  slotDefs.forEach((def) => {
     const row = document.createElement("div");
     row.className = "equipment-slot-row";
 
@@ -367,9 +369,9 @@ function updateEquipmentPanel() {
   attrsTitle.className = "equipment-summary-title";
   attrsTitle.textContent = "Attributes";
   attrsSection.appendChild(attrsTitle);
-
-  const total = attrs().total;
-  const bonus = attrS().bonus;
+  
+  const total = (attrs && attrs.total) || {};
+  const bonus = (attrs && attrs.bonus) || {};
 
   function makeAttrRow(label, key) {
     const row = document.createElement("div");
@@ -472,10 +474,9 @@ function updateSkillsPanel() {
   if (!skillsPanel || !skillsListContainer) return;
 
   skillsListContainer.innerHTML = "";
-
   if (!currentCharacter) return;
 
-  const skillsCfg = GAME_CONFIG.skills && GAME_CONFIG.skillS().weapon;
+  const skillsCfg = GAME_CONFIG.skills && GAME_CONFIG.skills.weapon;
   const skills = currentCharacter.skills;
 
   if (!skillsCfg || !skills) {
@@ -491,12 +492,12 @@ function updateSkillsPanel() {
   title.textContent = "Weapon Skills";
   skillsListContainer.appendChild(title);
 
-  skillKeys().forEach((key) => {
+  skillKeys.forEach((key) => {
     const row = document.createElement("div");
     row.className = "equipment-summary-row";
 
     const left = document.createElement("span");
-    left.textContent = labels[key] + ":";
+    left.textContent = (labels[key] || key) + ":";
     row.appendChild(left);
 
     const mid = document.createElement("span");
@@ -512,7 +513,7 @@ function updateSkillsPanel() {
     minusBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       changeWeaponSkill(key, -1);
-      updateSkillsPanel();
+      // recomputeCharacterComputedState() will update the panel
     });
 
     const plusBtn = document.createElement("button");
@@ -522,7 +523,7 @@ function updateSkillsPanel() {
     plusBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       changeWeaponSkill(key, +1);
-      updateSkillsPanel();
+      // recomputeCharacterComputedState() will update the panel
     });
 
     right.appendChild(minusBtn);
@@ -538,10 +539,9 @@ let currentCharacter = null;
 let currentSaveId = null;
 
 function updateCharacterSummary() {
-  // Only show the character name in the header; all stats are in the equipment view.
   if (!currentCharacter) {
     if (charSummaryName) charSummaryName.textContent = "";
-    if (charSummaryStats) charSummaryStats().textContent = "";
+    if (charSummaryStats) charSummaryStats.textContent = "";
     return;
   }
 
@@ -550,7 +550,7 @@ function updateCharacterSummary() {
   }
 
   if (charSummaryStats) {
-    charSummaryStatS().textContent = "";
+    charSummaryStats.textContent = "";
   }
 }
 
