@@ -10,12 +10,12 @@ const saveListContainer = document.getElementById("save-list");
 
 const S = PC.state;
 
-// Optional: initialize from existing state (if any)
+// Initialize fields (these are DATA fields, not functions)
 S.currentHP = S.currentHP ?? 0;
 S.characterComputed = S.characterComputed ?? null;
-S.getCurrentZone() = S.getCurrentZone() ?? null;
-S.getIsInZone() = S.getIsInZone() ?? false;
-S.getWorldMap() = S.getWorldMap() ?? null;
+S.currentZone = S.currentZone ?? null;
+S.isInZone = S.isInZone ?? false;
+S.worldMap = S.worldMap ?? null;
 
 // Getters / setters
 function getCurrentHP() { return S.currentHP; }
@@ -24,14 +24,15 @@ function setCurrentHP(v) { S.currentHP = v; }
 function getCharacterComputed() { return S.characterComputed; }
 function setCharacterComputed(v) { S.characterComputed = v; }
 
-function getgetCurrentZone()() { return S.getCurrentZone(); }
-function setgetCurrentZone()(z) { S.getCurrentZone() = z; }
+function getCurrentZone() { return S.currentZone; }
+function setCurrentZone(z) { S.currentZone = z; }
 
-function getgetIsInZone()() { return S.getIsInZone(); }
-function setgetIsInZone()(v) { S.getIsInZone() = v; }
+function getIsInZone() { return S.isInZone; }
+function setIsInZone(v) { S.isInZone = v; }
 
-function getgetWorldMap()() { return S.getWorldMap(); }
-function setgetWorldMap()(m) { S.getWorldMap() = m; }
+function getWorldMap() { return S.worldMap; }
+function setWorldMap(m) { S.worldMap = m; }
+
 
 function clearActiveExplorationFlag(zone) {
   for (let y = 0; y < zone.height; y++) {
@@ -41,21 +42,21 @@ function clearActiveExplorationFlag(zone) {
   }
 }
 
-function enterZoneFromgetWorldMap()(x, y) {
-  if (typeof getgetWorldMap()Tile !== "function") {
-    console.warn("enterZoneFromgetWorldMap(): getgetWorldMap()Tile is not available.");
+function enterZoneFromWorldMap(x, y) {
+  if (typeof getWorldMapTile !== "function") {
+    console.warn("enterZoneFromWorldMap: getWorldMapTile is not available.");
     return;
   }
 
-  const wm = getgetWorldMap()();
+  const wm = getWorldMap();
   if (!wm) {
-    console.warn("enterZoneFromgetWorldMap(): getWorldMap() is not initialized.");
+    console.warn("enterZoneFromWorldMap: getWorldMap() is not initialized.");
     return;
   }
 
-  const tile = getgetWorldMap()Tile(wm, x, y);
+  const tile = getWorldMapTile(wm, x, y);
   if (!tile || !tile.zoneId) {
-    console.warn("enterZoneFromgetWorldMap(): no zone mapped at", x, y);
+    console.warn("enterZoneFromWorldMap: no zone mapped at", x, y);
     return;
   }
 
@@ -65,7 +66,7 @@ function enterZoneFromgetWorldMap()(x, y) {
   }
 
   if (typeof createZoneFromDefinition !== "function") {
-    console.error("enterZoneFromgetWorldMap(): createZoneFromDefinition is missing.");
+    console.error("enterZoneFromWorldMap: createZoneFromDefinition is missing.");
     return;
   }
 
@@ -77,22 +78,23 @@ function enterZoneFromgetWorldMap()(x, y) {
       ensureGeneratedZoneDefinitionForWorldTile(tile);
     }
   } else {
-    console.error("enterZoneFromgetWorldMap(): ZONE_DEFINITIONS is not defined.");
+    console.error("enterZoneFromWorldMap: ZONE_DEFINITIONS is not defined.");
     return;
   }
 
   // Create zone instance
   const newZone = createZoneFromDefinition(tile.zoneId);
   if (!newZone) {
-    console.error("enterZoneFromgetWorldMap(): failed to create zone", tile.zoneId);
+    console.error("enterZoneFromWorldMap: failed to create zone", tile.zoneId);
     return;
   }
 
   // Switch state to the new zone
-  setgetCurrentZone()(newZone);
-  setgetIsInZone()(true);
+  setCurrentZone(newZone);
+  setIsInZone(true);
+  
+  const zone = getCurrentZone();
 
-  const zone = getgetCurrentZone()();
 
   // Place player on entry spawn immediately (0.0.70c+)
   if (zone && zone.entrySpawn && zone.tiles) {
@@ -112,7 +114,7 @@ function enterZoneFromgetWorldMap()(x, y) {
         zone.playerY = sy;
       }
     } else {
-      console.warn("enterZoneFromgetWorldMap(): entrySpawn out of bounds", zone.entrySpawn);
+      console.warn("enterZoneFromWorldMap: entrySpawn out of bounds", zone.entrySpawn);
     }
   }
 
@@ -128,7 +130,7 @@ function enterZoneFromgetWorldMap()(x, y) {
 
   wm.currentX = x;
   wm.currentY = y;
-  setgetWorldMap()(wm);
+  setWorldMap(wm);
 
   // Switch panels: hide world map, show zone
   if (typeof switchToZoneView === "function") {
@@ -139,8 +141,8 @@ function enterZoneFromgetWorldMap()(x, y) {
   if (typeof renderZoneUI === "function") {
     renderZoneUI();
   }
-  if (typeof rendergetWorldMap()UI === "function") {
-    rendergetWorldMap()UI();
+  if (typeof renderWorldMapUI === "function") {
+    renderWorldMapUI();
   }
 
   console.log(`Entered zone from world map: ${tile.zoneId}`, newZone);
@@ -1163,7 +1165,8 @@ window.debugZoneState = () => {
   return getCurrentZone();
 };
 
-window.debuggetWorldMap() = () => {
+window.debugWorldMap = () => {
   console.log("World Map:", getWorldMap());
   return getWorldMap();
 };
+
