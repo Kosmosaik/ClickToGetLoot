@@ -22,12 +22,10 @@ const zoneFinishMenuEl = document.getElementById("zone-finish-menu");
 const zoneFinishStayBtn = document.getElementById("zone-finish-stay");
 const zoneFinishLeaveBtn = document.getElementById("zone-finish-leave");
 
-// ----- Authoritative runtime state (PC.state) -----
 // IMPORTANT: avoid global const collisions across scripts.
 function STATE() { return PC.state; }
-function EXP() { return PC.STATE().exploration; }
-function MOV() { return PC.STATE().movement; }
-
+function EXP() { return PC.state.exploration; }
+function MOV() { return PC.state.movement; }
 
 function getZone() {
   return STATE().currentZone;
