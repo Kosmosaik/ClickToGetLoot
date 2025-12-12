@@ -235,7 +235,7 @@ window.addZoneDiscovery = addZoneDiscovery;
 if (zoneExploreNextBtn) {
   zoneExploreNextBtn.addEventListener("click", () => {
     if (typeof startZoneManualExploreOnce !== "function") return;
-    startZoneManualExploreOnce();
+    PC.api.zone.exploreOnce();
     renderZoneUI();
   });
 }
@@ -247,7 +247,7 @@ if (zoneExploreAutoBtn) {
     if (!getZone() || !inZone()) return;
     if (EXP().zoneExplorationActive) return; // already exploring
     if (typeof startZoneExplorationTicks === "function") {
-      startZoneExplorationTicks();
+      PC.api.zone.startAutoExplore();
     }
     renderZoneUI();
   });
@@ -258,7 +258,7 @@ if (zoneExploreStopBtn) {
   zoneExploreStopBtn.addEventListener("click", () => {
     if (!EXP().zoneExplorationActive) return;
     if (typeof stopZoneExplorationTicks === "function") {
-      stopZoneExplorationTicks();
+      PC.api.zone.stopAutoExplore();
     }
     addZoneMessage("You stop to catch your breath and look around.");
     renderZoneUI();
