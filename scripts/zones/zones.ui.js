@@ -23,15 +23,17 @@ const zoneFinishStayBtn = document.getElementById("zone-finish-stay");
 const zoneFinishLeaveBtn = document.getElementById("zone-finish-leave");
 
 // ----- Authoritative runtime state (PC.state) -----
-const STATE = PC.state;
-const EXP = STATE.exploration;
-const MOV = STATE.movement;
+// IMPORTANT: avoid global const collisions across scripts.
+function STATE() { return PC.state; }
+function EXP() { return PC.STATE().exploration; }
+function MOV() { return PC.STATE().movement; }
+
 
 function getZone() {
-  return STATE.currentZone;
+  return STATE().currentZone;
 }
 function inZone() {
-  return !!STATE.isInZone;
+  return !!STATE().isInZone;
 }
 
 // ----- Helpers -----
@@ -102,11 +104,11 @@ function getZoneStatusText(zone, stats) {
     return "Status: Zone completed";
   }
 
-  if (EXP.zoneExplorationActive) {
+  if (EXP().zoneExplorationActive) {
     return "Status: Exploring (Auto)";
   }
 
-  if (EXP.zoneManualExplorationActive) {
+  if (EXP().zoneManualExplorationActive) {
     return "Status: Exploring (Manual)";
   }
 
@@ -178,13 +180,13 @@ function renderZoneUI() {
   // Button states
   const canExplore =
     inZone() &&
-    !MOV.zoneMovementActive &&
+    !MOV().zoneMovementActive &&
     stats &&
     stats.totalExplorableTiles > 0 &&
     stats.percentExplored < 100;
 
   const anyExploreInProgress =
-    EXP.zoneExplorationActive || EXP.zoneManualExplorationActive;
+    EXP().zoneExplorationActive || EXP().zoneManualExplorationActive;
 
   if (zoneExploreNextBtn) {
     zoneExploreNextBtn.disabled = !canExplore || anyExploreInProgress;
@@ -193,7 +195,7 @@ function renderZoneUI() {
     zoneExploreAutoBtn.disabled = !canExplore || anyExploreInProgress;
   }
   if (zoneExploreStopBtn) {
-    zoneExploreStopBtn.disabled = !EXP.zoneExplorationActive;
+    zoneExploreStopBtn.disabled = !EXP().zoneExplorationActive;
   }
 }
 
@@ -245,7 +247,7 @@ if (zoneExploreNextBtn) {
 if (zoneExploreAutoBtn) {
   zoneExploreAutoBtn.addEventListener("click", () => {
     if (!getZone() || !inZone()) return;
-    if (EXP.zoneExplorationActive) return; // already exploring
+    if (EXP().zoneExplorationActive) return; // already exploring
     if (typeof startZoneExplorationTicks === "function") {
       startZoneExplorationTicks();
     }
@@ -256,7 +258,7 @@ if (zoneExploreAutoBtn) {
 // Stop Exploring (stop tick-based exploring)
 if (zoneExploreStopBtn) {
   zoneExploreStopBtn.addEventListener("click", () => {
-    if (!EXP.zoneExplorationActive) return;
+    if (!EXP().zoneExplorationActive) return;
     if (typeof stopZoneExplorationTicks === "function") {
       stopZoneExplorationTicks();
     }
@@ -336,13 +338,13 @@ if (zoneFinishLeaveBtn) {
 
     // 2) Mark the world map tile for this zone as VISITED and update currentX/currentY
     //    (only if we have both worldMap and currentZone and the helper exists)
-    if (STATE.worldMap && getZone() && typeof markWorldTileVisited === "function") {
-      markWorldTileVisited(STATE.worldMap, getZone().id);
+    if (STATE().worldMap && getZone() && typeof markWorldTileVisited === "function") {
+      markWorldTileVisited(STATE().worldMap, getZone().id);
     }
 
     // 3) Update main state to "not in a zone"
-    STATE.isInZone = false;
-    STATE.currentZone = null;
+    STATE().isInZone = false;
+    STATE().currentZone = null;
 
     // 4) Add a message (while the zone panel is still visible)
     addZoneMessage("You leave the area behind.");
