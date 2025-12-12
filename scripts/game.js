@@ -817,25 +817,28 @@ function changeAttribute(key, delta) {
 function updateHPBar() {
   if (!hpBarContainer || !hpBarFill || !hpBarLabel) return;
 
-  if (!characterComputed || !characterComputed.derivedStats) {
+  const cc = getCharacterComputed();
+  if (!cc || !cc.derivedStats) {
     hpBarContainer.style.display = "none";
     return;
   }
 
-  const max = characterComputed.derivedStats.maxHP || 0;
+  const max = cc.derivedStats.maxHP || 0;
   if (max <= 0) {
     hpBarContainer.style.display = "none";
     return;
   }
 
   // For now, always full HP (no damage system yet)
-  if (!currentHP || currentHP > max) {
-    currentHP = max;
+  let hp = getCurrentHP();
+  if (!hp || hp > max) {
+    hp = max;
+    setCurrentHP(hp);
   }
 
-  const pct = Math.max(0, Math.min(100, (currentHP / max) * 100));
+  const pct = Math.max(0, Math.min(100, (hp / max) * 100));
   hpBarFill.style.width = `${pct}%`;
-  hpBarLabel.textContent = `HP ${Math.round(currentHP)}/${Math.round(max)}`;
+  hpBarLabel.textContent = `HP ${Math.round(hp)}/${Math.round(max)}`;
   hpBarContainer.style.display = "block";
 }
 
