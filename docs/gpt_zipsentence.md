@@ -9,13 +9,22 @@ Perfect! What do you think of the projects code structure? Is it good? Anything 
 ---
 
 Rules: 
-1. Don't put code temporarily to already existing scripts if we don't intend to keep them there in the future (like we've done to game.js before).
-Create new scripts if we're working on new modules to keep the project modular already from the beginning.
 
-2. Never guess what's in my scripts and write hypothetical code. Always read the scripts from the .zip or ask me to send the code in the chat.
+NEVER guess file contents
+Never duplicate state access
+Make sure to check all relevant scripts
+Never refactor structure without approval
+Always provide full replacement blocks
+Summarize changes before continuing
 
-3. I want changes ONLY based on the exact contents of this file. If something is missing, ask me to paste it.
+New systems (resource nodes/entities/POIs) must:
 
-4. Give me the FULL function to replace instead of small lines of code.
+store their persistent data under PC.state.* (or the appropriate state subtree),
 
-5. Stop. Summarize exactly what changed, what files were touched, and what behavior should be tested.
+expose read/write via STATE()/EXP()/MOV() (or a new PC.api.* accessor if needed),
+
+expose actions via PC.api.<domain>.*,
+
+never create a new global function STATE() or new direct PC.state alias.
+
+This prevents the “must refactor again” loop.
