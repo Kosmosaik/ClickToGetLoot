@@ -167,7 +167,6 @@ if (btnCreateCharacter) {
 
 // --- 0.0.70a / 0.0.70c+: Enter Starting Zone automatically (exploration paused) ---
 if (typeof createDebugZone === "function") {
-  // Build the tutorial zone via the normal definition pipeline.
   const zone = createZoneFromDefinition("tutorial_zone");
   setCurrentZone(zone);
   setIsInZone(true);
@@ -178,6 +177,7 @@ if (typeof createDebugZone === "function") {
   if (zone && zone.entrySpawn && zone.tiles) {
     const sx = zone.entrySpawn.x;
     const sy = zone.entrySpawn.y;
+
     if (
       typeof sx === "number" && typeof sy === "number" &&
       sy >= 0 && sy < zone.height &&
@@ -185,29 +185,23 @@ if (typeof createDebugZone === "function") {
     ) {
       const spawnTile = zone.tiles[sy][sx];
       if (spawnTile) {
-        // Reveal the spawn tile and set the player marker.
         spawnTile.explored = true;
         setZonePlayerPosition(zone, sx, sy);
         zone.playerX = sx;
         zone.playerY = sy;
       }
     } else {
-      console.warn(
-        "game.creation: entrySpawn out of bounds for tutorial_zone",
-        zone.entrySpawn
-      );
+      console.warn("game.creation: entrySpawn out of bounds for tutorial_zone", zone.entrySpawn);
     }
   }
 
-  // Clean up any legacy explored islands (probably empty here, but safe).
   if (typeof normalizeZoneExploredConnectivity === "function") {
     normalizeZoneExploredConnectivity(zone);
   }
 
   if (typeof renderZoneUI === "function") {
-    renderZoneUI(); // show the zone immediately
+    renderZoneUI();
   }
-  // Do NOT start auto exploration here.
 }
     // Create the default world map for this new game.
     // We know our starting zone is the tutorial zone.
