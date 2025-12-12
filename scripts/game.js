@@ -185,7 +185,7 @@ function unequipSlotToInventory(slotKey) {
 
 function changeWeaponSkill(key, delta) {
   if (!currentCharacter) return;
-  const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skillS().weapon) || {};
+  const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skills().weapon) || {};
   const min = cfg.minLevel ?? 0;
   const max = cfg.maxLevel ?? 200;
 
@@ -238,7 +238,7 @@ function updateHPBar() {
     return;
   }
 
-  const max = cc.derivedStatS().maxHP || 0;
+  const max = cc.derivedStats().maxHP || 0;
   if (max <= 0) {
     hpBarContainer.style.display = "none";
     return;
@@ -317,7 +317,7 @@ function updateEquipmentPanel() {
   ];
 
   // ---- Slot rows ----
-  slotDefS().forEach((def) => {
+  slotDefs().forEach((def) => {
     const row = document.createElement("div");
     row.className = "equipment-slot-row";
 
@@ -371,7 +371,7 @@ function updateEquipmentPanel() {
   attrsTitle.textContent = "Attributes";
   attrsSection.appendChild(attrsTitle);
 
-  const total = attrS().total;
+  const total = attrs().total;
   const bonus = attrS().bonus;
 
   function makeAttrRow(label, key) {
@@ -494,7 +494,7 @@ function updateSkillsPanel() {
   title.textContent = "Weapon Skills";
   skillsListContainer.appendChild(title);
 
-  skillKeyS().forEach((key) => {
+  skillKeys().forEach((key) => {
     const row = document.createElement("div");
     row.className = "equipment-summary-row";
 
@@ -544,7 +544,7 @@ function updateCharacterSummary() {
   // Only show the character name in the header; all stats are in the equipment view.
   if (!currentCharacter) {
     if (charSummaryName) charSummaryName.textContent = "";
-    if (charSummaryStats) charSummaryStatS().textContent = "";
+    if (charSummaryStats) charSummaryStats().textContent = "";
     return;
   }
 
