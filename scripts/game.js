@@ -148,16 +148,20 @@ function enterZoneFromWorldMap(x, y) {
   console.log(`Entered zone from world map: ${tile.zoneId}`, newZone);
 }
 
+// Ensure exploration/movement substates are initialized (covers older saves / partial state)
+const exp = EXP();
 exp.zoneExplorationActive = exp.zoneExplorationActive ?? false;
 exp.zoneExplorationTimerId = exp.zoneExplorationTimerId ?? null;
 exp.zoneManualExplorationActive = exp.zoneManualExplorationActive ?? false;
 exp.zoneManualTimerId = exp.zoneManualTimerId ?? null;
 exp.zoneExploreDelayTimerId = exp.zoneExploreDelayTimerId ?? null;
 
+const mov = MOV();
 mov.zoneMovementActive = mov.zoneMovementActive ?? false;
 mov.zoneMovementTimerId = mov.zoneMovementTimerId ?? null;
 mov.zoneMovementPath = mov.zoneMovementPath ?? null;
 mov.zoneMovementOnArrival = mov.zoneMovementOnArrival ?? null;
+
 
 // Movement speed: tiles per second. You can override this in GAME_CONFIG.zone
 // by adding "movementTilesPerSecond" there.
