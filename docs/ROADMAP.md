@@ -167,7 +167,6 @@ These may be slotted later depending on direction:
 - Housing / base-building
 - Farming / resource nodes
 - Multiplayer features
-- Cosmetics / skins
 - World map view
 
 ---
