@@ -95,11 +95,9 @@ function saveCurrentGame() {
       equipmentUnlocked: equipmentUnlocked,
     },
 
-    // 0.0.70c — persist world map / world slots
-    // This stores the full worldMap object (width, height, tiles and metadata).
-    worldMap: typeof worldMap !== "undefined" ? worldMap : null,
+    // 0.0.70c+ — persist world map (owned by PC.state, not a global)
+    worldMap: (typeof STATE === "function" ? STATE().worldMap : null),
   };
-
 
   const idx = saves.findIndex(s => s.id === snapshot.id);
   if (idx === -1) {
@@ -117,7 +115,7 @@ function loadSave(id) {
   const saves = loadAllSaves();
   const save = saves.find(s => s.id === id);
   if (!save) return;
-  
+
   currentCharacter = {
     name: save.name,
     stats: { ...save.stats },
@@ -129,19 +127,26 @@ function loadSave(id) {
 
   loadInventoryFromSnapshot(save.inventory || {});
 
-  // 0.0.70c — Restore world map / world slots (if present in the save).
-  // For old saves that don't have worldMap, create a fresh default map.
+  // 0.0.70c+ — Restore world map from save into PC.state (no globals)
   if (save.worldMap) {
-    worldMap = save.worldMap;
+    if (typeof setWorldMap === "function") {
+      setWorldMap(save.worldMap);
+    } else if (typeof STATE === "function") {
+      STATE().worldMap = save.worldMap;
+    }
   } else if (typeof createDefaultWorldMap === "function") {
-    worldMap = createDefaultWorldMap("tutorial_zone");
+    const wm = createDefaultWorldMap("tutorial_zone");
+    if (typeof setWorldMap === "function") {
+      setWorldMap(wm);
+    } else if (typeof STATE === "function") {
+      STATE().worldMap = wm;
+    }
   }
-  
+
   // Restore equipped items (if present)
   if (save.equipped) {
     loadEquippedFromSnapshot(save.equipped);
   } else {
-    // If there was no equipment in the old save format, clear equipped.
     loadEquippedFromSnapshot(null);
   }
 
@@ -156,7 +161,6 @@ function loadSave(id) {
   const hasEquippedItems =
     save.equipped && Object.values(save.equipped).some(Boolean);
 
-  // If old save (no flags), infer from contents
   inventoryUnlocked =
     typeof feats.inventoryUnlocked === "boolean"
       ? feats.inventoryUnlocked
@@ -177,16 +181,15 @@ function loadSave(id) {
     equipmentPanel.style.display = "none";
   }
 
-  // 0.0.70c — Re-render world map if we have it in this save.
-  if (typeof renderWorldMapUI === "function" && typeof worldMap !== "undefined" && worldMap) {
+  // Re-render world map (renderer reads from STATE().worldMap)
+  if (typeof renderWorldMapUI === "function") {
     renderWorldMapUI();
   }
 
   // Show the main game screen
   setScreen("game");
 
-  // 0.0.70c — After loading a save, default to the World Map view
-  // (hide the Zone panel that says "No active zone").
+  // After loading a save, default to the World Map view
   if (typeof switchToWorldMapView === "function") {
     switchToWorldMapView();
   }
