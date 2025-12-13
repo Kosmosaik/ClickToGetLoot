@@ -9,7 +9,7 @@
 <body>
 <div id="game-header">
   <span class="game-header-text">
-    ProgressCrawl — v0.0.70d3-dev : QoL & Improvements part 3 v12
+    ProgressCrawl — v0.0.70d4-dev : Modularization v10
   </span>
   <button id="patch-notes-btn" type="button">Patch Notes</button>
 </div>
@@ -233,7 +233,29 @@
     </div>
   </div>
 </div>
+<script src="scripts/config.js"></script>
 
+<!-- Core -->
+<script src="scripts/core/pc.core.js"></script>
+<script src="scripts/core/pc.api.js"></script>
+
+<!-- Data / globals used by loot, inventory, equipment -->
+<script src="scripts/items.js"></script>
+<script src="scripts/quality.js"></script>
+
+<!-- UI helpers -->
+<script src="scripts/ui.js"></script>
+<script src="scripts/ui/ui.tooltip.js"></script>
+<script src="scripts/ui/ui.draggablePanels.js"></script>
+
+<!-- Character (createDefaultSkills + derived/computed stats) -->
+<script src="scripts/character/character.core.js"></script>
+<script src="scripts/character/character.derived.js"></script>
+<script src="scripts/character/character.skills.js"></script>
+<script src="scripts/character/character.compute.js"></script>
+<script src="scripts/character.js"></script>
+
+<!-- Zones + Worldmap -->
 <script src="scripts/zones/zones.data.js"></script>
 <script src="scripts/zones/zones.generator.js"></script>
 
@@ -243,28 +265,36 @@
 
 <script src="scripts/zones/zones.core.js"></script>
 
-<!-- game.js must come BEFORE modules that rely on its state helpers -->
+<!-- game.js defines core game globals/state helpers used by many modules -->
 <script src="scripts/game.js"></script>
 
-<!-- movement must exist before exploration + UI that may call it -->
 <script src="scripts/zones/zones.movement.js"></script>
-
-<!-- exploration defines startZoneExplorationTicks/manual explore -->
 <script src="scripts/zones/zones.exploration.js"></script>
-
-<!-- zones UI binds buttons to the now-defined functions -->
 <script src="scripts/zones/zones.ui.js"></script>
 
-<!-- game modules that depend on game.js state helpers -->
+<!-- Inventory (required by new game + save/load + inventory UI) -->
+<script src="scripts/inventory/inventory.state.js"></script>
+<script src="scripts/inventory/inventory.data.js"></script>
+<script src="scripts/inventory/inventory.sort.js"></script>
+<script src="scripts/inventory/inventory.render.category.js"></script>
+<script src="scripts/inventory/inventory.persistence.js"></script>
+<script src="scripts/inventory/inventory.core.js"></script>
+<script src="scripts/inventory.js"></script>
+
+<!-- Equipment (required by new game + save/load + equipment UI) -->
+<script src="scripts/equipment/equipment.core.js"></script>
+<script src="scripts/equipment/equipment.tooltip.js"></script>
+<script src="scripts/equipment.js"></script>
+
+<!-- Game modules -->
 <script src="scripts/game/game.loot.js"></script>
 <script src="scripts/game/game.save.js"></script>
 <script src="scripts/game/game.patchnotes.js"></script>
 <script src="scripts/game/game.screens.js"></script>
 <script src="scripts/game/game.ui.panels.js"></script>
-
-<!-- creation often calls setCurrentZone/setIsInZone, so it must be AFTER game.js -->
 <script src="scripts/game/game.creation.js"></script>
 
+<!-- Entry point (must be last) -->
 <script src="scripts/bootstrap.js"></script>
 
 </body>

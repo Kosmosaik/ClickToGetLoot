@@ -4,7 +4,6 @@
 console.log("worldmap.ui.js loaded");
 
 // ----- Safe accessors (avoid const collisions across scripts) -----
-function STATE() { return PC.state; }
 function getWorldMap() { return STATE().worldMap; }
 
 // ----- DOM references -----

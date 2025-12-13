@@ -1,37 +1,35 @@
 // scripts/game.js
 console.log(`game.js loaded v${GAME_CONFIG.version}`);
 
-// ----- Screen elements -----
-const saveListContainer = document.getElementById("save-list");
-
 // ---- State bridge (temporary) ----
 // Source of truth is PC.state.
 // These helpers avoid direct globals and make refactors safe.
 
-const S = PC.state;
+// Authoritative state access lives in pc.api.js via STATE()/EXP()/MOV()
+const S = () => STATE();
 
 // Initialize fields (these are DATA fields, not functions)
-S.currentHP = S.currentHP ?? 0;
-S.characterComputed = S.characterComputed ?? null;
-S.currentZone = S.currentZone ?? null;
-S.isInZone = S.isInZone ?? false;
-S.worldMap = S.worldMap ?? null;
+S().currentHP = S().currentHP ?? 0;
+S().characterComputed = S().characterComputed ?? null;
+S().currentZone = S().currentZone ?? null;
+S().isInZone = S().isInZone ?? false;
+S().worldMap = S().worldMap ?? null;
 
 // Getters / setters
-function getCurrentHP() { return S.currentHP; }
-function setCurrentHP(v) { S.currentHP = v; }
+function getCurrentHP() { return S().currentHP; }
+function setCurrentHP(v) { S().currentHP = v; }
 
-function getCharacterComputed() { return S.characterComputed; }
-function setCharacterComputed(v) { S.characterComputed = v; }
+function getCharacterComputed() { return S().characterComputed; }
+function setCharacterComputed(v) { S().characterComputed = v; }
 
-function getCurrentZone() { return S.currentZone; }
-function setCurrentZone(z) { S.currentZone = z; }
+function getCurrentZone() { return S().currentZone; }
+function setCurrentZone(z) { S().currentZone = z; }
 
-function getIsInZone() { return S.isInZone; }
-function setIsInZone(v) { S.isInZone = v; }
+function getIsInZone() { return S().isInZone; }
+function setIsInZone(v) { S().isInZone = v; }
 
-function getWorldMap() { return S.worldMap; }
-function setWorldMap(m) { S.worldMap = m; }
+function getWorldMap() { return S().worldMap; }
+function setWorldMap(m) { S().worldMap = m; }
 
 
 function clearActiveExplorationFlag(zone) {
@@ -148,540 +146,25 @@ function enterZoneFromWorldMap(x, y) {
   console.log(`Entered zone from world map: ${tile.zoneId}`, newZone);
 }
 
-// ---- Runtime state (authoritative) ----
-// IMPORTANT: avoid global const collisions across scripts.
+// Ensure exploration/movement substates are initialized (covers older saves / partial state)
 const exp = EXP();
-const mov = MOV();
-
 exp.zoneExplorationActive = exp.zoneExplorationActive ?? false;
 exp.zoneExplorationTimerId = exp.zoneExplorationTimerId ?? null;
 exp.zoneManualExplorationActive = exp.zoneManualExplorationActive ?? false;
 exp.zoneManualTimerId = exp.zoneManualTimerId ?? null;
 exp.zoneExploreDelayTimerId = exp.zoneExploreDelayTimerId ?? null;
 
+const mov = MOV();
 mov.zoneMovementActive = mov.zoneMovementActive ?? false;
 mov.zoneMovementTimerId = mov.zoneMovementTimerId ?? null;
 mov.zoneMovementPath = mov.zoneMovementPath ?? null;
 mov.zoneMovementOnArrival = mov.zoneMovementOnArrival ?? null;
 
+
 // Movement speed: tiles per second. You can override this in GAME_CONFIG.zone
 // by adding "movementTilesPerSecond" there.
 const ZONE_MOVEMENT_TILES_PER_SECOND =
   (GAME_CONFIG.zone && GAME_CONFIG.zone.movementTilesPerSecond) || 4;
-
-function findPlayerPositionInZone(zone) {
-  if (!zone || !zone.tiles) return null;
-
-  for (let y = 0; y < zone.height; y++) {
-    for (let x = 0; x < zone.width; x++) {
-      const t = zone.tiles[y][x];
-      if (t && t.hasPlayer) {
-        return { x, y };
-      }
-    }
-  }
-
-  return null;
-}
-
-function findPathToPreparedTile(zone) {
-  if (!zone || !zone.tiles) return null;
-
-  const tx = zone.preparedTargetX;
-  const ty = zone.preparedTargetY;
-  if (typeof tx !== "number" || typeof ty !== "number") {
-    return null;
-  }
-
-  const start = findPlayerPositionInZone(zone);
-  if (!start) {
-    // No player marker yet (e.g. very first exploration) – let exploration
-    // handle revealing and placing the player instead of moving first.
-    return null;
-  }
-
-  const width = zone.width;
-  const height = zone.height;
-
-  // 1) Build list of "stance" positions: tiles adjacent to the target that
-  //    are not blocked AND are already explored OR currently have the player.
-  const stanceTargets = [];
-  const dirs = [
-    { dx:  1, dy:  0 },
-    { dx: -1, dy:  0 },
-    { dx:  0, dy:  1 },
-    { dx:  0, dy: -1 },
-  ];
-
-  for (let i = 0; i < dirs.length; i++) {
-    const sx = tx + dirs[i].dx;
-    const sy = ty + dirs[i].dy;
-
-    if (sy < 0 || sy >= height || sx < 0 || sx >= width) continue;
-
-    const t = zone.tiles[sy][sx];
-    if (!t) continue;
-
-    if (t.kind === "blocked") continue;
-
-    // Must be known ground to stand on: explored or already has the player.
-    if (!t.explored && !t.hasPlayer) continue;
-
-    stanceTargets.push({ x: sx, y: sy });
-  }
-
-  // No valid stance tile: either we're already adjacent in a weird edge case,
-  // or this target is isolated from known ground. In that case, don't move.
-  if (stanceTargets.length === 0) {
-    return null;
-  }
-
-  // Treat stance targets as BFS goals.
-  const targetSet = new Set(stanceTargets.map(p => `${p.x},${p.y}`));
-
-  const visited = [];
-  for (let y = 0; y < height; y++) {
-    visited[y] = [];
-  }
-
-  const queue = [];
-  queue.push({ x: start.x, y: start.y, prev: null });
-  visited[start.y][start.x] = true;
-
-  let endNode = null;
-
-  while (queue.length > 0) {
-    const node = queue.shift();
-    const key = `${node.x},${node.y}`;
-    if (targetSet.has(key)) {
-      endNode = node;
-      break;
-    }
-
-    for (let i = 0; i < dirs.length; i++) {
-      const nx = node.x + dirs[i].dx;
-      const ny = node.y + dirs[i].dy;
-
-      if (ny < 0 || ny >= height || nx < 0 || nx >= width) continue;
-      if (visited[ny][nx]) continue;
-
-      const tile = zone.tiles[ny][nx];
-      if (!tile) continue;
-
-      // Only move through:
-      //  - non-blocked tiles
-      //  - that are already explored OR have the player (start tile)
-      if (tile.kind === "blocked") continue;
-      if (!tile.explored && !tile.hasPlayer) continue;
-
-      visited[ny][nx] = true;
-      queue.push({ x: nx, y: ny, prev: node });
-    }
-  }
-
-  if (!endNode) {
-    // No path from current player position to any stance tile using known ground.
-    // In that case, don't move – exploration will still happen, but from afar.
-    return null;
-  }
-
-  // Reconstruct path from end to start.
-  const revPath = [];
-  let cur = endNode;
-  while (cur) {
-    revPath.push({ x: cur.x, y: cur.y });
-    cur = cur.prev;
-  }
-  revPath.reverse();
-
-  // First element is the player's current position; we only need the steps AFTER that.
-  if (revPath.length > 0) {
-    if (revPath[0].x === start.x && revPath[0].y === start.y) {
-      revPath.shift();
-    }
-  }
-
-  return revPath;
-}
-
-function startZoneMovement(path, onArrival) {
-  const zone = getCurrentZone();
-  if (!zone || !getIsInZone()) {
-    if (typeof onArrival === "function") onArrival();
-    return;
-  }
-  if (!path || path.length === 0) {
-    if (typeof onArrival === "function") onArrival();
-    return;
-  }
-
-  MOV().zoneMovementActive = true;
-  MOV().zoneMovementPath = path.slice(); // copy
-  MOV().zoneMovementOnArrival = typeof onArrival === "function" ? onArrival : null;
-
-  const stepDelayMs = Math.max(50, 1000 / ZONE_MOVEMENT_TILES_PER_SECOND);
-
-  function step() {
-    const z = getCurrentZone();
-    if (!MOV().zoneMovementActive || !z || !getIsInZone()) {
-      MOV().zoneMovementTimerId = null;
-      return;
-    }
-
-    if (!MOV().zoneMovementPath || MOV().zoneMovementPath.length === 0) {
-      MOV().zoneMovementActive = false;
-      MOV().zoneMovementTimerId = null;
-      const cb = MOV().zoneMovementOnArrival;
-      MOV().zoneMovementOnArrival = null;
-      if (typeof cb === "function") cb();
-      return;
-    }
-
-    const next = MOV().zoneMovementPath.shift();
-    setZonePlayerPosition(z, next.x, next.y);
-
-    if (typeof renderZoneUI === "function") {
-      renderZoneUI();
-    }
-
-    MOV().zoneMovementTimerId = setTimeout(step, stepDelayMs);
-  }
-
-  step();
-}
-
-function stopZoneMovement() {
-  if (MOV().zoneMovementTimerId) {
-    clearTimeout(MOV().zoneMovementTimerId);
-    MOV().zoneMovementTimerId = null;
-  }
-  MOV().zoneMovementActive = false;
-  MOV().zoneMovementPath = null;
-  MOV().zoneMovementOnArrival = null;
-}
-
-// Shared generic messages for exploration
-const ZONE_GENERIC_MESSAGES = [
-  "You uncover a patch of ground.",
-  "You scout a quiet stretch of the zone.",
-  "You reveal more of the surrounding area.",
-  "You push the boundary of the unknown.",
-  "You chart another small piece of this zone.",
-  "You smell fart in the air, but decide to continue anyway.",
-  "You slipped on a piece of shit."
-];
-
-function setZonePlayerPosition(zone, x, y) {
-  if (!zone || !zone.tiles) return;
-
-  for (let yy = 0; yy < zone.height; yy++) {
-    for (let xx = 0; xx < zone.width; xx++) {
-      const t = zone.tiles[yy][xx];
-      if (!t) continue;
-      t.hasPlayer = (xx === x && yy === y);
-    }
-  }
-}
-
-function addRandomZoneMessage() {
-  if (typeof addZoneMessage !== "function") return;
-  const msg =
-    ZONE_GENERIC_MESSAGES[Math.floor(Math.random() * ZONE_GENERIC_MESSAGES.length)];
-  addZoneMessage(msg);
-}
-
-// --- Zone exploration tick system (2–5s random delay) ---
-
-function scheduleNextZoneExplorationTick() {
-  if (!EXP().zoneExplorationActive || !getIsInZone() || !getCurrentZone()) return;
-
-  const idleDelay = 200;
-
-  EXP().zoneExplorationTimerId = setTimeout(() => {
-    EXP().zoneExplorationTimerId = null;
-    beginZoneExplorationCycle();
-  }, idleDelay);
-}
-
-// Reveal the next explorable tile (sequential), add a random message, update UI.
-// Returns true if a tile was actually revealed, false otherwise.
-function revealNextTileWithMessageAndUI() {
-  if (
-    !window.ZoneDebug ||
-    (typeof ZoneDebug.revealPreparedExplorationTile !== "function" &&
-      typeof ZoneDebug.revealNextExplorableTileSequential !== "function")
-  ) {
-    return false;
-  }
-  if (!getCurrentZone()) return false;
-
-  // Prefer revealing a pre-marked tile, fall back to old sequential reveal.
-  let changed = false;
-  if (typeof ZoneDebug.revealPreparedExplorationTile === "function") {
-    changed = ZoneDebug.revealPreparedExplorationTile(getCurrentZone());
-  } else {
-    changed = ZoneDebug.revealNextExplorableTileSequential(getCurrentZone());
-  }
-  
-  if (changed) {
-    addRandomZoneMessage();
-  } else {
-    if (typeof addZoneMessage === "function") {
-      addZoneMessage("There is nothing left to explore here.");
-    }
-  }
-
-  if (typeof renderZoneUI === "function") {
-    renderZoneUI();
-  }
-
-  // 0.0.70c — after revealing a tile, check if we just completed the zone.
-  if (window.ZoneDebug && typeof ZoneDebug.getZoneExplorationStats === "function") {
-    const stats = ZoneDebug.getZoneExplorationStats(getCurrentZone());
-    if (stats && stats.isComplete && typeof onZoneFullyExplored === "function") {
-      onZoneFullyExplored();
-    }
-  }
-
-  return changed;
-}
-
-function beginZoneExplorationCycle() {
-  if (!EXP().zoneExplorationActive || !getIsInZone() || !getCurrentZone()) return;
-  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
-
-  const zone = getCurrentZone();
-  const stats = ZoneDebug.getZoneExplorationStats(zone);
-
-  if (stats.isComplete || stats.exploredTiles >= stats.totalExplorableTiles) {
-    console.log("Zone fully explored. Stopping exploration ticks.");
-    stopZoneExplorationTicks();
-    if (typeof onZoneFullyExplored === "function") onZoneFullyExplored();
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  if (typeof ZoneDebug.prepareNextExplorationTile !== "function") return;
-
-  const prepared = ZoneDebug.prepareNextExplorationTile(zone);
-  if (!prepared) {
-    console.log("No more tiles to prepare in this zone.");
-    stopZoneExplorationTicks();
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  if (typeof renderZoneUI === "function") renderZoneUI();
-
-  const path = findPathToPreparedTile(zone);
-  if (!path) {
-    console.warn("beginZoneExplorationCycle: no path to prepared tile; stopping auto exploration.");
-    stopZoneExplorationTicks();
-    if (typeof addZoneMessage === "function") addZoneMessage("You can't reach that area yet.");
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  if (path.length === 0) {
-    startZoneExploreDelay(() => runZoneExplorationTick());
-    return;
-  }
-
-  startZoneMovement(path, () => {
-    startZoneExploreDelay(() => runZoneExplorationTick());
-  });
-}
-
-function runZoneExplorationTick() {
-  if (!EXP().zoneExplorationActive || !getIsInZone() || !getCurrentZone()) return;
-  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
-
-  const zone = getCurrentZone();
-  const stats = ZoneDebug.getZoneExplorationStats(zone);
-
-  if (stats.isComplete || stats.exploredTiles >= stats.totalExplorableTiles) {
-    console.log("Zone fully explored. Stopping exploration ticks.");
-    stopZoneExplorationTicks();
-    if (typeof onZoneFullyExplored === "function") onZoneFullyExplored();
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  revealNextTileWithMessageAndUI();
-  scheduleNextZoneExplorationTick();
-}
-
-function startZoneExplorationTicks() {
-  if (EXP().zoneExplorationActive) return;
-  if (!getIsInZone() || !getCurrentZone()) return;
-  if (MOV().zoneMovementActive) return;
-
-  console.log("Starting zone exploration ticks.");
-  EXP().zoneExplorationActive = true;
-  scheduleNextZoneExplorationTick();
-}
-
-// Clear the "this tile will be explored next" flag for the current zone.
-// This is used when stopping auto exploration so no "?" keeps blinking.
-function clearZoneActiveExploreFlags() {
-  if (!getCurrentZone() || !getCurrentZone().tiles) return;
-
-  for (let y = 0; y < getCurrentZone().height; y++) {
-    for (let x = 0; x < getCurrentZone().width; x++) {
-      const t = getCurrentZone().tiles[y][x];
-      if (t && t.isActiveExplore) {
-        t.isActiveExplore = false;
-      }
-    }
-  }
-}
-
-function startZoneExploreDelay(onReveal) {
-  const zone = getCurrentZone();
-  if (!zone || !zone.tiles) {
-    if (typeof onReveal === "function") onReveal();
-    return;
-  }
-
-  const tx = zone.preparedTargetX;
-  const ty = zone.preparedTargetY;
-  if (typeof tx !== "number" || typeof ty !== "number") {
-    if (typeof onReveal === "function") onReveal();
-    return;
-  }
-
-  clearZoneActiveExploreFlags();
-
-  const tile = zone.tiles[ty][tx];
-  if (tile) tile.isActiveExplore = true;
-
-  if (typeof renderZoneUI === "function") renderZoneUI();
-
-  const delay = 200 + Math.random() * 200;
-
-  EXP().zoneExploreDelayTimerId = setTimeout(() => {
-    EXP().zoneExploreDelayTimerId = null;
-    if (typeof onReveal === "function") onReveal();
-  }, delay);
-}
-
-function cancelZoneExploreDelay() {
-  if (EXP().zoneExploreDelayTimerId) {
-    clearTimeout(EXP().zoneExploreDelayTimerId);
-    EXP().zoneExploreDelayTimerId = null;
-  }
-}
-
-function stopZoneExplorationTicks() {
-  if (!EXP().zoneExplorationActive) return;
-
-  EXP().zoneExplorationActive = false;
-
-  if (EXP().zoneExplorationTimerId) {
-    clearTimeout(EXP().zoneExplorationTimerId);
-    EXP().zoneExplorationTimerId = null;
-  }
-
-  stopZoneMovement();
-  cancelZoneExploreDelay();
-  clearZoneActiveExploreFlags();
-
-  if (typeof renderZoneUI === "function") {
-    renderZoneUI();
-  }
-
-  console.log("Zone exploration ticks stopped.");
-}
-
-// 0.0.70c — Called once when a zone becomes fully explored.
-function onZoneFullyExplored() {
-  console.log("Zone fully explored. Unlocking adjacent world tiles (0.0.70c).");
-
-  // Need a world map + helper to do anything.
-  if (!getWorldMap()) return;
-  if (typeof unlockAdjacentWorldTiles !== "function") return;
-
-  const x = getWorldMap().currentX;
-  const y = getWorldMap().currentY;
-
-  if (typeof x !== "number" || typeof y !== "number") {
-    return;
-  }
-
-  // Apply the world rule: reveal neighbors around this world tile.
-  unlockAdjacentWorldTiles(getWorldMap(), x, y);
-
-  // Optional player feedback.
-  if (typeof addZoneMessage === "function") {
-    addZoneMessage(
-      "You feel the world open up. New areas are now visible on the world map."
-    );
-  }
-    // 0.0.70c — Auto-save after world expansion so unlocked zones persist
-  if (typeof saveCurrentGame === "function") {
-    saveCurrentGame();
-  }
-}
-
-function startZoneManualExploreOnce() {
-  if (EXP().zoneManualExplorationActive) return;
-  if (EXP().zoneExplorationActive) return;
-  if (MOV().zoneMovementActive) return;
-  if (!getIsInZone() || !getCurrentZone()) return;
-  if (!window.ZoneDebug || typeof ZoneDebug.getZoneExplorationStats !== "function") return;
-
-  const zone = getCurrentZone();
-  const stats = ZoneDebug.getZoneExplorationStats(zone);
-
-  if (stats.isComplete || stats.exploredTiles >= stats.totalExplorableTiles) {
-    if (typeof onZoneFullyExplored === "function") onZoneFullyExplored();
-    if (typeof addZoneMessage === "function") addZoneMessage("There is nothing left to explore here.");
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  if (typeof ZoneDebug.prepareNextExplorationTile !== "function") return;
-
-  const prepared = ZoneDebug.prepareNextExplorationTile(zone);
-  if (!prepared) {
-    if (typeof addZoneMessage === "function") addZoneMessage("There is nothing left to explore here.");
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  if (typeof renderZoneUI === "function") renderZoneUI();
-
-  const path = findPathToPreparedTile(zone);
-  if (!path) {
-    if (typeof addZoneMessage === "function") addZoneMessage("You can't reach that area yet.");
-    if (typeof renderZoneUI === "function") renderZoneUI();
-    return;
-  }
-
-  EXP().zoneManualExplorationActive = true;
-
-  const finishManualExplore = () => {
-    EXP().zoneManualExplorationActive = false;
-    revealNextTileWithMessageAndUI();
-    if (typeof renderZoneUI === "function") renderZoneUI();
-  };
-
-  if (path.length === 0) {
-    startZoneExploreDelay(finishManualExplore);
-    return;
-  }
-
-  startZoneMovement(path, () => {
-    startZoneExploreDelay(finishManualExplore);
-  });
-}
-
-// Expose for UI
-window.startZoneManualExploreOnce = startZoneManualExploreOnce;
-
-// Expose for UI script
-window.startZoneExplorationTicks = startZoneExplorationTicks;
-window.stopZoneExplorationTicks = stopZoneExplorationTicks;
 
 // ----- Equipment helpers -----
 function unequipSlotToInventory(slotKey) {
@@ -699,13 +182,15 @@ function unequipSlotToInventory(slotKey) {
 
 function changeWeaponSkill(key, delta) {
   if (!currentCharacter) return;
+
   const cfg = (GAME_CONFIG.skills && GAME_CONFIG.skills.weapon) || {};
   const min = cfg.minLevel ?? 0;
   const max = cfg.maxLevel ?? 200;
 
-  if (!currentCharacter.skills) {
+  if (!currentCharacter.skills && typeof createDefaultSkills === "function") {
     currentCharacter.skills = createDefaultSkills();
   }
+  if (!currentCharacter.skills) return;
 
   const oldVal = currentCharacter.skills[key] ?? 0;
   let next = oldVal + delta;
@@ -716,8 +201,9 @@ function changeWeaponSkill(key, delta) {
 
   currentCharacter.skills[key] = next;
 
-  // Recompute + autosave
-  recomputeCharacterComputedState();
+  if (typeof recomputeCharacterComputedState === "function") {
+    recomputeCharacterComputedState();
+  }
   if (typeof saveCurrentGame === "function") {
     saveCurrentGame();
   }
@@ -758,7 +244,6 @@ function updateHPBar() {
     return;
   }
 
-  // For now, always full HP (no damage system yet)
   let hp = getCurrentHP();
   if (!hp || hp > max) {
     hp = max;
@@ -884,9 +369,9 @@ function updateEquipmentPanel() {
   attrsTitle.className = "equipment-summary-title";
   attrsTitle.textContent = "Attributes";
   attrsSection.appendChild(attrsTitle);
-
-  const total = attrs.total;
-  const bonus = attrs.bonus;
+  
+  const total = (attrs && attrs.total) || {};
+  const bonus = (attrs && attrs.bonus) || {};
 
   function makeAttrRow(label, key) {
     const row = document.createElement("div");
@@ -983,13 +468,12 @@ function updateEquipmentPanel() {
 }
 
 /**
- * Render the Skills panel: weapon skills with dev +/- controls.
+ * Render the Skills panel: weapon skills with dev +/- controlS().
  */
 function updateSkillsPanel() {
   if (!skillsPanel || !skillsListContainer) return;
 
   skillsListContainer.innerHTML = "";
-
   if (!currentCharacter) return;
 
   const skillsCfg = GAME_CONFIG.skills && GAME_CONFIG.skills.weapon;
@@ -1013,7 +497,7 @@ function updateSkillsPanel() {
     row.className = "equipment-summary-row";
 
     const left = document.createElement("span");
-    left.textContent = labels[key] + ":";
+    left.textContent = (labels[key] || key) + ":";
     row.appendChild(left);
 
     const mid = document.createElement("span");
@@ -1029,7 +513,7 @@ function updateSkillsPanel() {
     minusBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       changeWeaponSkill(key, -1);
-      updateSkillsPanel();
+      // recomputeCharacterComputedState() will update the panel
     });
 
     const plusBtn = document.createElement("button");
@@ -1039,7 +523,7 @@ function updateSkillsPanel() {
     plusBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       changeWeaponSkill(key, +1);
-      updateSkillsPanel();
+      // recomputeCharacterComputedState() will update the panel
     });
 
     right.appendChild(minusBtn);
@@ -1055,7 +539,6 @@ let currentCharacter = null;
 let currentSaveId = null;
 
 function updateCharacterSummary() {
-  // Only show the character name in the header; all stats are in the equipment view.
   if (!currentCharacter) {
     if (charSummaryName) charSummaryName.textContent = "";
     if (charSummaryStats) charSummaryStats.textContent = "";
@@ -1070,11 +553,6 @@ function updateCharacterSummary() {
     charSummaryStats.textContent = "";
   }
 }
-
-// ----- Initial screen -----
-setScreen("start");
-resetCharacterCreation();
-renderSaveList();
 
 // ----- Inventory / Loot / Equipment logic -----
 

@@ -1,22 +1,35 @@
 // scripts/bootstrap.js
 (function () {
   if (!window.PC) {
-    console.error("Bootstrap failed: window.PC missing. Did pc.core.js load?");
+    console.error("BOOT FAIL: window.PC missing. Did scripts/core/pc.core.js load?");
     return;
   }
 
-  // In browsers, top-level `const GAME_CONFIG = ...` does NOT attach to window.
-  const hasGameConfig =
-    (typeof GAME_CONFIG !== "undefined") || !!window.GAME_CONFIG;
-
-  if (!hasGameConfig) {
-    console.error("Bootstrap failed: GAME_CONFIG missing. Did config.js load?");
+  if (typeof STATE !== "function" || typeof EXP !== "function" || typeof MOV !== "function") {
+    console.error("BOOT FAIL: STATE/EXP/MOV missing. Did scripts/core/pc.api.js load?");
     return;
   }
 
-  // Prefer the non-window one if it exists
-  const cfg =
-    (typeof GAME_CONFIG !== "undefined") ? GAME_CONFIG : window.GAME_CONFIG;
+  // Hard dependency checks (add/remove as your project evolves)
+  const requiredFns = [
+    "setScreen",
+    "resetCharacterCreation",
+    "renderSaveList",
+    "createDefaultSkills",
+    "loadInventoryFromSnapshot",
+  ];
 
-  console.log(`Bootstrap OK — ProgressCrawl v${cfg.version}`);
+  const missing = requiredFns.filter((name) => typeof window[name] !== "function");
+  if (missing.length) {
+    console.error("BOOT FAIL: Missing required functions:", missing);
+    console.error("This almost always means a missing <script src> include or wrong load order in index.html.");
+    return;
+  }
+
+  // Startup
+  setScreen("start");
+  resetCharacterCreation();
+  renderSaveList();
+
+  console.log("BOOT OK");
 })();
