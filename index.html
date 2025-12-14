@@ -259,6 +259,14 @@
 <script src="scripts/zones/zones.data.js"></script>
 <script src="scripts/zones/zones.generator.js"></script>
 
+<!-- 0.0.70e — Content (defs + tables + deterministic placement helpers)
+     Must load before zones.core.js (initializeZoneContent hook). -->
+<script src="scripts/content/content.defs.js"></script>
+<script src="scripts/content/content.spawnTables.js"></script>
+<script src="scripts/content/content.rng.js"></script>
+<script src="scripts/content/content.place.js"></script>
+<script src="scripts/content/content.populate.js"></script>
+
 <script src="scripts/worldmap/worldmap.slots.js"></script>
 <script src="scripts/worldmap/worldmap.core.js"></script>
 <script src="scripts/worldmap/worldmap.ui.js"></script>
