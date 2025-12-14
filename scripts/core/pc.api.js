@@ -44,6 +44,25 @@ console.log("pc.api.js loaded");
     if (typeof stopZoneExplorationTicks === "function") stopZoneExplorationTicks();
   };
 
+  // Phase 6.3 — Tile click routing (interaction entrypoint).
+  // UI should call this; the router/handlers live elsewhere.
+  PC.api.zone.interactAt = (x, y) => {
+    // Prefer a dedicated router if/when it exists.
+    if (typeof PC.zoneInteractAt === "function") {
+      PC.zoneInteractAt(x, y);
+      return;
+    }
+    if (typeof window.zoneInteractAt === "function") {
+      window.zoneInteractAt(x, y);
+      return;
+    }
+
+    // Placeholder (Phase 7 will replace this).
+    if (typeof window.addZoneMessage === "function") {
+      window.addZoneMessage("Nothing to interact with here (yet).");
+    }
+  };
+
   // World actions
   PC.api.world.enterZone = (x, y) => {
     if (typeof enterZoneFromWorldMap === "function") enterZoneFromWorldMap(x, y);
