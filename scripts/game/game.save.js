@@ -97,6 +97,9 @@ function saveCurrentGame() {
 
     // 0.0.70c+ — persist world map (owned by PC.state, not a global)
     worldMap: (typeof STATE === "function" ? STATE().worldMap : null),
+
+    // 0.0.70e — persist per-zone deltas (deterministic regen + deltas)
+    zoneDeltas: (typeof STATE === "function" ? (STATE().zoneDeltas || {}) : {}),
   };
 
   const idx = saves.findIndex(s => s.id === snapshot.id);
@@ -141,6 +144,11 @@ function loadSave(id) {
     } else if (typeof STATE === "function") {
       STATE().worldMap = wm;
     }
+  }
+
+  // 0.0.70e — Restore per-zone deltas into PC.state
+  if (typeof STATE === "function") {
+    STATE().zoneDeltas = save.zoneDeltas || {};
   }
 
   // Restore equipped items (if present)
