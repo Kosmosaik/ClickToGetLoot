@@ -59,7 +59,7 @@
     locations: {
       count: 1,
       entries: [
-        { id: "clearing", weight: 100 },
+        { id: "ruined_clearing", weight: 100 },
       ],
     },
   };
