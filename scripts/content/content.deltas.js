@@ -9,6 +9,7 @@
 //   harvested: { [instanceId]: true },
 //   defeated: { [instanceId]: true },
 //   opened: { [instanceId]: true },
+//   inspected: { [instanceId]: true },
 //   discoveredLocations: { [instanceId]: true }
 // }
 
@@ -31,12 +32,14 @@
       harvested: {},
       defeated: {},
       opened: {},
+      inspected: {},
       discoveredLocations: {},
     };
     // Back-compat: ensure keys exist
     store[id].harvested = store[id].harvested || {};
     store[id].defeated = store[id].defeated || {};
     store[id].opened = store[id].opened || {};
+    store[id].inspected = store[id].inspected || {};
     store[id].discoveredLocations = store[id].discoveredLocations || {};
     return store[id];
   }
@@ -67,6 +70,38 @@
     applyMapToInstances(zone.content.resourceNodes, delta.harvested, 'harvested');
     applyMapToInstances(zone.content.entities, delta.defeated, 'defeated');
     applyMapToInstances(zone.content.pois, delta.opened, 'opened');
+    applyMapToInstances(zone.content.pois, delta.inspected, 'inspected');
     applyMapToInstances(zone.content.locations, delta.discoveredLocations, 'discovered');
+  };
+
+  // Convenience mutators (Phase 7): write deltas on interaction.
+  PC.content.markHarvested = PC.content.markHarvested || function markHarvested(zoneId, instId) {
+    const d = ensureZoneDelta(zoneId);
+    if (!d || !instId) return;
+    d.harvested[String(instId)] = true;
+  };
+
+  PC.content.markDefeated = PC.content.markDefeated || function markDefeated(zoneId, instId) {
+    const d = ensureZoneDelta(zoneId);
+    if (!d || !instId) return;
+    d.defeated[String(instId)] = true;
+  };
+
+  PC.content.markOpened = PC.content.markOpened || function markOpened(zoneId, instId) {
+    const d = ensureZoneDelta(zoneId);
+    if (!d || !instId) return;
+    d.opened[String(instId)] = true;
+  };
+
+  PC.content.markInspected = PC.content.markInspected || function markInspected(zoneId, instId) {
+    const d = ensureZoneDelta(zoneId);
+    if (!d || !instId) return;
+    d.inspected[String(instId)] = true;
+  };
+
+  PC.content.markLocationDiscovered = PC.content.markLocationDiscovered || function markLocationDiscovered(zoneId, instId) {
+    const d = ensureZoneDelta(zoneId);
+    if (!d || !instId) return;
+    d.discoveredLocations[String(instId)] = true;
   };
 })();
