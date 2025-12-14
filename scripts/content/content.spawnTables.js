@@ -1,92 +1,158 @@
 // scripts/content/content.spawnTables.js
-// 0.0.70e — Spawn table scaffolding.
+// 0.0.70e — Spawn tables (Phase 3).
 //
-// Spawn tables describe *what* can appear in a zone, by context:
-// era / biome / difficulty / templateId (later).
+// Spawn tables describe *what* can appear in a zone, by context.
+// This phase introduces the primary lookup structure:
+//   biome → era → difficultyKey
 //
-// This file is only the container + conventions. The actual tables
-// will be populated step-by-step during 0.0.70e.
+// Important:
+// - Keep tables data-only.
+// - Do not hardcode game logic here.
+// - Determinism is handled by content.populate.js via seeded RNG.
+//
+// Back-compat:
+// - We still support lookup by worldTile.templateId ("byTemplate").
+// - tutorial_zone remains a byTemplate special-case.
 
 (function () {
   const PC = (window.PC = window.PC || {});
   PC.content = PC.content || {};
 
-  // NOTE: Keep tables data-only.
-  // Structure (first pass):
+  // ---------------------------------------------------------------------------
+  // Shape
+  // ---------------------------------------------------------------------------
   // PC.content.SPAWN_TABLES = {
-  //   "tutorial_forest": {
-  //     resourceNodes: [{ id: "tree_oak", weight: 60 }, ...],
-  //     entities: [{ id: "critter_rabbit", weight: 30 }, ...],
-  //     pois: [{ id: "stash_small", weight: 10 }, ...],
-  //     locations: [{ id: "clearing", weight: 20 }, ...],
-  //   }
-  // }
+  //   byContext: {
+  //     "temperate_forest": {
+  //       "primitive": {
+  //         "easy": {
+  //           resourceNodes: { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //           entities:      { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //           pois:          { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //           locations:     { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //         }
+  //       }
+  //     }
+  //   },
+  //   byTemplate: {
+  //     "primitive_forest_easy": { ...same kind objects... },
+  //     "tutorial_zone": { ... }
+  //   },
+  // };
+  // ---------------------------------------------------------------------------
+
   PC.content.SPAWN_TABLES = PC.content.SPAWN_TABLES || {};
+  PC.content.SPAWN_TABLES.byContext = PC.content.SPAWN_TABLES.byContext || {};
+  PC.content.SPAWN_TABLES.byTemplate = PC.content.SPAWN_TABLES.byTemplate || {};
 
   // ---------------------------------------------------------------------------
-  // 0.0.70e — First pass spawn tables
+  // Phase 3.3 — Spawn constraints vocabulary (documented for later expansion)
+  // ---------------------------------------------------------------------------
+  // For later phases, each entry/kind may add constraints such as:
+  // - allowedTileKinds: ["floor", "grass", ...]
+  // - minDistanceFromEntry: 3
+  // - nearWater: true
+  // - nearWall: true
+  // - preferOpenAreas: true
   //
-  // Each table describes counts + weighted entries per content kind.
-  // The keys are currently:
-  // - worldTile.templateId (preferred), e.g. "primitive_forest_easy"
-  // - or zone.id for handcrafted exceptions, e.g. "tutorial_zone"
-  //
-  // Shape per kind:
-  //   { count: number | [min,max], entries: [{ id, weight }, ...] }
+  // In Phase 3 we only document the vocabulary; placement engine will
+  // implement constraints in Phase 4.
+
+  // ---------------------------------------------------------------------------
+  // Helpers (data-only convenience)
+  // ---------------------------------------------------------------------------
+  function ensurePath(obj, keys) {
+    let cur = obj;
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      cur[k] = cur[k] || {};
+      cur = cur[k];
+    }
+    return cur;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phase 3.1 — First context table (temperate_forest / primitive / easy)
+  // ---------------------------------------------------------------------------
+  // Matches world slot metadata:
+  // - tile.biome: "temperate_forest"
+  // - tile.era: "primitive"
+  // - tile.difficultyRating bucketed to "easy" (see populate resolver)
+  const ctx_easy = ensurePath(PC.content.SPAWN_TABLES.byContext, [
+    "temperate_forest",
+    "primitive",
+    "easy",
+  ]);
+
+  ctx_easy.resourceNodes = {
+    countRange: [14, 22],
+    entries: [
+      { defId: "oak_tree", w: 70 },
+      { defId: "stone_cluster", w: 20 },
+      { defId: "fallen_branches", w: 10 },
+    ],
+  };
+
+  ctx_easy.entities = {
+    countRange: [2, 5],
+    entries: [
+      { defId: "rabbit", w: 85 },
+      { defId: "wolf", w: 15 },
+    ],
+  };
+
+  ctx_easy.pois = {
+    countRange: [1, 2],
+    entries: [
+      { defId: "stash_small", w: 75 },
+      { defId: "trap_snare", w: 25 },
+    ],
+  };
+
+  ctx_easy.locations = {
+    countRange: [0, 1],
+    entries: [
+      { defId: "ruined_clearing", w: 70 },
+      { defId: "cave_entrance", w: 30 },
+    ],
+  };
+
+  // ---------------------------------------------------------------------------
+  // Phase 3.1 — Template tables (back-compat + handcrafted exceptions)
   // ---------------------------------------------------------------------------
 
-  // Main early-game template.
-  PC.content.SPAWN_TABLES.primitive_forest_easy = {
-    resourceNodes: {
-      count: [14, 22],
-      entries: [
-        { id: "oak_tree", weight: 70 },
-        { id: "stone_cluster", weight: 30 },
-      ],
-    },
-    entities: {
-      count: [2, 5],
-      entries: [
-        { id: "rabbit", weight: 100 },
-      ],
-    },
-    pois: {
-      count: [1, 2],
-      entries: [
-        { id: "stash_small", weight: 100 },
-      ],
-    },
-    locations: {
-      count: 1,
-      entries: [
-        { id: "ruined_clearing", weight: 100 },
-      ],
-    },
+  // Back-compat template id still used by some world slot templates.
+  // Keep this aligned with ctx_easy for now.
+  PC.content.SPAWN_TABLES.byTemplate.primitive_forest_easy = {
+    resourceNodes: ctx_easy.resourceNodes,
+    entities: ctx_easy.entities,
+    pois: ctx_easy.pois,
+    locations: ctx_easy.locations,
   };
 
   // Tutorial zone (small static map) — keep the counts tiny.
-  PC.content.SPAWN_TABLES.tutorial_zone = {
+  PC.content.SPAWN_TABLES.byTemplate.tutorial_zone = {
     resourceNodes: {
-      count: [2, 4],
+      countRange: [2, 4],
       entries: [
-        { id: "oak_tree", weight: 70 },
-        { id: "stone_cluster", weight: 30 },
+        { defId: "oak_tree", w: 70 },
+        { defId: "stone_cluster", w: 30 },
       ],
     },
     entities: {
-      count: 1,
+      countRange: [1, 1],
       entries: [
-        { id: "rabbit", weight: 100 },
+        { defId: "rabbit", w: 100 },
       ],
     },
     pois: {
-      count: 1,
+      countRange: [1, 1],
       entries: [
-        { id: "stash_small", weight: 100 },
+        { defId: "stash_small", w: 100 },
       ],
     },
     locations: {
-      count: 0,
+      countRange: [0, 0],
       entries: [],
     },
   };

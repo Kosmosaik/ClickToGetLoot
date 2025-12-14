@@ -30,20 +30,44 @@
     return `${zoneSeed}::${label}`;
   }
 
-  // Pick a spawn table id to use for this zone.
+  // Phase 3 — Spawn table resolution.
   // Priority:
-  // 1) worldTile.templateId (if table exists)
-  // 2) zone.id (if table exists)
-  // 3) null
-  function resolveSpawnTableId(zone, worldTile) {
-    const tables = PC.content.SPAWN_TABLES || {};
+  // 1) byTemplate lookup using worldTile.templateId
+  // 2) byTemplate lookup using zone.id (handcrafted exceptions)
+  // 3) byContext lookup using worldTile.biome / worldTile.era / difficulty bucket
+  function difficultyKeyFromRating(rating) {
+    const r = Math.floor(Number(rating) || 0);
+    if (r <= 0) return null;
+    if (r <= 3) return "easy";
+    if (r <= 6) return "medium";
+    return "hard";
+  }
+
+  function resolveSpawnTable(zone, def, worldTile) {
+    const root = PC.content.SPAWN_TABLES || {};
+    const byTemplate = root.byTemplate || root;
+    const byContext = root.byContext || null;
+
     const t1 = worldTile && worldTile.templateId ? String(worldTile.templateId) : null;
-    if (t1 && tables[t1]) return t1;
+    if (t1 && byTemplate[t1]) return { table: byTemplate[t1], tableId: t1, source: "template" };
 
     const t2 = zone && zone.id ? String(zone.id) : null;
-    if (t2 && tables[t2]) return t2;
+    if (t2 && byTemplate[t2]) return { table: byTemplate[t2], tableId: t2, source: "template" };
 
-    return null;
+    if (!byContext) return null;
+
+    const biome = worldTile && worldTile.biome ? String(worldTile.biome) : null;
+    const era = worldTile && worldTile.era ? String(worldTile.era) : null;
+    const diffKey = difficultyKeyFromRating(worldTile && worldTile.difficultyRating);
+
+    if (!biome || !era || !diffKey) return null;
+
+    const ctxBiome = byContext[biome];
+    const ctxEra = ctxBiome ? ctxBiome[era] : null;
+    const ctx = ctxEra ? (ctxEra[diffKey] || ctxEra.any || null) : null;
+    if (!ctx) return null;
+
+    return { table: ctx, tableId: `${biome}/${era}/${diffKey}`, source: "context" };
   }
 
   // Utility: clamp int.
@@ -68,6 +92,18 @@
   }
 
   // Place one kind of content (resourceNodes/entities/pois/locations).
+  function normalizeEntries(entries) {
+    if (!Array.isArray(entries)) return [];
+    return entries
+      .map((e) => {
+        const id = e && (e.defId || e.id) ? String(e.defId || e.id) : null;
+        const w = e && (e.w != null || e.weight != null) ? Number(e.w != null ? e.w : e.weight) : null;
+        if (!id) return null;
+        return { id, w: Number.isFinite(w) ? w : 1 };
+      })
+      .filter(Boolean);
+  }
+
   function placeKind(zone, kindKey, kindDefKey, kindCfg, rngObj, used) {
     if (!zone || !zone.content) return;
     if (!kindCfg) return;
@@ -76,8 +112,8 @@
       ? PC.content.DEFS[kindDefKey]
       : {};
 
-    const entries = Array.isArray(kindCfg.entries) ? kindCfg.entries : [];
-    const count = pickCount(kindCfg.count, rngObj);
+    const entries = normalizeEntries(kindCfg.entries);
+    const count = pickCount(kindCfg.countRange != null ? kindCfg.countRange : kindCfg.count, rngObj);
     if (count <= 0 || entries.length === 0) return;
 
     // Candidate tiles: all walkable.
@@ -139,11 +175,10 @@
       (zone.content.locations && zone.content.locations.length);
     if (alreadyHasContent) return;
 
-    const tableId = resolveSpawnTableId(zone, worldTile);
-    if (!tableId) return;
-
-    const table = PC.content.SPAWN_TABLES ? PC.content.SPAWN_TABLES[tableId] : null;
-    if (!table) return;
+    const resolved = resolveSpawnTable(zone, def, worldTile);
+    if (!resolved || !resolved.table) return;
+    const table = resolved.table;
+    const tableId = resolved.tableId;
 
     const zoneSeed = buildZoneSeed(zone, worldTile);
 
@@ -165,7 +200,7 @@
     // Light debug (can be removed later)
     if (PC?.config?.debug?.logContentGen) {
       console.log(
-        `[0.0.70e] Populated zone content for "${zone.id}" via table "${tableId}":`,
+        `[0.0.70e] Populated zone content for "${zone.id}" via ${resolved.source} table "${tableId}":`,
         {
           resourceNodes: zone.content.resourceNodes.length,
           entities: zone.content.entities.length,
