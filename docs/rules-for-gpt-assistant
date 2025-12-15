@@ -1,0 +1,10 @@
+## Project Rules (Do Not Break)
+
+- Zone templates define layout only (no difficulty baked in).
+- World tiles own difficultyRating (numeric, 1–10+).
+- Spawn tables NEVER generate difficulty.
+- Use SPAWN_TABLES.byContext for procedural content.
+- Use SPAWN_TABLES.byTemplate only for handcrafted exceptions.
+- Do NOT introduce template IDs with difficulty in the name.
+- All content population must go through initializeZoneContent().
+- Persistence must be delta-based (no regenerating player-changed content).
