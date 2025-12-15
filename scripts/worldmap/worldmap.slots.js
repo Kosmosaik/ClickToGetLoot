@@ -85,7 +85,7 @@ function initializeWorldSlotMetadata(tile, options) {
  * Pick a world slot template based on distance from the starting tile.
  * For 0.0.70c this is deliberately simple:
  *  - distance 0 = tutorial
- *  - everything else = primitive forest easy
+ *  - everything else = primitive forest d1
  *
  * Later we can add rings with different biomes/difficulties/eras.
  */
@@ -94,7 +94,7 @@ function pickWorldSlotTemplateForDistance(distance) {
     return WORLD_SLOT_TEMPLATES.tutorial;
   }
 
-  return WORLD_SLOT_TEMPLATES.primitive_forest_easy;
+  return WORLD_SLOT_TEMPLATES.primitive_forest_d1;
 }
 
 /**
@@ -152,7 +152,7 @@ function pickDifficultyForDistance(distance) {
 function initializeWorldSlotFromDistance(tile, distance) {
   const preset =
     pickWorldSlotTemplateForDistance(distance) ||
-    WORLD_SLOT_TEMPLATES.primitive_forest_easy;
+    WORLD_SLOT_TEMPLATES.primitive_forest_d1;
 
   // Difficulty rating is an instance-level world tile property.
   // We pick it here (distance-weighted) and pass it as an explicit override.
