@@ -178,6 +178,18 @@
     </div>
 
     <button id="loot-button">Loot!</button>
+
+    <!-- Phase 9 — Content interaction modal (Harvest/Kill/Inspect/Enter) -->
+    <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div id="modal-panel" class="panel modal-panel">
+        <h2 id="modal-title">...</h2>
+        <div id="modal-body" class="modal-body"></div>
+        <div class="modal-actions">
+          <button id="modal-primary" type="button">OK</button>
+          <button id="modal-secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
     <div id="progress-container">
       <div id="progress"></div>
     </div>
@@ -299,7 +311,8 @@
 
 <!-- Game modules -->
 <script src="scripts/game/game.loot.js"></script>
-<script src="scripts/game/game.save.js"></script>
+    <script src="scripts/game/game.save.js"></script>
+    <script src="scripts/game/game.ui.modal.js"></script>
 <script src="scripts/game/game.patchnotes.js"></script>
 <script src="scripts/game/game.screens.js"></script>
 <script src="scripts/game/game.ui.panels.js"></script>
