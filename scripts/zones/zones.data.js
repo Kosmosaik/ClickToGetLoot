@@ -105,8 +105,8 @@ const ZONE_DEFINITIONS = {
 // World tiles carry a templateId (e.g. "primitive_forest_easy") which
 // we map to one of these templates when generating a new zone on demand.
 const ZONE_TEMPLATES = {
-  primitive_forest_easy: {
-    id: "primitive_forest_easy",
+  primitive_forest_d1: {
+    id: "primitive_forest_d1",
     name: "Primitive Forest",
     difficulty: 1,
     generator: "cellular_automata",
