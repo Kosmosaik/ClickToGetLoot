@@ -40,7 +40,7 @@ const ZONE_DEFINITIONS = {
 
 // 0.0.70c — Zone templates (used by world slots / auto-generated zones).
 // These are separate from ZONE_DEFINITIONS to keep data modular.
-// World tiles carry a templateId (e.g. "primitive_forest_easy") which
+// World tiles carry a templateId (e.g. "primitive_forest_d1") which
 // we map to one of these templates when generating a new zone on demand.
 const ZONE_TEMPLATES = {
   // Starting zone template (metadata only).

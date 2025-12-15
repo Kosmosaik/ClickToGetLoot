@@ -1210,7 +1210,7 @@ function ensureGeneratedZoneDefinitionForWorldTile(tile) {
     return existing;
   }
 
-  const templateId = tile.templateId || "primitive_forest_d1";
+  const templateId = tile.templateId || (PC.ZONES && PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID ? PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID : "primitive_forest_d1");
   if (typeof ZONE_TEMPLATES === "undefined") {
     console.warn("ensureGeneratedZoneDefinitionForWorldTile: ZONE_TEMPLATES is not defined.");
     return null;
