@@ -26,7 +26,7 @@ function createWorldMapTile(x, y) {
     // These will be assigned when the tile becomes DISCOVERED.
     era: null,          // e.g. "primitive", "fantasy", ...
     biome: null,        // e.g. "temperate_forest", "desert", ...
-    templateId: null,   // e.g. "primitive_forest_easy" (maps to a zone template)
+    templateId: null,   // e.g. "primitive_forest_d1" (maps to a zone template)
     seed: null,         // seed used when generating the actual zone
     zoneGenerated: false, // has a zone already been generated for this slot?
 
