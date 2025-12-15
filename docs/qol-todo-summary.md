@@ -53,9 +53,9 @@ These should be handled in future QoL passes or adjacent branches:
 
 6. **World map coordinate system change**
    - Original objective: set tutorial zone to `(0, 0)` and use:
-     - North: `Y + 1`
+     - North: `Y + or -1 depending on what makes sense`
      - East: `X + 1`
-     - South: `Y - 1`
+     - South: `Y - or +1`
      - West: `X - 1`
    - TODO: update world map generation, movement, and UI representation accordingly.
   
@@ -63,13 +63,17 @@ These should be handled in future QoL passes or adjacent branches:
 
 8. **Remove the "Overview World map ready (Tutorial Zone + adjacent placeholders)" text/field**
 
-9. **Remove the 4 starting zones around the Tutorial Zones and replace them with current CA generated zones.**
+9. **Remove the "Zone" menu text in the top and move up the Zone Info field instead. We need to save on UI height in the zone panel.
 
-10. **Remove the "Zone" menu text in the top and move up the Zone Info field instead. We need to save on UI height in the zone panel.
+10. **Randomize min/max width & height and fillChance on zones. Set different min/max and fill values depending on zone type/biome.
 
-11. **Randomize min/max width & height and fillChance on zones. Set different min/max and fill values depending on zone type/biome.
+11. **Make "Explore Auto" and "Stop Exploring" the same button. When clicking "Explore Auto" it just turns to "Stop Exploring".
 
-12. 
+12. **Make Zone Info more player friendly by removing Zone ID and adding Zone Name instead.**
+
+13. **Add Completed as state to zone so when viewing Zone Info on a zone in world map, it should say "Discovered" = Not Explored, "Visited" = Entered but not fully explored, "Completed" = Fully completed (100% tiles explored). In the future there will be a different calculation based on POIs, Locations and subareas.
+
+---
 
 ## IDEAS BELOW ARE NOT TO BE IMPLEMENTED YET. THESE ARE ONLY IDEAS AND NEED TO BE THOUGHT ON FURTHER.
 xx. **Add a "view distance" mechanic (3×3 area around player)**
