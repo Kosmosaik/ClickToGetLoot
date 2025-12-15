@@ -23,7 +23,7 @@ const WORLD_SLOT_TEMPLATES = {
     biome: BIOME.TEMPERATE_FOREST,
     templateId: "tutorial_cave",
   },
-  primitive_forest_easy: {
+  primitive_forest_d1: {
     era: ERA.PRIMITIVE,
     biome: BIOME.TEMPERATE_FOREST,
     templateId: "primitive_forest_d1",
