@@ -3,8 +3,30 @@
 This document is meant as a handoff / technical summary for the next GPT assistant and for future maintenance.
 
 ---
+### TODOs made AFTER 0.0.70e (prioritize these first).
 
-### Known TODOs (from original user list; not yet implemented or only partially addressed)
+1. **Add resource nodes, entities, POIs and Locations to Discoveries-list.**
+   - Currently only Locations are stored in Discoveries after interaction has been made.  
+   - TODO: whenever content is revealed upon "explored" it should be added to the Discoveries list.
+   - Add sorting options (by name, by distance to player, by content/node type"
+   - Add interact/move to function. When content is clicked in Discoveries, move player to the tile and then open up the window for harvest/kill etc.
+  
+2. **Zone Items and Loot-Button items are not unified and grade system is not implemented**
+   - Currently items are separated from zone system and loot button. Zone items are not generated from items.js and they have no properties for future expansion.
+   - Question: Do we remove items.js, or generate ALL items from items.js instead?
+   - Item grades are not generating/randomizing in zones. All items have F0 as grade. The idea is that all resource nodes, entities, POIs etc
+     will roll a random grade upon creation/generation, and the items looted from the node, entity, POI etc will derive from that grade generation.
+     Higher difficulty in zone = higher chance to generate higher grade (F0-S9).
+   - In the future, player will be able to "improve" the grade when harvesting/looting entity etc based on skills, tool handling etc.
+  
+3. **Stone Cluster glyph/symbol is too big. Can we reduce its size or do we have to change the symbol completely?**
+
+4. **When playing on phone: For some reason the player icon is not centered in the tile. This is NOT an important QoL change, and I don't want it to mess up anything for PC**
+
+     
+
+
+### TODOs created BEFORE 0.0.70e
 
 These should be handled in future QoL passes or adjacent branches:
 
