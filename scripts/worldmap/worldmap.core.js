@@ -16,7 +16,7 @@ function createWorldMapTile(x, y) {
     x,
     y,
 
-    // Zone identifier (e.g. "tutorial_zone", "tutorial_zone_north")
+    // Zone identifier (e.g. "tutorial_zone", "auto_zone_6_5")
     zoneId: null,
 
     // Fog of war state for the world map.
@@ -26,7 +26,7 @@ function createWorldMapTile(x, y) {
     // These will be assigned when the tile becomes DISCOVERED.
     era: null,          // e.g. "primitive", "fantasy", ...
     biome: null,        // e.g. "temperate_forest", "desert", ...
-    templateId: null,   // e.g. "primitive_forest_easy" (maps to a zone template)
+    templateId: null,   // e.g. "primitive_forest_d1" (maps to a zone template)
     seed: null,         // seed used when generating the actual zone
     zoneGenerated: false, // has a zone already been generated for this slot?
 
@@ -65,8 +65,8 @@ function getWorldMapTile(worldMap, x, y) {
 }
 
 // Create the default world map for a new game.
-// For now: a small grid with the Tutorial Zone in the center,
-// and 4 adjacent placeholder zones around it.
+// The Tutorial Zone is placed in the center.
+// All other tiles start as UNKNOWN and are revealed via the adjacency unlock rule.
 function createDefaultWorldMap(startZoneId) {
   const width = 13;
   const height = 13;
@@ -92,31 +92,9 @@ function createDefaultWorldMap(startZoneId) {
     }
   }
 
-  // Adjacent placeholder zones (first ring around tutorial)
-  const neighbors = [
-    { dx: 0, dy: -1, idSuffix: "north" },
-    { dx: 0, dy: 1, idSuffix: "south" },
-    { dx: -1, dy: 0, idSuffix: "west" },
-    { dx: 1, dy: 0, idSuffix: "east" },
-  ];
-
-  neighbors.forEach((n) => {
-    const nx = centerX + n.dx;
-    const ny = centerY + n.dy;
-    const tile = getWorldMapTile(map, nx, ny);
-    if (!tile) return;
-
-    tile.zoneId = `${startZoneId}_${n.idSuffix}`;
-    tile.fogState = WORLD_FOG_STATE.DISCOVERED;
-
-    // Manhattan distance from the starting tile (these will all be 1 here)
-    const distance = Math.abs(nx - map.startX) + Math.abs(ny - map.startY);
-
-    // 0.0.70c: initialize world slot metadata for the first ring
-    if (typeof initializeWorldSlotFromDistance === "function") {
-      initializeWorldSlotFromDistance(tile, distance);
-    }
-  });
+  // NOTE: We no longer pre-create the 4 adjacent tiles around the tutorial.
+  // Neighbor tiles will be revealed and initialized by unlockAdjacentWorldTiles()
+  // once the tutorial zone (or any zone) is explored.
 
   // Current selection = starting tile
   map.currentX = centerX;

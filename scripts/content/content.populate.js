@@ -34,13 +34,43 @@
   // Priority:
   // 1) byTemplate lookup using worldTile.templateId
   // 2) byTemplate lookup using zone.id (handcrafted exceptions)
-  // 3) byContext lookup using worldTile.biome / worldTile.era / difficulty bucket
-  function difficultyKeyFromRating(rating) {
+  // 3) byContext lookup using worldTile.biome / worldTile.era / difficultyRating (numeric)
+
+  function normalizeDifficultyRating(rating) {
     const r = Math.floor(Number(rating) || 0);
-    if (r <= 0) return null;
-    if (r <= 3) return "easy";
-    if (r <= 6) return "medium";
-    return "hard";
+    return r > 0 ? r : null;
+  }
+
+  // Resolve a context table from a biome/era node.
+  // Supported shapes (data-only):
+  // - Array of { difficultyRange:[min,max], table:{...} }
+  // - Object with a "_ranges" array of the same shape (legacy convenience)
+  // - Object keyed by numeric difficulty strings ("1", "2", ...)
+  function resolveContextTable(ctxEraNode, difficultyRating) {
+    if (!ctxEraNode || !difficultyRating) return null;
+
+    const list = Array.isArray(ctxEraNode)
+      ? ctxEraNode
+      : (Array.isArray(ctxEraNode._ranges) ? ctxEraNode._ranges : null);
+
+    if (list) {
+      for (let i = 0; i < list.length; i++) {
+        const entry = list[i];
+        const range = entry && Array.isArray(entry.difficultyRange) ? entry.difficultyRange : null;
+        const table = entry && entry.table ? entry.table : null;
+        if (!range || range.length < 2 || !table) continue;
+        const min = Math.floor(Number(range[0]) || 0);
+        const max = Math.floor(Number(range[1]) || 0);
+        if (difficultyRating >= min && difficultyRating <= max) return table;
+      }
+      return null;
+    }
+
+    // Direct numeric key fallback
+    const key = String(difficultyRating);
+    if (ctxEraNode[key]) return ctxEraNode[key];
+    if (ctxEraNode.any) return ctxEraNode.any;
+    return null;
   }
 
   function resolveSpawnTable(zone, def, worldTile) {
@@ -58,16 +88,16 @@
 
     const biome = worldTile && worldTile.biome ? String(worldTile.biome) : null;
     const era = worldTile && worldTile.era ? String(worldTile.era) : null;
-    const diffKey = difficultyKeyFromRating(worldTile && worldTile.difficultyRating);
+    const diffRating = normalizeDifficultyRating(worldTile && worldTile.difficultyRating);
 
-    if (!biome || !era || !diffKey) return null;
+    if (!biome || !era || !diffRating) return null;
 
     const ctxBiome = byContext[biome];
-    const ctxEra = ctxBiome ? ctxBiome[era] : null;
-    const ctx = ctxEra ? (ctxEra[diffKey] || ctxEra.any || null) : null;
+    const ctxEraNode = ctxBiome ? ctxBiome[era] : null;
+    const ctx = resolveContextTable(ctxEraNode, diffRating);
     if (!ctx) return null;
 
-    return { table: ctx, tableId: `${biome}/${era}/${diffKey}`, source: "context" };
+    return { table: ctx, tableId: `${biome}/${era}/dr${diffRating}`, source: "context" };
   }
 
   // Utility: clamp int.

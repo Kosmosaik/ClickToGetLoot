@@ -3,7 +3,7 @@
 //
 // Spawn tables describe *what* can appear in a zone, by context.
 // This phase introduces the primary lookup structure:
-//   biome → era → difficultyKey
+//   biome → era → difficultyRating (ranges)
 //
 // Important:
 // - Keep tables data-only.
@@ -24,18 +24,21 @@
   // PC.content.SPAWN_TABLES = {
   //   byContext: {
   //     "temperate_forest": {
-  //       "primitive": {
-  //         "easy": {
-  //           resourceNodes: { countRange:[min,max], entries:[{ defId, w }, ...] },
-  //           entities:      { countRange:[min,max], entries:[{ defId, w }, ...] },
-  //           pois:          { countRange:[min,max], entries:[{ defId, w }, ...] },
-  //           locations:     { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //       "primitive": [
+  //         {
+  //           difficultyRange: [1, 3], // inclusive
+  //           table: {
+  //             resourceNodes: { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //             entities:      { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //             pois:          { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //             locations:     { countRange:[min,max], entries:[{ defId, w }, ...] },
+  //           }
   //         }
-  //       }
+  //       ]
   //     }
   //   },
   //   byTemplate: {
-  //     "primitive_forest_easy": { ...same kind objects... },
+  //     "primitive_forest": { ...same kind objects... },
   //     "tutorial_zone": { ... }
   //   },
   // };
@@ -72,19 +75,26 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Phase 3.1 — First context table (temperate_forest / primitive / easy)
+  // Phase 3.1 — First context table (temperate_forest / primitive / difficulty 1-3)
   // ---------------------------------------------------------------------------
   // Matches world slot metadata:
   // - tile.biome: "temperate_forest"
   // - tile.era: "primitive"
-  // - tile.difficultyRating bucketed to "easy" (see populate resolver)
-  const ctx_easy = ensurePath(PC.content.SPAWN_TABLES.byContext, [
+  // - tile.difficultyRating must fall within the range (see populate resolver)
+  const ctx_list = ensurePath(PC.content.SPAWN_TABLES.byContext, [
     "temperate_forest",
     "primitive",
-    "easy",
   ]);
 
-  ctx_easy.resourceNodes = {
+  // Ensure list container.
+  if (!Array.isArray(ctx_list._ranges)) ctx_list._ranges = [];
+
+  const ctx_r1_3 = { difficultyRange: [1, 3], table: {} };
+  ctx_list._ranges.push(ctx_r1_3);
+
+  const ctx = ctx_r1_3.table;
+
+  ctx.resourceNodes = {
     // Phase 9: scale by zone size so small zones don't get overstuffed
     // and large zones don't feel empty.
     // We treat countRange as a baseline for ~100 walkable tiles.
@@ -100,7 +110,7 @@
     ],
   };
 
-  ctx_easy.entities = {
+  ctx.entities = {
     // Phase 9: scale by zone size (baseline for ~100 walkable tiles).
     scaleByZoneSize: true,
     baseTiles: 100,
@@ -113,7 +123,7 @@
     ],
   };
 
-  ctx_easy.pois = {
+  ctx.pois = {
     countRange: [1, 2],
     entries: [
       { defId: "stash_small", w: 75 },
@@ -121,7 +131,7 @@
     ],
   };
 
-  ctx_easy.locations = {
+  ctx.locations = {
     countRange: [0, 1],
     entries: [
       { defId: "ruined_clearing", w: 70 },
@@ -133,14 +143,6 @@
   // Phase 3.1 — Template tables (back-compat + handcrafted exceptions)
   // ---------------------------------------------------------------------------
 
-  // Back-compat template id still used by some world slot templates.
-  // Keep this aligned with ctx_easy for now.
-  PC.content.SPAWN_TABLES.byTemplate.primitive_forest_easy = {
-    resourceNodes: ctx_easy.resourceNodes,
-    entities: ctx_easy.entities,
-    pois: ctx_easy.pois,
-    locations: ctx_easy.locations,
-  };
 
   // Tutorial zone (small static map) — keep the counts tiny.
   PC.content.SPAWN_TABLES.byTemplate.tutorial_zone = {

@@ -21,12 +21,15 @@ const WORLD_SLOT_TEMPLATES = {
   tutorial: {
     era: ERA.PRIMITIVE,
     biome: BIOME.TEMPERATE_FOREST,
-    templateId: "tutorial_cave",
+    // Separate template id for the starting zone.
+    // The actual starting zone uses a static ZONE_DEFINITIONS entry (tutorial_zone),
+    // but keeping a dedicated templateId helps keep metadata intent clear.
+    templateId: (PC.ZONES && PC.ZONES.START_TEMPLATE_ID) ? PC.ZONES.START_TEMPLATE_ID : "tutorial_start",
   },
-  primitive_forest_easy: {
+  primitive_forest_d1: {
     era: ERA.PRIMITIVE,
     biome: BIOME.TEMPERATE_FOREST,
-    templateId: "primitive_forest_easy",
+    templateId: (PC.ZONES && PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID) ? PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID : "primitive_forest_d1",
   },
 };
 
@@ -46,7 +49,7 @@ function initializeWorldSlotMetadata(tile, options) {
     tile.biome = opts.biome || BIOME.TEMPERATE_FOREST;
   }
   if (!tile.templateId) {
-    tile.templateId = opts.templateId || "primitive_forest_easy";
+    tile.templateId = opts.templateId || (PC.ZONES && PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID ? PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID : "primitive_forest_d1");
   }
 
   // Difficulty rating 1–10 — derived from the zone template if available.
@@ -85,7 +88,7 @@ function initializeWorldSlotMetadata(tile, options) {
  * Pick a world slot template based on distance from the starting tile.
  * For 0.0.70c this is deliberately simple:
  *  - distance 0 = tutorial
- *  - everything else = primitive forest easy
+ *  - everything else = primitive forest d1
  *
  * Later we can add rings with different biomes/difficulties/eras.
  */
@@ -94,7 +97,7 @@ function pickWorldSlotTemplateForDistance(distance) {
     return WORLD_SLOT_TEMPLATES.tutorial;
   }
 
-  return WORLD_SLOT_TEMPLATES.primitive_forest_easy;
+  return WORLD_SLOT_TEMPLATES.primitive_forest_d1;
 }
 
 /**
@@ -152,11 +155,19 @@ function pickDifficultyForDistance(distance) {
 function initializeWorldSlotFromDistance(tile, distance) {
   const preset =
     pickWorldSlotTemplateForDistance(distance) ||
-    WORLD_SLOT_TEMPLATES.primitive_forest_easy;
+    WORLD_SLOT_TEMPLATES.primitive_forest_d1;
 
-  // No difficulty here anymore; we let initializeWorldSlotMetadata
-  // derive it from ZONE_TEMPLATES[preset.templateId].
-  initializeWorldSlotMetadata(tile, preset);
+  // Difficulty rating is an instance-level world tile property.
+  // We pick it here (distance-weighted) and pass it as an explicit override.
+  //
+  // NOTE: The tutorial tile (distance 0) is intentionally fixed and may use
+  // the template default difficulty.
+  const opts = { ...preset };
+  if (distance !== 0) {
+    opts.difficultyRating = pickDifficultyForDistance(distance);
+  }
+
+  initializeWorldSlotMetadata(tile, opts);
 }
 
 // Debug helper – so you can poke this from DevTools if you want.
@@ -166,5 +177,6 @@ window.WorldSlotDebug = {
   WORLD_SLOT_TEMPLATES,
   initializeWorldSlotMetadata,
   pickWorldSlotTemplateForDistance,
+  pickDifficultyForDistance,
   initializeWorldSlotFromDistance,
 };

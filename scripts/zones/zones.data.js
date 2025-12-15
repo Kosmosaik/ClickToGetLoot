@@ -36,77 +36,27 @@ const ZONE_DEFINITIONS = {
       "##########",
     ],
   },
-
-    // Simple generated zones around the tutorial zone.
-  // These will use a Cellular Automata-based generator in 0.0.70b.
-  tutorial_zone_north: {
-    id: "tutorial_zone_north",
-    name: "Northern Wilds",
-    type: "generated",
-    generator: "cellular_automata",
-    generatorConfig: {
-      width: 38,
-      height: 24,
-      fillChance: 0.57,       // probability a tile starts as wall
-      smoothIterations: 4,    // how many CA smoothing passes
-      borderIsWall: true,     // keep solid border
-    },
-    defaultWeatherState: "overcast",
-  },
-
-  tutorial_zone_south: {
-    id: "tutorial_zone_south",
-    name: "Southern Caves",
-    type: "generated",
-    generator: "cellular_automata",
-    generatorConfig: {
-      width: 38,
-      height: 24,
-      fillChance: 0.46,
-      smoothIterations: 5,
-      borderIsWall: true,
-    },
-    defaultWeatherState: "humid",
-  },
-
-  tutorial_zone_west: {
-    id: "tutorial_zone_west",
-    name: "Western Grove",
-    type: "generated",
-    generator: "cellular_automata",
-    generatorConfig: {
-      width: 38,
-      height: 24,
-      fillChance: 0.40,
-      smoothIterations: 4,
-      borderIsWall: true,
-    },
-    defaultWeatherState: "clear",
-  },
-
-  tutorial_zone_east: {
-    id: "tutorial_zone_east",
-    name: "Eastern Ridge",
-    type: "generated",
-    generator: "cellular_automata",
-    generatorConfig: {
-      width: 38,
-      height: 24,
-      fillChance: 0.51,
-      smoothIterations: 5,
-      borderIsWall: true,
-    },
-    defaultWeatherState: "windy",
-  },
 };
 
 // 0.0.70c — Zone templates (used by world slots / auto-generated zones).
 // These are separate from ZONE_DEFINITIONS to keep data modular.
-// World tiles carry a templateId (e.g. "primitive_forest_easy") which
+// World tiles carry a templateId (e.g. "primitive_forest_d1") which
 // we map to one of these templates when generating a new zone on demand.
 const ZONE_TEMPLATES = {
-  primitive_forest_easy: {
-    id: "primitive_forest_easy",
+  // Starting zone template (metadata only).
+  // The tutorial zone itself is a static layout defined in ZONE_DEFINITIONS,
+  // but world tiles still carry a templateId, so we keep this here as a
+  // dedicated "start" template. It is not used for procedural generation.
+  tutorial_start: {
+    id: "tutorial_start",
+    name: "Tutorial Start",
+    difficulty: 1,
+    generator: null,
+    generatorConfig: null,
+    defaultWeatherState: "clear",
+  },
+  primitive_forest: {
+    id: "primitive_forest",
     name: "Primitive Forest",
     difficulty: 1,
     generator: "cellular_automata",

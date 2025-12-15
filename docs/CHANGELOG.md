@@ -1,3 +1,55 @@
+# ProgressCrawl — Patch 0.0.70f
+## World Generation & Zone System Cleanup
+
+This update improves world generation, zone structure, and difficulty scaling, making exploration more dynamic and future expansion easier.
+
+---
+
+## Added
+- **Distance-Based Zone Difficulty**
+  - Zones now receive a difficulty rating based on how far they are from the starting area.
+  - Nearby zones are generally safer, while distant zones trend toward higher difficulty.
+  - Difficulty is no longer fixed to a zone type.
+
+- **Dedicated Starting Zone Type**
+  - The starting area now uses its own predefined zone type.
+  - All surrounding zones use normal procedural generation rules.
+
+---
+
+## Changed
+- **Procedural Zone Generation**
+  - Removed special handling for the four zones adjacent to the starting area.
+  - All non-starting zones are now generated using the same procedural rules.
+
+- **Zone Difficulty System**
+  - Replaced “easy / medium / hard” logic with a unified numeric difficulty rating.
+  - Difficulty now ranges from 1–10 and scales naturally across the world map.
+
+- **Zone Template Structure**
+  - Zone templates now define layout and identity only.
+  - Difficulty is handled per zone instance, not baked into the zone type.
+
+- **Content Spawning Rules**
+  - Procedural content now relies on biome, era, and difficulty context.
+  - Template-specific spawn rules are reserved for special zones only.
+
+---
+
+## Removed
+- Hardcoded generation of the four adjacent zones around the starting area.
+- Template-based difficulty overrides for normal procedural zones.
+- Redundant default template spawn overrides.
+
+---
+
+## Fixed
+- All procedural zones previously spawning at difficulty 1.
+- Inconsistent difficulty behavior when exploring outward from the starting area.
+- Fragile zone template references that made renaming or adding zones error-prone.
+
+---
+
 # ProgressCrawl — Patch 0.0.70e
 ## Zone Content & Exploration Update
 
