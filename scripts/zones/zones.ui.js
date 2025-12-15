@@ -66,11 +66,20 @@ function buildContentIndex(zone) {
 function getTopTileContent(zone, contentIndex, x, y) {
   const key = `${x},${y}`;
   const entity = contentIndex.entities.get(key);
-  if (entity) return { kind: "entities", inst: entity };
+  if (entity) {
+    const s = entity.state || {};
+    // Phase 9: defeated entities are removed/invisible until respawned.
+    if (!s.defeated) return { kind: "entities", inst: entity };
+  }
   const poi = contentIndex.pois.get(key);
   if (poi) return { kind: "pois", inst: poi };
   const rn = contentIndex.resourceNodes.get(key);
-  if (rn) return { kind: "resourceNodes", inst: rn };
+  if (rn) {
+    const s = rn.state || {};
+    // Phase 9: depleted/harvested nodes are removed/invisible until respawned.
+    const spent = !!s.depleted || !!s.harvested || (typeof s.chargesLeft === "number" && s.chargesLeft <= 0);
+    if (!spent) return { kind: "resourceNodes", inst: rn };
+  }
   const loc = contentIndex.locations.get(key);
   if (loc) return { kind: "locations", inst: loc };
   return null;
@@ -170,7 +179,11 @@ function buildZoneGridString(zone) {
           ch = getMarkerGlyph(top.kind, top.inst, def);
           classes += " zone-cell-content";
           classes += ` zone-cell-content-${top.kind}`;
-          if (label) classes += " zone-cell-content-done";
+          // Phase 9:
+          // - Nodes/entities that are "done" are not rendered at all.
+          // - POIs keep a "done" style when opened.
+          // - Locations remain visible without a "done" style.
+          if (label && top.kind !== "locations") classes += " zone-cell-content-done";
           const nm = def && def.name ? def.name : top.inst.defId;
           title = `${nm} ${label}`.trim();
         }
