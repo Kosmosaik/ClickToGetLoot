@@ -1,3 +1,64 @@
+# ProgressCrawl — Patch 0.0.70e
+## Zone Content & Exploration Update
+
+This update focuses on making zones feel alive, persistent, and meaningful to explore. Zones are now populated with real content, your actions matter, and progress is saved.
+
+---
+
+## ✨ Added
+- **Populated Zones**
+  - Zones now contain trees, stone, creatures, points of interest, and locations.
+  - Content placement is consistent and feels intentional.
+
+- **Persistent Exploration**
+  - Explored tiles stay revealed after leaving and reloading the game.
+  - You no longer need to re-explore the same zone repeatedly.
+
+- **Interactive Zone Content**
+  - Click on content in zones to interact:
+    - Harvest resources
+    - Kill creatures
+    - Inspect points of interest
+    - Enter locations (full transitions coming later)
+
+- **Interaction Window**
+  - Actions now require confirmation via a small popup window.
+  - You can cancel interactions without consequences.
+
+- **Inventory Unlock from Exploration**
+  - The inventory now unlocks automatically when you gain your first item from zones.
+
+---
+
+## 🔄 Changed
+- **Zone Scaling**
+  - The amount of content in a zone now scales with zone size.
+  - Larger zones feel fuller; smaller zones feel tighter and more focused.
+
+- **Content Visibility Rules**
+  - Harvested resources and defeated enemies disappear from the zone.
+  - Opened points of interest remain visible but can no longer be interacted with.
+  - Locations remain visible once discovered.
+
+- **More Natural Exploration Flow**
+  - Zones feel less random and more balanced during exploration.
+
+---
+
+## 🐛 Fixed
+- Exploration progress resetting after reload.
+- Content reappearing after being harvested or defeated.
+- Inventory not unlocking when gaining items outside of the loot button.
+- Inconsistent behavior when interacting with zone content.
+
+---
+
+## 🧭 Notes
+- Tutorial zones use special rules and are not affected by some of these systems yet.
+- Location entry currently marks discovery only; full location transitions will come later.
+
+---
+
 # 0.0.70d2 – Exploration Behavior Improvements (QoL Update)
 
 This update focuses entirely on making exploration feel smarter, smoother, and less random. The goal was to reduce strange pathing choices, cut down unnecessary walking, and make the explorer behave more like a real adventurer instead of bouncing around the map.

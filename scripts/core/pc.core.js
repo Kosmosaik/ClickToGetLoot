@@ -24,6 +24,9 @@
     // worldmap
     worldMap: null,
 
+    // 0.0.70e — per-zone delta persistence (deterministic regen + deltas)
+    zoneDeltas: {},
+
     // exploration timers/state (we'll migrate these next)
     exploration: {
       zoneExplorationActive: false,

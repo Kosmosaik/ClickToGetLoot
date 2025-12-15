@@ -3,6 +3,22 @@
 
 const SAVE_KEY = "CTGL_SAVES_V1";
 
+// Phase 8 — coalesce frequent save requests (e.g. multi-item loot) into a single write.
+let _saveScheduled = false;
+
+function requestSaveCurrentGame() {
+  if (_saveScheduled) return;
+  _saveScheduled = true;
+  setTimeout(() => {
+    _saveScheduled = false;
+    try {
+      saveCurrentGame();
+    } catch (e) {
+      console.warn("requestSaveCurrentGame: saveCurrentGame failed", e);
+    }
+  }, 0);
+}
+
 function loadAllSaves() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
@@ -97,6 +113,9 @@ function saveCurrentGame() {
 
     // 0.0.70c+ — persist world map (owned by PC.state, not a global)
     worldMap: (typeof STATE === "function" ? STATE().worldMap : null),
+
+    // 0.0.70e — persist per-zone deltas (deterministic regen + deltas)
+    zoneDeltas: (typeof STATE === "function" ? (STATE().zoneDeltas || {}) : {}),
   };
 
   const idx = saves.findIndex(s => s.id === snapshot.id);
@@ -140,6 +159,20 @@ function loadSave(id) {
       setWorldMap(wm);
     } else if (typeof STATE === "function") {
       STATE().worldMap = wm;
+    }
+  }
+
+  // 0.0.70e — Restore per-zone deltas into PC.state
+  if (typeof STATE === "function") {
+    STATE().zoneDeltas = save.zoneDeltas || {};
+
+    // Phase 8 — Validate/normalize delta shape (backward compat + corruption guard).
+    try {
+      if (window.PC?.content && typeof PC.content.normalizeAllZoneDeltas === "function") {
+        PC.content.normalizeAllZoneDeltas(STATE().zoneDeltas);
+      }
+    } catch (e) {
+      console.warn("loadSave: failed to normalize zoneDeltas", e);
     }
   }
 

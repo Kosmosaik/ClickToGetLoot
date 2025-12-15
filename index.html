@@ -9,7 +9,7 @@
 <body>
 <div id="game-header">
   <span class="game-header-text">
-    ProgressCrawl — v0.0.70e-dev : It's Alive! (Step 1)
+    ProgressCrawl — v0.0.70e-stable: Zone Content & Exploration
   </span>
   <button id="patch-notes-btn" type="button">Patch Notes</button>
 </div>
@@ -178,6 +178,18 @@
     </div>
 
     <button id="loot-button">Loot!</button>
+
+    <!-- Phase 9 — Content interaction modal (Harvest/Kill/Inspect/Enter) -->
+    <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div id="modal-panel" class="panel modal-panel">
+        <h2 id="modal-title">...</h2>
+        <div id="modal-body" class="modal-body"></div>
+        <div class="modal-actions">
+          <button id="modal-primary" type="button">OK</button>
+          <button id="modal-secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
     <div id="progress-container">
       <div id="progress"></div>
     </div>
@@ -259,6 +271,17 @@
 <script src="scripts/zones/zones.data.js"></script>
 <script src="scripts/zones/zones.generator.js"></script>
 
+<!-- 0.0.70e — Content (defs + tables + deterministic placement helpers)
+     Must load before zones.core.js (initializeZoneContent hook). -->
+<script src="scripts/content/content.defs.js"></script>
+<script src="scripts/content/content.lootTables.js"></script>
+<script src="scripts/content/content.spawnTables.js"></script>
+<script src="scripts/content/content.rng.js"></script>
+<script src="scripts/content/content.place.js"></script>
+<script src="scripts/content/content.populate.js"></script>
+<script src="scripts/content/content.deltas.js"></script>
+<script src="scripts/content/content.interact.js"></script>
+
 <script src="scripts/worldmap/worldmap.slots.js"></script>
 <script src="scripts/worldmap/worldmap.core.js"></script>
 <script src="scripts/worldmap/worldmap.ui.js"></script>
@@ -288,7 +311,8 @@
 
 <!-- Game modules -->
 <script src="scripts/game/game.loot.js"></script>
-<script src="scripts/game/game.save.js"></script>
+    <script src="scripts/game/game.save.js"></script>
+    <script src="scripts/game/game.ui.modal.js"></script>
 <script src="scripts/game/game.patchnotes.js"></script>
 <script src="scripts/game/game.screens.js"></script>
 <script src="scripts/game/game.ui.panels.js"></script>

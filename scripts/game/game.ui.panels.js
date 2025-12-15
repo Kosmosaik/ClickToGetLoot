@@ -62,3 +62,21 @@ if (skillsButton && skillsPanel) {
   });
 }
 
+// ----- Global unlock helpers -----
+// Some systems (zone harvesting, POIs, etc.) add items without going through the loot button flow.
+// This centralizes the "inventory unlock" behavior so any item source can unlock it safely.
+window.ensureInventoryUnlocked = function ensureInventoryUnlocked() {
+  if (typeof inventoryUnlocked !== "boolean") return;
+  if (inventoryUnlocked) return;
+
+  inventoryUnlocked = true;
+
+  if (typeof inventoryButton !== "undefined" && inventoryButton) {
+    inventoryButton.style.display = "block";
+    inventoryButton.classList.add("inventory-unlock");
+    setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 3000);
+    setTimeout(() => inventoryButton.focus(), 200);
+  }
+};
+
+

@@ -31,6 +31,102 @@ function inZone() {
 
 // ----- Helpers -----
 
+// Build quick lookup maps for placed zone content by tile coordinate.
+// Instances are stored in zone.content.* arrays; we index them per render.
+function buildContentIndex(zone) {
+  const idx = {
+    resourceNodes: new Map(),
+    entities: new Map(),
+    pois: new Map(),
+    locations: new Map(),
+  };
+
+  if (!zone || !zone.content) return idx;
+
+  const addAll = (kind, list) => {
+    if (!Array.isArray(list)) return;
+    for (const inst of list) {
+      if (!inst) continue;
+      const x = Number(inst.x);
+      const y = Number(inst.y);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      idx[kind].set(`${x},${y}`, inst);
+    }
+  };
+
+  addAll("resourceNodes", zone.content.resourceNodes);
+  addAll("entities", zone.content.entities);
+  addAll("pois", zone.content.pois);
+  addAll("locations", zone.content.locations);
+  return idx;
+}
+
+// Resolve the highest-priority content instance on a tile.
+// Priority: entity > POI > node > location
+function getTopTileContent(zone, contentIndex, x, y) {
+  const key = `${x},${y}`;
+  const entity = contentIndex.entities.get(key);
+  if (entity) {
+    const s = entity.state || {};
+    // Phase 9: defeated entities are removed/invisible until respawned.
+    if (!s.defeated) return { kind: "entities", inst: entity };
+  }
+  const poi = contentIndex.pois.get(key);
+  if (poi) return { kind: "pois", inst: poi };
+  const rn = contentIndex.resourceNodes.get(key);
+  if (rn) {
+    const s = rn.state || {};
+    // Phase 9: depleted/harvested nodes are removed/invisible until respawned.
+    const spent = !!s.depleted || !!s.harvested || (typeof s.chargesLeft === "number" && s.chargesLeft <= 0);
+    if (!spent) return { kind: "resourceNodes", inst: rn };
+  }
+  const loc = contentIndex.locations.get(key);
+  if (loc) return { kind: "locations", inst: loc };
+  return null;
+}
+
+function getContentDef(kind, defId) {
+  const defs = window.PC?.content?.DEFS;
+  if (!defs || !defs[kind]) return null;
+  return defs[kind][defId] || null;
+}
+
+function getInstanceStateLabel(kind, inst) {
+  const s = inst && inst.state ? inst.state : {};
+  if (kind === "resourceNodes") {
+    if (s.depleted) return "(depleted)";
+    if (typeof s.chargesLeft === "number" && s.chargesLeft <= 0) return "(depleted)";
+    return "";
+  }
+  if (kind === "entities") {
+    if (s.defeated) return "(defeated)";
+    return "";
+  }
+  if (kind === "pois") {
+    if (s.opened) return "(opened)";
+    if (s.inspected) return "(inspected)";
+    if (s.triggered) return "(triggered)";
+    return "";
+  }
+  if (kind === "locations") {
+    if (s.discovered) return "(discovered)";
+    return "";
+  }
+  return "";
+}
+
+function getMarkerGlyph(kind, inst, def) {
+  // Prefer explicit glyph from definition.
+  const g = def && def.glyph ? String(def.glyph) : null;
+  if (g) return g;
+  // Fallbacks if a def is missing.
+  if (kind === "entities") return "e";
+  if (kind === "pois") return "!";
+  if (kind === "resourceNodes") return "*";
+  if (kind === "locations") return "○";
+  return ".";
+}
+
 // Build an HTML grid from the current zone.
 // # = blocked, ? = unexplored walkable, . = explored walkable, L = locked
 // Each cell is a <span> so we can click on it.
@@ -39,6 +135,8 @@ function inZone() {
 // Each cell is a <span> so we can click on it.
 function buildZoneGridString(zone) {
   if (!zone) return "(No active zone)";
+
+  const contentIndex = buildContentIndex(zone);
 
   let html = "";
 
@@ -69,13 +167,36 @@ function buildZoneGridString(zone) {
         classes += " zone-cell-exploring";
       }
 
-      // --- 4) Player marker ☺ on the latest explored tile ---
+      // --- 4) Content markers (only on explored tiles) ---
+      // Priorities: entity > POI > node > location.
+      // NOTE: We only show markers for explored walkable tiles.
+      let title = "";
+      if (tile.kind !== "blocked" && tile.kind !== "locked" && tile.explored) {
+        const top = getTopTileContent(zone, contentIndex, x, y);
+        if (top && top.inst) {
+          const def = getContentDef(top.kind, top.inst.defId);
+          const label = getInstanceStateLabel(top.kind, top.inst);
+          ch = getMarkerGlyph(top.kind, top.inst, def);
+          classes += " zone-cell-content";
+          classes += ` zone-cell-content-${top.kind}`;
+          // Phase 9:
+          // - Nodes/entities that are "done" are not rendered at all.
+          // - POIs keep a "done" style when opened.
+          // - Locations remain visible without a "done" style.
+          if (label && top.kind !== "locations") classes += " zone-cell-content-done";
+          const nm = def && def.name ? def.name : top.inst.defId;
+          title = `${nm} ${label}`.trim();
+        }
+      }
+
+      // --- 5) Player marker ☻ on the latest explored tile ---
       // We now track the player directly on the tile as tile.hasPlayer.
       if (tile.hasPlayer) {
         ch = "☻";
       }
 
-      html += `<span class="${classes}" data-x="${x}" data-y="${y}">${ch}</span>`;
+      const titleAttr = title ? ` title="${title.replace(/\"/g, "&quot;")}"` : "";
+      html += `<span class="${classes}" data-x="${x}" data-y="${y}"${titleAttr}>${ch}</span>`;
     }
     html += "<br>";
   }
@@ -282,6 +403,20 @@ if (zoneGridEl) {
 
     // Only handle clicks on locked gate tiles that belong to a locked region.
     if (tile.kind !== "locked" || tile.lockedRegionId == null) {
+      // Phase 6.3 — Click routing for content interactions.
+      // UI does not decide the interaction type; it only routes the click.
+      // Only allow interaction on explored, walkable tiles.
+      if (tile.kind === "blocked") return;
+      if (!tile.explored) return;
+
+      if (window.PC?.api?.zone && typeof PC.api.zone.interactAt === "function") {
+        PC.api.zone.interactAt(x, y);
+      }
+
+      // Even if no handler exists yet, we still refresh to keep tooltips/markers correct.
+      if (typeof renderZoneUI === "function") {
+        renderZoneUI();
+      }
       return;
     }
 
@@ -299,6 +434,18 @@ if (zoneGridEl) {
 
     // Mark the gate tile itself as explored so it no longer shows as '?'.
     tile.explored = true;
+
+    // 0.0.70e — persist explored tiles so gate doesn't reset on reload.
+    try {
+      if (window.PC?.content && typeof PC.content.markTileExplored === "function") {
+        PC.content.markTileExplored(zone.id, x, y);
+      }
+    } catch {}
+
+    // Debounced autosave: unlocking/ exploring should persist.
+    if (typeof requestSaveCurrentGame === "function") {
+      requestSaveCurrentGame();
+    }
 
     if (typeof addZoneMessage === "function") {
       addZoneMessage("You unlock a hidden passage leading deeper into the area.");

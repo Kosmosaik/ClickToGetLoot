@@ -636,6 +636,25 @@
   white-space: pre;          /* keeps perfect grid alignment */
 }
 
+/* Zone grid cells (spans). */
+.zone-cell {
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Content markers (Phase 6). */
+.zone-cell-content {
+  font-weight: 600;
+}
+
+/* “Done” states (opened/depleted/defeated/discovered) — keep subtle. */
+.zone-cell-content-done {
+  opacity: 0.55;
+}
+
 /* === Messages === */
 #zone-messages-list {
   list-style-type: disc;
@@ -689,6 +708,56 @@
 
 .worldmap-tile-info.hidden {
   display: none;
+}
+
+/* -------------------------------------------------------------------------
+   Phase 9 — Modal overlay (content interactions)
+   ------------------------------------------------------------------------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 9999;
+}
+
+.modal-panel {
+  width: min(340px, 92vw);
+  max-height: 75vh;
+  overflow: auto;
+  /* Full-opacity window to match other panels */
+  background: #202020;
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.modal-panel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.modal-body {
+  margin: 0.5rem 0 0.75rem 0;
+  color: #cfd6dd;
+  line-height: 1.35;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.modal-actions button {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  font-size: 0.85rem;
 }
 
 #worldmap-enter-zone-button {

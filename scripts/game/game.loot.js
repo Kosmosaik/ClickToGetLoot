@@ -73,14 +73,8 @@ function startLoot() {
 
       addToInventory(instance); // from inventory.js
 
-      if (!inventoryUnlocked) {
-        inventoryUnlocked = true;
-        if (inventoryButton) {
-          inventoryButton.style.display = "block";
-          inventoryButton.classList.add("inventory-unlock");
-          setTimeout(() => inventoryButton.classList.remove("inventory-unlock"), 3000);
-          setTimeout(() => inventoryButton.focus(), 200);
-        }
+      if (typeof window.ensureInventoryUnlocked === "function") {
+        window.ensureInventoryUnlocked();
       }
 
       // Unlock equipment only when first equippable item drops
