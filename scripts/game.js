@@ -107,6 +107,12 @@ function enterZoneFromWorldMap(x, y) {
       const spawnTile = zone.tiles[sy][sx];
       if (spawnTile) {
         spawnTile.explored = true;
+        // 0.0.70e — persist explored entry tile.
+        try {
+          if (window.PC?.content && typeof PC.content.markTileExplored === "function") {
+            PC.content.markTileExplored(zone.id, sx, sy);
+          }
+        } catch {}
         setZonePlayerPosition(zone, sx, sy);
         zone.playerX = sx;
         zone.playerY = sy;
@@ -116,18 +122,19 @@ function enterZoneFromWorldMap(x, y) {
     }
   }
 
-  // Cleanup explored connectivity (0.0.70c+)
-  if (typeof normalizeZoneExploredConnectivity === "function") {
-    normalizeZoneExploredConnectivity(zone);
-  }
-
-  // 0.0.70e — apply saved per-zone deltas (deterministic regen + deltas)
+  // 0.0.70e — apply saved per-zone deltas (content state + explored tiles).
   try {
     if (window.PC && PC.content && typeof PC.content.applyZoneDeltas === "function") {
       PC.content.applyZoneDeltas(zone);
     }
   } catch (e) {
     console.warn("enterZoneFromWorldMap: failed to apply zone deltas", e);
+  }
+
+  // Cleanup explored connectivity (0.0.70c+)
+  // Run AFTER deltas so loaded explored tiles are normalized too.
+  if (typeof normalizeZoneExploredConnectivity === "function") {
+    normalizeZoneExploredConnectivity(zone);
   }
 
   // Update fog + current position on the world map
