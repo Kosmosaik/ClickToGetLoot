@@ -85,6 +85,13 @@
   ]);
 
   ctx_easy.resourceNodes = {
+    // Phase 9: scale by zone size so small zones don't get overstuffed
+    // and large zones don't feel empty.
+    // We treat countRange as a baseline for ~100 walkable tiles.
+    scaleByZoneSize: true,
+    baseTiles: 100,
+    minCount: 6,
+    maxCount: 30,
     countRange: [14, 22],
     entries: [
       { defId: "oak_tree", w: 70 },
@@ -94,6 +101,11 @@
   };
 
   ctx_easy.entities = {
+    // Phase 9: scale by zone size (baseline for ~100 walkable tiles).
+    scaleByZoneSize: true,
+    baseTiles: 100,
+    minCount: 1,
+    maxCount: 10,
     countRange: [2, 5],
     entries: [
       { defId: "rabbit", w: 85 },

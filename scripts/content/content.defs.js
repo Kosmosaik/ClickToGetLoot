@@ -27,6 +27,14 @@
   PC.content.register = PC.content.register || function register(kind, def) {
     if (!kind || !def || !def.id) return;
     if (!PC.content.DEFS[kind]) PC.content.DEFS[kind] = {};
+
+    // Phase 9 — Data hygiene: warn on duplicate IDs.
+    // We allow overwrite so hot-reloads / dev edits don't hard-crash, but we
+    // make it loud to avoid subtle content bugs.
+    if (PC.content.DEFS[kind][def.id]) {
+      console.warn(`[ContentDefs] Duplicate def id "${def.id}" for kind "${kind}". Overwriting.`);
+    }
+
     PC.content.DEFS[kind][def.id] = def;
   };
 
@@ -138,7 +146,7 @@
     // Inspect-only for now; later can be armed/disarmed, etc.
     stateDefaults: { inspected: false, triggered: false },
     blocksMovement: false,
-    lootTableId: null,
+    lootTableId: "trap_snare_basic",
   });
 
   // Locations (bigger landmarks; still tile-anchored for now)

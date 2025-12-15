@@ -91,6 +91,45 @@
     return 0;
   }
 
+  // Phase 9 — Scale spawn counts by zone size.
+  // Supports optional fields on the kind config:
+  // - scaleByZoneSize: true
+  // - baseTiles: 100 (baseline walkable tile count)
+  // - minCount / maxCount clamps
+  // - densityPer100: number or [min,max] (alternative to countRange)
+  function computeScaledCount(kindCfg, rngObj, walkableCount) {
+    if (!kindCfg) return 0;
+
+    const minClamp = kindCfg.minCount != null ? clampInt(kindCfg.minCount, 0, 9999) : null;
+    const maxClamp = kindCfg.maxCount != null ? clampInt(kindCfg.maxCount, 0, 9999) : null;
+
+    // Option A: explicit density per 100 walkable tiles
+    if (kindCfg.densityPer100 != null) {
+      const density = pickCount(kindCfg.densityPer100, rngObj);
+      let cnt = Math.floor((Math.max(0, walkableCount) / 100) * density);
+      if (minClamp != null) cnt = Math.max(minClamp, cnt);
+      if (maxClamp != null) cnt = Math.min(maxClamp, cnt);
+      return cnt;
+    }
+
+    // Option B: scale an existing baseline count by zone size
+    const baseTiles = kindCfg.baseTiles != null ? Math.max(1, clampInt(kindCfg.baseTiles, 1, 100000)) : 100;
+    const baselineCount = pickCount(kindCfg.countRange != null ? kindCfg.countRange : kindCfg.count, rngObj);
+
+    if (kindCfg.scaleByZoneSize) {
+      let cnt = Math.floor((Math.max(0, walkableCount) / baseTiles) * baselineCount);
+      if (minClamp != null) cnt = Math.max(minClamp, cnt);
+      if (maxClamp != null) cnt = Math.min(maxClamp, cnt);
+      return cnt;
+    }
+
+    // Default: unscaled baseline.
+    let cnt = baselineCount;
+    if (minClamp != null) cnt = Math.max(minClamp, cnt);
+    if (maxClamp != null) cnt = Math.min(maxClamp, cnt);
+    return cnt;
+  }
+
   // Place one kind of content (resourceNodes/entities/pois/locations).
   function normalizeEntries(entries) {
     if (!Array.isArray(entries)) return [];
@@ -113,13 +152,15 @@
       : {};
 
     const entries = normalizeEntries(kindCfg.entries);
-    const count = pickCount(kindCfg.countRange != null ? kindCfg.countRange : kindCfg.count, rngObj);
-    if (count <= 0 || entries.length === 0) return;
+    if (entries.length === 0) return;
 
     // Candidate tiles: all walkable.
     const candidates = typeof PC.content.getAllWalkablePositions === "function"
       ? PC.content.getAllWalkablePositions(zone)
       : [];
+
+    const count = computeScaledCount(kindCfg, rngObj, candidates.length);
+    if (count <= 0) return;
 
     if (zone.entrySpawn) {
       const key = `${zone.entrySpawn.x},${zone.entrySpawn.y}`;

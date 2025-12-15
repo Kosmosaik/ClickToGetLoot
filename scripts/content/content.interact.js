@@ -206,15 +206,24 @@
       return;
     }
 
-    // Traps: inspect-only for now.
+    // Traps: for Phase 9, "Inspect" yields loot once and then marks as opened.
     if (inst.defId === "trap_snare") {
-      if (inst.state.inspected) {
-        msg(`You inspect the ${nm}. Nothing else to do (yet).`);
+      if (inst.state.opened) {
+        msg(`${nm} has already been inspected.`);
         return;
       }
+
+      const lootTableId = def?.lootTableId;
+      const loot = lootTableId ? rollLoot(lootTableId, `${zone.id}:poi:${inst.id}:loot`) : [];
+      giveLootToInventory(loot);
+
       inst.state.inspected = true;
+      inst.state.opened = true;
+      if (PC.content.markOpened) PC.content.markOpened(zone.id, inst.id);
       if (PC.content.markInspected) PC.content.markInspected(zone.id, inst.id);
-      msg(`You carefully inspect the ${nm}.`);
+
+      msg(`You inspect ${nm}.`);
+      if (loot.length > 0) msg(`Loot: ${loot.map(r => `${r.item} x${r.qty}`).join(", ")}`);
       saveAfterInteraction();
       refreshUI();
       return;
@@ -261,16 +270,17 @@
     const def = getDef("locations", inst.defId);
     const nm = def?.name || inst.defId;
 
-    if (inst.state.discovered) {
-      msg(`${nm} has already been discovered.`);
-      return;
+    // Phase 9: "Enter" is the UX contract. The actual location transition
+    // will be implemented later. For now:
+    // - first enter => discover + log
+    // - subsequent enters => message only
+    if (!inst.state.discovered) {
+      inst.state.discovered = true;
+      if (PC.content.markLocationDiscovered) PC.content.markLocationDiscovered(zone.id, inst.id);
+      disc(`Discovered: ${nm}`);
     }
 
-    inst.state.discovered = true;
-    if (PC.content.markLocationDiscovered) PC.content.markLocationDiscovered(zone.id, inst.id);
-    disc(`Discovered: ${nm}`);
-    msg(`You take a closer look at ${nm}.`);
-
+    msg(`You enter ${nm}. (Location travel not implemented yet.)`);
     saveAfterInteraction();
     refreshUI();
   }
@@ -294,11 +304,63 @@
       return;
     }
 
-    if (top.kind === "resourceNodes") return handleResourceNode(zone, top.inst);
-    if (top.kind === "pois") return handlePoi(zone, top.inst);
-    if (top.kind === "entities") return handleEntity(zone, top.inst);
-    if (top.kind === "locations") return handleLocation(zone, top.inst);
+    // If content is already spent/closed, do not open the modal.
+    const s = top.inst.state || {};
+    if (top.kind === "resourceNodes" && (s.depleted || s.harvested || (typeof s.chargesLeft === "number" && s.chargesLeft <= 0))) {
+      const def = getDef("resourceNodes", top.inst.defId);
+      const nm = def?.name || top.inst.defId;
+      msg(`${nm} has already been harvested.`);
+      return;
+    }
+    if (top.kind === "entities" && s.defeated) {
+      const def = getDef("entities", top.inst.defId);
+      const nm = def?.name || top.inst.defId;
+      msg(`${nm} has already been dealt with.`);
+      return;
+    }
+    if (top.kind === "pois" && s.opened) {
+      const def = getDef("pois", top.inst.defId);
+      const nm = def?.name || top.inst.defId;
+      msg(`${nm} is already opened.`);
+      return;
+    }
 
-    msg("Nothing interesting here.");
+    // Phase 9: show a confirmation modal (consistent UI) before changing state.
+    const showModal = typeof window.showChoiceModal === "function" ? window.showChoiceModal : null;
+    if (!showModal) {
+      // Fallback: behave like old flow.
+      if (top.kind === "resourceNodes") return handleResourceNode(zone, top.inst);
+      if (top.kind === "pois") return handlePoi(zone, top.inst);
+      if (top.kind === "entities") return handleEntity(zone, top.inst);
+      if (top.kind === "locations") return handleLocation(zone, top.inst);
+      return;
+    }
+
+    const def = getDef(top.kind, top.inst.defId);
+    const nm = def?.name || top.inst.defId;
+    const kindLabel = top.kind === "resourceNodes" ? "Resource Node" :
+      top.kind === "entities" ? "Entity" :
+      top.kind === "pois" ? "Point of Interest" :
+      top.kind === "locations" ? "Location" : "";
+
+    const primaryText = top.kind === "resourceNodes" ? "Harvest" :
+      top.kind === "entities" ? "Kill" :
+      top.kind === "pois" ? "Inspect" :
+      top.kind === "locations" ? `Enter ${nm}` : "OK";
+
+    const body = kindLabel ? `${kindLabel}: ${nm}` : nm;
+
+    showModal({
+      title: nm,
+      body,
+      primaryText,
+      secondaryText: "Cancel",
+      onPrimary: () => {
+        if (top.kind === "resourceNodes") return handleResourceNode(zone, top.inst);
+        if (top.kind === "pois") return handlePoi(zone, top.inst);
+        if (top.kind === "entities") return handleEntity(zone, top.inst);
+        if (top.kind === "locations") return handleLocation(zone, top.inst);
+      },
+    });
   };
 })();

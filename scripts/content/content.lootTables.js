@@ -63,6 +63,17 @@
     ],
   };
 
+  // Snare trap — simple "scavenge" style loot for now.
+  // Later this will likely become a task/mini-game outcome table.
+  PC.content.LOOT_TABLES.trap_snare_basic = {
+    rolls: 1,
+    entries: [
+      { item: "Rope", w: 40, qty: [1, 1] },
+      { item: "Wood", w: 40, qty: [1, 2] },
+      { item: "Meat", w: 20, qty: [1, 1] },
+    ],
+  };
+
   // --- Entities ---
   PC.content.LOOT_TABLES.rabbit_basic = {
     rolls: 1,
