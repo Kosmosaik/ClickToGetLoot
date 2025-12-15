@@ -8,6 +8,10 @@ function addToInventory(inst) {
   inventory[inst.name].qty += 1;
   inventory[inst.name].items.push(inst);
   renderInventory();
+  
+  if (typeof window.ensureInventoryUnlocked === "function") {
+  window.ensureInventoryUnlocked();
+}
 
   // Auto-save after loot/change
   if (typeof saveCurrentGame === "function") {
