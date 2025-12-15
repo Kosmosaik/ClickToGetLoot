@@ -17,6 +17,9 @@
   const PC = (window.PC = window.PC || {});
   PC.content = PC.content || {};
 
+  // Delta schema version. Bump if we change on-disk shape.
+  PC.content.DELTAS_VERSION = PC.content.DELTAS_VERSION || 1;
+
   function ensureDeltaStore() {
     if (typeof STATE !== 'function') return null;
     const st = STATE();
@@ -29,18 +32,22 @@
     if (!store || !zoneId) return null;
     const id = String(zoneId);
     store[id] = store[id] || {
+      _v: PC.content.DELTAS_VERSION,
       harvested: {},
       defeated: {},
       opened: {},
       inspected: {},
       discoveredLocations: {},
+      exploredTiles: {},
     };
     // Back-compat: ensure keys exist
+    store[id]._v = store[id]._v || PC.content.DELTAS_VERSION;
     store[id].harvested = store[id].harvested || {};
     store[id].defeated = store[id].defeated || {};
     store[id].opened = store[id].opened || {};
     store[id].inspected = store[id].inspected || {};
     store[id].discoveredLocations = store[id].discoveredLocations || {};
+    store[id].exploredTiles = store[id].exploredTiles || {};
     return store[id];
   }
 
@@ -72,6 +79,24 @@
     applyMapToInstances(zone.content.pois, delta.opened, 'opened');
     applyMapToInstances(zone.content.pois, delta.inspected, 'inspected');
     applyMapToInstances(zone.content.locations, delta.discoveredLocations, 'discovered');
+
+    // Restore explored tiles.
+    // NOTE: we only set explored=true for tiles that exist.
+    if (zone.tiles && delta.exploredTiles) {
+      for (const key in delta.exploredTiles) {
+        if (!delta.exploredTiles[key]) continue;
+        const parts = String(key).split(',');
+        if (parts.length !== 2) continue;
+        const x = Number(parts[0]);
+        const y = Number(parts[1]);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+        if (y < 0 || y >= zone.height || x < 0 || x >= zone.width) continue;
+        const tile = zone.tiles?.[y]?.[x];
+        if (!tile) continue;
+        // Keep blocked tiles blocked; but allow explored on locked gates too.
+        tile.explored = true;
+      }
+    }
   };
 
   // Convenience mutators (Phase 7): write deltas on interaction.
@@ -103,5 +128,41 @@
     const d = ensureZoneDelta(zoneId);
     if (!d || !instId) return;
     d.discoveredLocations[String(instId)] = true;
+  };
+
+  // Exploration persistence ("?" tiles): store explored coordinates.
+  PC.content.markTileExplored = PC.content.markTileExplored || function markTileExplored(zoneId, x, y) {
+    const d = ensureZoneDelta(zoneId);
+    if (!d) return;
+    const xi = Number(x);
+    const yi = Number(y);
+    if (!Number.isFinite(xi) || !Number.isFinite(yi)) return;
+    const key = `${xi},${yi}`;
+    d.exploredTiles[key] = true;
+  };
+
+  // Phase 8: validate + normalize delta store (for backward compat / corrupted saves).
+  PC.content.normalizeAllZoneDeltas = PC.content.normalizeAllZoneDeltas || function normalizeAllZoneDeltas(store) {
+    const st = store || (typeof STATE === 'function' ? (STATE().zoneDeltas || {}) : null);
+    if (!st || typeof st !== 'object') return {};
+
+    for (const zid in st) {
+      const d = st[zid];
+      if (!d || typeof d !== 'object') {
+        st[zid] = ensureZoneDelta(zid);
+        continue;
+      }
+
+      // Ensure schema keys.
+      d._v = d._v || PC.content.DELTAS_VERSION;
+      d.harvested = d.harvested && typeof d.harvested === 'object' ? d.harvested : {};
+      d.defeated = d.defeated && typeof d.defeated === 'object' ? d.defeated : {};
+      d.opened = d.opened && typeof d.opened === 'object' ? d.opened : {};
+      d.inspected = d.inspected && typeof d.inspected === 'object' ? d.inspected : {};
+      d.discoveredLocations = d.discoveredLocations && typeof d.discoveredLocations === 'object' ? d.discoveredLocations : {};
+      d.exploredTiles = d.exploredTiles && typeof d.exploredTiles === 'object' ? d.exploredTiles : {};
+    }
+
+    return st;
   };
 })();
