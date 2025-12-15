@@ -24,12 +24,12 @@ const WORLD_SLOT_TEMPLATES = {
     // Separate template id for the starting zone.
     // The actual starting zone uses a static ZONE_DEFINITIONS entry (tutorial_zone),
     // but keeping a dedicated templateId helps keep metadata intent clear.
-    templateId: "tutorial_start",
+    templateId: (PC.ZONES && PC.ZONES.START_TEMPLATE_ID) ? PC.ZONES.START_TEMPLATE_ID : "tutorial_start",
   },
   primitive_forest_d1: {
     era: ERA.PRIMITIVE,
     biome: BIOME.TEMPERATE_FOREST,
-    templateId: "primitive_forest_d1",
+    templateId: (PC.ZONES && PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID) ? PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID : "primitive_forest_d1",
   },
 };
 
@@ -49,7 +49,7 @@ function initializeWorldSlotMetadata(tile, options) {
     tile.biome = opts.biome || BIOME.TEMPERATE_FOREST;
   }
   if (!tile.templateId) {
-    tile.templateId = opts.templateId || "primitive_forest_d1";
+    tile.templateId = opts.templateId || (PC.ZONES && PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID ? PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID : "primitive_forest_d1");
   }
 
   // Difficulty rating 1–10 — derived from the zone template if available.
