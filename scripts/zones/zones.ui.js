@@ -422,6 +422,18 @@ if (zoneGridEl) {
     // Mark the gate tile itself as explored so it no longer shows as '?'.
     tile.explored = true;
 
+    // 0.0.70e — persist explored tiles so gate doesn't reset on reload.
+    try {
+      if (window.PC?.content && typeof PC.content.markTileExplored === "function") {
+        PC.content.markTileExplored(zone.id, x, y);
+      }
+    } catch {}
+
+    // Debounced autosave: unlocking/ exploring should persist.
+    if (typeof requestSaveCurrentGame === "function") {
+      requestSaveCurrentGame();
+    }
+
     if (typeof addZoneMessage === "function") {
       addZoneMessage("You unlock a hidden passage leading deeper into the area.");
     }
