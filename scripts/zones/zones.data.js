@@ -55,8 +55,8 @@ const ZONE_TEMPLATES = {
     generatorConfig: null,
     defaultWeatherState: "clear",
   },
-  primitive_forest_d1: {
-    id: "primitive_forest_d1",
+  primitive_forest: {
+    id: "primitive_forest",
     name: "Primitive Forest",
     difficulty: 1,
     generator: "cellular_automata",
