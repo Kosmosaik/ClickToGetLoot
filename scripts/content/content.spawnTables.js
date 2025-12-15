@@ -143,20 +143,6 @@
   // Phase 3.1 — Template tables (back-compat + handcrafted exceptions)
   // ---------------------------------------------------------------------------
 
-  // Template override for the current default procedural template.
-  // Mainly useful for quick testing and special-case templates.
-  // Most spawning should use byContext (biome/era/difficultyRating) instead.
-  const DEFAULT_TEMPLATE_ID =
-    (window.PC && PC.ZONES && PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID)
-      ? PC.ZONES.DEFAULT_PROCEDURAL_TEMPLATE_ID
-      : "primitive_forest_d1";
-
-  PC.content.SPAWN_TABLES.byTemplate[DEFAULT_TEMPLATE_ID] = {
-    resourceNodes: ctx.resourceNodes,
-    entities: ctx.entities,
-    pois: ctx.pois,
-    locations: ctx.locations,
-  };
 
   // Tutorial zone (small static map) — keep the counts tiny.
   PC.content.SPAWN_TABLES.byTemplate.tutorial_zone = {
