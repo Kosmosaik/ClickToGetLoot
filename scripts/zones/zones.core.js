@@ -1132,6 +1132,18 @@ function revealPreparedExplorationTile(zone) {
   tile.isActiveExplore = false;
   tile.explored = true;
 
+  // 0.0.70e — persist explored tiles so "?" does not reset on reload.
+  try {
+    if (window.PC?.content && typeof PC.content.markTileExplored === "function") {
+      PC.content.markTileExplored(zone.id, target.x, target.y);
+    }
+  } catch {}
+
+  // Debounced autosave: exploring should persist.
+  if (typeof requestSaveCurrentGame === "function") {
+    requestSaveCurrentGame();
+  }
+
   // Move the player marker to this tile.
   clearZonePlayerMarker(zone);
   tile.hasPlayer = true;
@@ -1154,6 +1166,18 @@ function revealNextExplorableTileSequential(zone) {
       const tile = zone.tiles[y][x];
       if (isTileExplorable(tile) && !tile.explored) {
         tile.explored = true;
+
+        // 0.0.70e — persist explored tiles so "?" does not reset on reload.
+        try {
+          if (window.PC?.content && typeof PC.content.markTileExplored === "function") {
+            PC.content.markTileExplored(zone.id, x, y);
+          }
+        } catch {}
+
+        // Debounced autosave: exploring should persist.
+        if (typeof requestSaveCurrentGame === "function") {
+          requestSaveCurrentGame();
+        }
 
         // Move the player marker onto this tile.
         tile.hasPlayer = true;
@@ -1238,7 +1262,4 @@ window.ZoneDebug = {
   revealPreparedExplorationTile,      // NEW
   ensureGeneratedZoneDefinitionForWorldTile,
 };
-
-
-
 
