@@ -7,30 +7,6 @@ This roadmap is flexible and will evolve as development continues.
 
 ---
 
-## v0.0.70 — Zones & Exploration (Phase 1)
-Unlocks real gameplay beyond clicking “Loot”. Exploring
-
-### Planned:
-- Add “Zones” (areas the player can visit , kinda like biomes). 
-- Each zone has:
-  - Level range / Difficulty system (we need to discuss this a lot to find a good balance), a specific biome, Points of interests (small interactable objects/areas), locations (stage-transitioning areas where new exploration progress starts with its oen POIs and entities), enemies etc. Not all of this will be implemented in 0.0.70, but it till be discussed and a lot of decisions will be made here to set the foundation going forward.
-- Zone unlock progression (unlocks adjacent/neighbouring zones to "finished" zones)
-- A Starting Zone that the player will begin in. This zone will in the future have predefined quests/tasks that the player will have to complete before 100%-ing the zone and continue to the next zone, while future zones     will have optional/randomly generated quests and progress will be more time based.
-- Generate Resource Nodes, Entities, POIs and Locations.
-- Make resource nodes contain resources (item/loot table) - Simple click and harvest interaction for now.
-
-
-### UI:
-- New Zone selection panel (World map - This will be locked and invisible to the player until Starting Zone has been finished).
-- Zone descriptions
-- Zone completion time bar (similar to loot bar), going from 0% to 100%. During this time resource nodes, entities, POIs, Locations etc will pop up in a list that you can interact with.
-- World map -> Zone -> World map transition
-- Zone "finished" screen when clicking a button "Exit Zone" when 100% explored. Brings you back to the world map.
-- Make it shown that a zone has been "completed".
-- Timers when player chooses to interact with things in the list (timers for "Walking to X...", "Preparing ....", "Searching for a place to build shelter..." etc). This will make it feel like the character is actually walking around and doing stuff than just instantly interact with everything in the zome.
-
----
-
 ## v0.0.71 -> 0.0.74 - Polish, Expand & Improve existing systems + Level System
 
 ### Planned:
@@ -90,6 +66,7 @@ Introduces resource gathering
 - Basic crafting stations (campfire → forge → advanced forge)
 - Crafting stats and quality bonuses
 - Interactables can require specific tools to gather (Axe to cut down tree etc).
+- Timers when player chooses to interact with things in the list (timers for "Walking to X...", "Preparing ....", "Searching for a place to build shelter..." etc). This will make it feel like the character is actually walking around and doing stuff than just instantly interact with everything in the zome.
 
  - Resource Nodes (Player interacts - get resources from node)
        Resource nodes to add: "Fallen Branch Pile" (gives Twig and Wooden Branch), "Stone Cluster" (gives Small Stone), "Tall Grass Patch" (gives grass bundle and occasionally Plant Fibre), "Tree (Scarred)"(Gives tree bark and insect/bug(find use for it)", "Tree (Normal), gives wood log, woodern branch and           twigs (needs an axe for cutting down tree to get logs).
