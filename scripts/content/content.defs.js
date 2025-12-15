@@ -106,7 +106,7 @@
     id: "rabbit",
     kind: "entity",
     name: "Rabbit",
-    glyph: "🐇",
+    glyph: "r",
     tags: { eras: ["primitive"], biomes: ["temperate_forest"], difficulty: [1] },
     stateDefaults: { defeated: false },
     blocksMovement: false,
