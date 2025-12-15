@@ -4,7 +4,7 @@ One of the .md files is written to guide your understanding of the project (0.0.
 
 ---
 
-Perfect! What do you think of the projects code structure? Is it good? Anything to improve? Are the scripts too heavy in code so we need to modularize or refactor, or are we good to go with 0.0.70c?
+Perfect! What do you think of the projects code structure? Is it good? Anything to improve? Are the scripts too heavy in code so we need to modularize or refactor, or are we good to go with x.x.x?
 
 ---
 
