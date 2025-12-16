@@ -1,3 +1,52 @@
+# ProgressCrawl — Patch 0.0.70h
+## QoL Update: Zone Interaction & Discoveries
+
+This update improves **how you interact with zones and discoveries**, making movement and interaction feel more natural, consistent, and intuitive.
+
+---
+
+## Added
+
+### Move-to-Interact System
+- Clicking **content on the zone map** now makes your character:
+  - Move next to the target tile
+  - Then automatically interact with it
+- The same behavior applies when clicking items in the **Discoveries list**.
+
+### Clickable Discoveries
+- Discoveries now behave like proper clickable entries:
+  - Pointer cursor on hover
+  - No text-selection cursor
+  - Clear visual feedback when hovering or clicking
+
+---
+
+## Changed
+
+### Unified Interaction Logic
+- Zone map clicks and Discoveries clicks now use the **same interaction flow**.
+- You must be **adjacent** to a tile to interact:
+  - If you’re far away, your character walks to the correct spot first.
+  - If you’re already next to it, interaction happens instantly.
+
+### Smarter Movement Rules
+- Interactions won’t interrupt auto-exploration or ongoing movement.
+- Clicking unreachable content now safely fails instead of breaking flow.
+
+---
+
+## Fixed
+
+- Removed inconsistent behavior where map clicks and Discoveries clicks worked differently.
+- Prevented accidental interactions from long distance without movement.
+- Eliminated UI cursor confusion when interacting with Discoveries.
+
+---
+
+Happy exploring!
+
+---
+
 # ProgressCrawl — Patch 0.0.70g
 ## QoL Update: Discoveries & Exploration UI
 
@@ -51,15 +100,7 @@ This update improves how **Discoveries** work during zone exploration, making in
 
 ---
 
-## Notes
-
-- No save files were changed.
-- No zone generation or balance changes were made.
-- Tutorial zones remain handcrafted and unaffected by procedural rules.
-
-This update lays the foundation for upcoming improvements like **clicking discoveries to move/interact**, enhanced POI behavior, and deeper zone interaction tools.
-
-Happy exploring! 🌲🗺️
+Happy exploring!
 
 ---
 
