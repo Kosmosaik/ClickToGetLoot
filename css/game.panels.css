@@ -687,6 +687,14 @@
   user-select: none;
 }
 
+#zone-discoveries-list li.zone-discovery-entry:hover {
+  text-decoration: underline;
+}
+
+#zone-discoveries-list li.zone-discovery-entry:active {
+  opacity: 0.8;
+}
+
 .zone-discovery-glyph {
   width: 1.2em;
   display: inline-block;
