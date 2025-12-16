@@ -222,7 +222,40 @@
         x: pos.x,
         y: pos.y,
         state: Object.assign({}, def.stateDefaults || {}),
+        quality: null, // QoL: persistent quality per placed instance
       };
+
+      // QoL: Assign & persist instance quality (F0..S9)
+      try {
+        const delta = (PC.content && typeof PC.content.getZoneDelta === "function")
+          ? PC.content.getZoneDelta(zone.id)
+          : null;
+
+        const qmap = delta ? (delta.qualities = delta.qualities || {}) : null;
+        const existingQ = qmap ? qmap[instance.id] : null;
+
+        if (typeof existingQ === "string" && existingQ.length >= 2) {
+          instance.quality = existingQ;
+        } else {
+          // Prefer worldTile difficultyRating when available (1–10)
+          const diff = worldTile && typeof worldTile.difficultyRating === "number"
+            ? worldTile.difficultyRating
+            : null;
+
+          const q = (PC.api && PC.api.items && typeof PC.api.items.rollQualityForZoneDifficulty === "function")
+            ? PC.api.items.rollQualityForZoneDifficulty(diff)
+            : (typeof rollQuality === "function" ? rollQuality() : "F0");
+
+          instance.quality = q;
+
+          if (qmap) qmap[instance.id] = q;
+          if (PC.content && typeof PC.content.setInstanceQuality === "function") {
+            PC.content.setInstanceQuality(zone.id, instance.id, q);
+          }
+        }
+      } catch {
+        // If anything goes wrong, keep null (handlers will default later).
+      }
 
       zone.content[kindKey].push(instance);
       used.add(k);
