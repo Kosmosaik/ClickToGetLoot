@@ -17,6 +17,9 @@ const zoneExploreStopBtn = document.getElementById("zone-explore-stop");
 
 const zoneMessagesListEl = document.getElementById("zone-messages-list");
 const zoneDiscoveriesListEl = document.getElementById("zone-discoveries-list");
+const zoneDiscoveriesSortEl = document.getElementById("zone-discoveries-sort");
+
+let zoneDiscoveriesSortMode = "distance";
 
 const zoneFinishMenuEl = document.getElementById("zone-finish-menu");
 const zoneFinishStayBtn = document.getElementById("zone-finish-stay");
@@ -187,11 +190,40 @@ function renderZoneDiscoveries(zone) {
   const content = zone.content || {};
   zoneDiscoveriesListEl.innerHTML = "";
 
-  function addEntry(kind, inst) {
+  // Determine player position (for distance sorting)
+  let playerX = null;
+  let playerY = null;
+  if (zone.tiles) {
+    for (let y = 0; y < zone.height; y++) {
+      const row = zone.tiles[y];
+      if (!row) continue;
+      for (let x = 0; x < zone.width; x++) {
+        const t = row[x];
+        if (t && t.hasPlayer) {
+          playerX = x;
+          playerY = y;
+          break;
+        }
+      }
+      if (playerX != null) break;
+    }
+  }
+
+  function distSq(x, y) {
+    if (playerX == null || playerY == null) return Number.POSITIVE_INFINITY;
+    const dx = x - playerX;
+    const dy = y - playerY;
+    return dx * dx + dy * dy;
+  }
+
+  const entries = [];
+
+  function collect(kind, inst) {
     if (!inst) return;
 
     const x = Number(inst.x);
     const y = Number(inst.y);
+
     if (!isTileExplored(zone, x, y)) return;
 
     // Hide "done" stuff (matches how the zone map hides nodes/entities etc)
@@ -199,43 +231,69 @@ function renderZoneDiscoveries(zone) {
 
     const def = getContentDef(kind, inst.defId);
     const name = def && def.name ? def.name : (inst.defId || "Unknown");
-
     const glyph = getMarkerGlyph(kind, inst, def);
-    const label = getInstanceStateLabel(kind, inst); // locations may show (discovered)
+    const label = getInstanceStateLabel(kind, inst);
 
+    entries.push({
+      kind,
+      id: String(inst.id ?? ""),
+      x,
+      y,
+      name,
+      glyph,
+      label,
+      d2: distSq(x, y),
+    });
+  }
+
+  // Collect
+  if (Array.isArray(content.resourceNodes)) for (const inst of content.resourceNodes) collect("resourceNodes", inst);
+  if (Array.isArray(content.entities)) for (const inst of content.entities) collect("entities", inst);
+  if (Array.isArray(content.pois)) for (const inst of content.pois) collect("pois", inst);
+  if (Array.isArray(content.locations)) for (const inst of content.locations) collect("locations", inst);
+
+  // Sort mode (dropdown wins; fallback to remembered mode)
+  const mode =
+    (zoneDiscoveriesSortEl && zoneDiscoveriesSortEl.value) ||
+    zoneDiscoveriesSortMode ||
+    "distance";
+
+  if (mode === "name") {
+    entries.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (mode === "type") {
+    entries.sort((a, b) => {
+      if (a.kind !== b.kind) return a.kind.localeCompare(b.kind);
+      return a.name.localeCompare(b.name);
+    });
+  } else {
+    // distance default
+    entries.sort((a, b) => {
+      if (a.d2 !== b.d2) return a.d2 - b.d2;
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  // Render
+  for (const e of entries) {
     const li = document.createElement("li");
     li.className = "zone-discovery-entry";
-    li.dataset.kind = kind;
-    li.dataset.id = String(inst.id ?? "");
-    li.dataset.x = String(x);
-    li.dataset.y = String(y);
+    li.dataset.kind = e.kind;
+    li.dataset.id = e.id;
+    li.dataset.x = String(e.x);
+    li.dataset.y = String(e.y);
 
     const glyphEl = document.createElement("span");
     glyphEl.className = "zone-discovery-glyph";
-    glyphEl.textContent = glyph;
+    glyphEl.textContent = e.glyph;
 
     const textEl = document.createElement("span");
     textEl.className = "zone-discovery-text";
-    textEl.textContent = label ? `${name} ${label}` : name;
+    textEl.textContent = e.label ? `${e.name} ${e.label}` : e.name;
 
     li.appendChild(glyphEl);
     li.appendChild(textEl);
 
     zoneDiscoveriesListEl.appendChild(li);
-  }
-
-  // Keep stable ordering (Step 2 will add sorting later)
-  if (Array.isArray(content.resourceNodes)) {
-    for (const inst of content.resourceNodes) addEntry("resourceNodes", inst);
-  }
-  if (Array.isArray(content.entities)) {
-    for (const inst of content.entities) addEntry("entities", inst);
-  }
-  if (Array.isArray(content.pois)) {
-    for (const inst of content.pois) addEntry("pois", inst);
-  }
-  if (Array.isArray(content.locations)) {
-    for (const inst of content.locations) addEntry("locations", inst);
   }
 }
 
@@ -468,6 +526,14 @@ window.addZoneMessage = addZoneMessage;
 window.addZoneDiscovery = addZoneDiscovery;
 
 // ----- Button wiring -----
+
+// Discoveries sort control (UI-only)
+if (zoneDiscoveriesSortEl) {
+  zoneDiscoveriesSortEl.addEventListener("change", () => {
+    zoneDiscoveriesSortMode = zoneDiscoveriesSortEl.value || "distance";
+    if (typeof renderZoneUI === "function") renderZoneUI();
+  });
+}
 
 // Explore Next Tile (manual, one step)
 if (zoneExploreNextBtn) {
