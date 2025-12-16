@@ -629,8 +629,8 @@ if (zoneGridEl) {
       if (tile.kind === "blocked") return;
       if (!tile.explored) return;
 
-      if (window.PC?.api?.zone && typeof PC.api.zone.interactAt === "function") {
-        PC.api.zone.interactAt(x, y);
+      if (window.PC?.api?.zone && typeof PC.api.zone.moveToAndInteractAt === "function") {
+        PC.api.zone.moveToAndInteractAt(x, y);
       }
 
       // Even if no handler exists yet, we still refresh to keep tooltips/markers correct.
@@ -686,7 +686,6 @@ if (zoneFinishStayBtn) {
 }
 
 // Finish menu: LEAVE ZONE
-// Finish menu: LEAVE ZONE
 if (zoneFinishLeaveBtn) {
   zoneFinishLeaveBtn.addEventListener("click", () => {
     console.log("Player chose to LEAVE the zone.");
@@ -718,4 +717,21 @@ if (zoneFinishLeaveBtn) {
     }
   });
 }
+
+// Discoveries click -> move adjacent -> interact (same as map click)
+if (zoneDiscoveriesListEl) {
+  zoneDiscoveriesListEl.addEventListener("click", (e) => {
+    const li = e.target && e.target.closest ? e.target.closest("li.zone-discovery-entry") : null;
+    if (!li) return;
+
+    const x = parseInt(li.dataset.x, 10);
+    const y = parseInt(li.dataset.y, 10);
+    if (Number.isNaN(x) || Number.isNaN(y)) return;
+
+    if (window.PC?.api?.zone && typeof PC.api.zone.moveToAndInteractAt === "function") {
+      PC.api.zone.moveToAndInteractAt(x, y);
+    }
+  });
+}
+
 
