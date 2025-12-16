@@ -61,7 +61,7 @@ These should be handled in future QoL passes or adjacent branches:
 
 13. **Add Completed as state to zone so when viewing Zone Info on a zone in world map, it should say "Discovered" = Not Explored, "Visited" = Entered but not fully explored, "Completed" = Fully completed (100% tiles explored). In the future there will be a different calculation based on POIs, Locations and subareas.
 
-14. Remove messages when there's nothing of interest in the tile, and add messages for finding resources, entities, POIs etc.
+14. Remove messages when there's nothing of interest in the tile, and instead add messages for finding resources, entities, POIs etc.
 
 ---
 
