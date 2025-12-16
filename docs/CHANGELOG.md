@@ -1,4 +1,5 @@
-# Patch Notes — QoL Update: Discoveries & Exploration UI
+# ProgressCrawl — Patch 0.0.70g
+## QoL Update: Discoveries & Exploration UI
 
 This update improves how **Discoveries** work during zone exploration, making information clearer, more useful, and easier to interact with — without changing core gameplay rules.
 
