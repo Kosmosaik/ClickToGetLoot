@@ -32,6 +32,50 @@ console.log("pc.api.js loaded");
   // ---- Action API (extend only) ----
   PC.api.zone = PC.api.zone || {};
   PC.api.world = PC.api.world || {};
+  PC.api.items = PC.api.items || {};
+
+  // QoL: roll item quality (F0..S9) biased by zone difficulty (1–10).
+  // Implementation: roll N times and take the best result.
+  // - difficulty 1 => 1 roll (baseline)
+  // - difficulty 10 => up to 5 rolls (cap)
+  PC.api.items.rollQualityForZoneDifficulty = PC.api.items.rollQualityForZoneDifficulty || function rollQualityForZoneDifficulty(difficultyRating) {
+    const d = Number(difficultyRating);
+    const diff = Number.isFinite(d) ? Math.max(1, Math.min(10, d)) : 1;
+
+    // Ensure rollQuality exists (quality.js)
+    if (typeof rollQuality !== "function") return "F0";
+
+    // 1..5 rolls, scaled by difficulty
+    const rolls = Math.max(1, Math.min(5, 1 + Math.floor((diff - 1) / 2)));
+
+    // Compare quality strings using global TIER_ORDER + SUBLEVELS_PER_TIER (quality.js)
+    const stepOf = (q) => {
+      if (!q || typeof q !== "string" || q.length < 2) return 0;
+      const tier = q[0];
+      const sub = parseInt(q.slice(1), 10);
+      const tierIdx = (typeof TIER_ORDER !== "undefined" && Array.isArray(TIER_ORDER))
+        ? TIER_ORDER.indexOf(tier)
+        : 0;
+      const stepsPerTier = (typeof SUBLEVELS_PER_TIER === "number") ? SUBLEVELS_PER_TIER : 10;
+      const safeTierIdx = tierIdx >= 0 ? tierIdx : 0;
+      const safeSub = Number.isFinite(sub) ? Math.max(0, Math.min(stepsPerTier - 1, sub)) : 0;
+      return safeTierIdx * stepsPerTier + safeSub;
+    };
+
+    let best = rollQuality();
+    let bestStep = stepOf(best);
+
+    for (let i = 1; i < rolls; i++) {
+      const cand = rollQuality();
+      const s = stepOf(cand);
+      if (s > bestStep) {
+        best = cand;
+        bestStep = s;
+      }
+    }
+
+    return best;
+  };
 
   // Zone actions (wire to existing functions if present)
   PC.api.zone.exploreOnce = () => {
