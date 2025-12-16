@@ -17,7 +17,7 @@ const zoneExploreStopBtn = document.getElementById("zone-explore-stop");
 
 const zoneMessagesListEl = document.getElementById("zone-messages-list");
 const zoneDiscoveriesListEl = document.getElementById("zone-discoveries-list");
-const zoneDiscoveriesSortEl = document.getElementById("zone-discoveries-sort");
+const zoneDiscoveriesSortBarEl = document.getElementById("zone-discoveries-sort-bar");
 
 // UI-only (not saved)
 let zoneDiscoveriesSort = { key: "distance", dir: "asc" };
@@ -270,12 +270,6 @@ function renderZoneDiscoveries(zone) {
   if (Array.isArray(content.entities)) for (const inst of content.entities) collect("entities", inst);
   if (Array.isArray(content.pois)) for (const inst of content.pois) collect("pois", inst);
   if (Array.isArray(content.locations)) for (const inst of content.locations) collect("locations", inst);
-
-  // Sort mode (dropdown wins; fallback to remembered mode)
-  const mode =
-    (zoneDiscoveriesSortEl && zoneDiscoveriesSortEl.value) ||
-    zoneDiscoveriesSortMode ||
-    "distance";
 
   // Sort
   const key = zoneDiscoveriesSort.key || "distance";
