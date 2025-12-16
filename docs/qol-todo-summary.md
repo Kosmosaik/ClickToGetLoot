@@ -6,9 +6,6 @@ This document is meant as a handoff / technical summary for the next GPT assista
 ### TODOs written down AFTER 0.0.70e (prioritize these first).
 
 1. **Add resource nodes, entities, POIs and Locations to Discoveries-list.**
-   - Currently only Locations are stored in Discoveries after interaction has been made.  
-   - TODO: whenever content is revealed upon "explored" it should be added to the Discoveries list.
-   - Add sorting options (by name, by distance to player, by content/node type"
    - Add interact/move to function. When content is clicked in Discoveries, move player to the tile and then open up the window for harvest/kill etc.
   
 2. **Zone Items and Loot-Button items are not unified and grade system is not implemented**
@@ -72,6 +69,8 @@ These should be handled in future QoL passes or adjacent branches:
 12. **Make Zone Info more player friendly by removing Zone ID and adding Zone Name instead.**
 
 13. **Add Completed as state to zone so when viewing Zone Info on a zone in world map, it should say "Discovered" = Not Explored, "Visited" = Entered but not fully explored, "Completed" = Fully completed (100% tiles explored). In the future there will be a different calculation based on POIs, Locations and subareas.
+
+14. Remove messages when there's nothing of interest in the tile, and add messages for finding resources, entities, POIs etc.
 
 ---
 

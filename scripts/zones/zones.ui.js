@@ -17,6 +17,10 @@ const zoneExploreStopBtn = document.getElementById("zone-explore-stop");
 
 const zoneMessagesListEl = document.getElementById("zone-messages-list");
 const zoneDiscoveriesListEl = document.getElementById("zone-discoveries-list");
+const zoneDiscoveriesSortBarEl = document.getElementById("zone-discoveries-sort-bar");
+
+// UI-only (not saved)
+let zoneDiscoveriesSort = { key: "distance", dir: "asc" };
 
 const zoneFinishMenuEl = document.getElementById("zone-finish-menu");
 const zoneFinishStayBtn = document.getElementById("zone-finish-stay");
@@ -125,6 +129,190 @@ function getMarkerGlyph(kind, inst, def) {
   if (kind === "resourceNodes") return "*";
   if (kind === "locations") return "○";
   return ".";
+}
+
+// ---------------------------------------------------------------------------
+// QoL — Discoveries list (state-driven, derived from explored + active content)
+// ---------------------------------------------------------------------------
+// Rules:
+// - Only show content on explored tiles.
+// - Remove from list when "done" in the same way the grid stops rendering it:
+//   - resourceNodes: depleted/harvested/chargesLeft<=0 => hidden
+//   - entities: defeated => hidden
+//   - pois: for now, opened/inspected/triggered => hidden (static POIs later)
+//   - locations: always show on explored tiles (discovered label if applicable)
+//
+// NOTE: No new persistent state is introduced here. This is derived UI.
+
+function isInstanceHiddenFromZone(kind, inst) {
+  const s = inst && inst.state ? inst.state : {};
+
+  if (kind === "resourceNodes") {
+    const spent =
+      !!s.depleted ||
+      !!s.harvested ||
+      (typeof s.chargesLeft === "number" && s.chargesLeft <= 0);
+    return spent;
+  }
+
+  if (kind === "entities") {
+    return !!s.defeated;
+  }
+
+  if (kind === "pois") {
+    // For now: remove most POIs when interacted with.
+    // (Later we can introduce "static" POI types that remain.)
+    return !!s.opened || !!s.inspected || !!s.triggered;
+  }
+
+  // locations remain visible
+  return false;
+}
+
+function isTileExplored(zone, x, y) {
+  if (!zone || !zone.tiles) return false;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+  if (y < 0 || y >= zone.height || x < 0 || x >= zone.width) return false;
+  const row = zone.tiles[y];
+  if (!row) return false;
+  const tile = row[x];
+  return !!tile && tile.explored === true;
+}
+
+function updateZoneDiscoveriesSortBar() {
+  if (!zoneDiscoveriesSortBarEl) return;
+
+  const buttons = zoneDiscoveriesSortBarEl.querySelectorAll("button.sort-btn[data-key]");
+  for (const btn of buttons) {
+    const key = btn.dataset.key;
+    const baseLabel = (key === "distance") ? "Distance" : (key === "name") ? "Name" : "Type";
+
+    if (key === zoneDiscoveriesSort.key) {
+      btn.classList.add("active");
+      btn.textContent = `${baseLabel} ${zoneDiscoveriesSort.dir === "asc" ? "▲" : "▼"}`;
+    } else {
+      btn.classList.remove("active");
+      btn.textContent = baseLabel;
+    }
+  }
+}
+
+function renderZoneDiscoveries(zone) {
+  if (!zoneDiscoveriesListEl) return;
+
+  // No zone => clear list
+  if (!zone) {
+    zoneDiscoveriesListEl.innerHTML = "";
+    return;
+  }
+
+  const content = zone.content || {};
+  zoneDiscoveriesListEl.innerHTML = "";
+
+  // Determine player position (for distance sorting)
+  let playerX = null;
+  let playerY = null;
+  if (zone.tiles) {
+    for (let y = 0; y < zone.height; y++) {
+      const row = zone.tiles[y];
+      if (!row) continue;
+      for (let x = 0; x < zone.width; x++) {
+        const t = row[x];
+        if (t && t.hasPlayer) {
+          playerX = x;
+          playerY = y;
+          break;
+        }
+      }
+      if (playerX != null) break;
+    }
+  }
+
+  function distSq(x, y) {
+    if (playerX == null || playerY == null) return Number.POSITIVE_INFINITY;
+    const dx = x - playerX;
+    const dy = y - playerY;
+    return dx * dx + dy * dy;
+  }
+
+  const entries = [];
+
+  function collect(kind, inst) {
+    if (!inst) return;
+
+    const x = Number(inst.x);
+    const y = Number(inst.y);
+
+    if (!isTileExplored(zone, x, y)) return;
+
+    // Hide "done" stuff (matches how the zone map hides nodes/entities etc)
+    if (isInstanceHiddenFromZone(kind, inst)) return;
+
+    const def = getContentDef(kind, inst.defId);
+    const name = def && def.name ? def.name : (inst.defId || "Unknown");
+    const glyph = getMarkerGlyph(kind, inst, def);
+    const label = getInstanceStateLabel(kind, inst);
+
+    entries.push({
+      kind,
+      id: String(inst.id ?? ""),
+      x,
+      y,
+      name,
+      glyph,
+      label,
+      d2: distSq(x, y),
+    });
+  }
+
+  // Collect
+  if (Array.isArray(content.resourceNodes)) for (const inst of content.resourceNodes) collect("resourceNodes", inst);
+  if (Array.isArray(content.entities)) for (const inst of content.entities) collect("entities", inst);
+  if (Array.isArray(content.pois)) for (const inst of content.pois) collect("pois", inst);
+  if (Array.isArray(content.locations)) for (const inst of content.locations) collect("locations", inst);
+
+  // Sort
+  const key = zoneDiscoveriesSort.key || "distance";
+  const dir = zoneDiscoveriesSort.dir || "asc";
+  const mul = (dir === "asc") ? 1 : -1;
+
+  if (key === "name") {
+    entries.sort((a, b) => mul * a.name.localeCompare(b.name));
+  } else if (key === "type") {
+    entries.sort((a, b) => {
+      if (a.kind !== b.kind) return mul * a.kind.localeCompare(b.kind);
+      return mul * a.name.localeCompare(b.name);
+    });
+  } else {
+    // distance default
+    entries.sort((a, b) => {
+      if (a.d2 !== b.d2) return mul * (a.d2 - b.d2);
+      return a.name.localeCompare(b.name);
+    });
+  }
+
+  // Render
+  for (const e of entries) {
+    const li = document.createElement("li");
+    li.className = "zone-discovery-entry";
+    li.dataset.kind = e.kind;
+    li.dataset.id = e.id;
+    li.dataset.x = String(e.x);
+    li.dataset.y = String(e.y);
+
+    const glyphEl = document.createElement("span");
+    glyphEl.className = "zone-discovery-glyph";
+    glyphEl.textContent = e.glyph;
+
+    const textEl = document.createElement("span");
+    textEl.className = "zone-discovery-text";
+    textEl.textContent = e.label ? `${e.name} ${e.label}` : e.name;
+
+    li.appendChild(glyphEl);
+    li.appendChild(textEl);
+
+    zoneDiscoveriesListEl.appendChild(li);
+  }
 }
 
 // Build an HTML grid from the current zone.
@@ -254,6 +442,11 @@ function renderZoneUI() {
     if (zoneExploreNextBtn) zoneExploreNextBtn.disabled = true;
     if (zoneExploreAutoBtn) zoneExploreAutoBtn.disabled = true;
     if (zoneExploreStopBtn) zoneExploreStopBtn.disabled = true;
+
+    // QoL: Clear discoveries when not in a zone
+    if (typeof renderZoneDiscoveries === "function") {
+      renderZoneDiscoveries(null);
+    }
     return;
   }
 
@@ -311,6 +504,12 @@ function renderZoneUI() {
   if (zoneExploreStopBtn) {
     zoneExploreStopBtn.disabled = !EXP().zoneExplorationActive;
   }
+
+  // QoL: Discoveries derived from explored tiles + active content
+  if (typeof renderZoneDiscoveries === "function") {
+    updateZoneDiscoveriesSortBar();
+    renderZoneDiscoveries(zone);
+  }
 }
 
 // Expose so other scripts can trigger UI refresh
@@ -346,6 +545,27 @@ window.addZoneMessage = addZoneMessage;
 window.addZoneDiscovery = addZoneDiscovery;
 
 // ----- Button wiring -----
+
+// Discoveries sort (inventory-style tabs)
+if (zoneDiscoveriesSortBarEl) {
+  zoneDiscoveriesSortBarEl.addEventListener("click", (e) => {
+    const btn = e.target && e.target.closest ? e.target.closest("button.sort-btn[data-key]") : null;
+    if (!btn) return;
+
+    const key = btn.dataset.key;
+    if (!key) return;
+
+    if (zoneDiscoveriesSort.key === key) {
+      zoneDiscoveriesSort.dir = (zoneDiscoveriesSort.dir === "asc") ? "desc" : "asc";
+    } else {
+      zoneDiscoveriesSort.key = key;
+      zoneDiscoveriesSort.dir = "asc";
+    }
+
+    updateZoneDiscoveriesSortBar();
+    renderZoneUI();
+  });
+}
 
 // Explore Next Tile (manual, one step)
 if (zoneExploreNextBtn) {

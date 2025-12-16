@@ -9,7 +9,7 @@
 <body>
 <div id="game-header">
   <span class="game-header-text">
-    ProgressCrawl — v0.0.70f-dev : QoL Part 1 v3
+    ProgressCrawl — v0.0.70g-dev : QoL Part 1 v9
   </span>
   <button id="patch-notes-btn" type="button">Patch Notes</button>
 </div>
@@ -150,9 +150,18 @@
         <!-- RIGHT DISCOVERIES SIDEBAR -->
         <div id="zone-discoveries-column">
           <div class="zone-section-title">Discoveries</div>
+        
+          <!-- Inventory-style sort bar -->
+          <div id="zone-discoveries-sort-bar" class="inventory-sort-bar">
+            <span>Sort by:</span>
+            <button type="button" class="sort-btn" data-key="distance">Distance</button>
+            <button type="button" class="sort-btn" data-key="name">Name</button>
+            <button type="button" class="sort-btn" data-key="type">Type</button>
+          </div>
+        
           <ul id="zone-discoveries-list"></ul>
         </div>
-    
+
       </div>
     </div>
 

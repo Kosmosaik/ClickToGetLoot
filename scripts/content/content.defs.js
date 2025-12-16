@@ -71,7 +71,7 @@
     id: "stone_cluster",
     kind: "resourceNode",
     name: "Stone Cluster",
-    glyph: "⛰",
+    glyph: "▲",
     tags: { eras: ["primitive"], biomes: ["temperate_forest"], difficulty: [1, 2, 3] },
     stateDefaults: { depleted: false, chargesLeft: 2 },
     blocksMovement: false,

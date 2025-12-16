@@ -1,3 +1,68 @@
+# ProgressCrawl — Patch 0.0.70g
+## QoL Update: Discoveries & Exploration UI
+
+This update improves how **Discoveries** work during zone exploration, making information clearer, more useful, and easier to interact with — without changing core gameplay rules.
+
+---
+
+## Added
+
+### Discoveries from Exploration
+- Content (resources, enemies, POIs, locations) now appears in **Discoveries** as soon as its tile is **explored**, not only after interaction.
+- Discoveries now truly represent *what you’ve found so far* in the zone.
+
+### Inventory-Style Sorting
+- Discoveries now use the **same sorting UI as the inventory**.
+- Sort by:
+  - **Distance** (default, closest first)
+  - **Name**
+  - **Type**
+- Clicking the active sort toggles ascending/descending order (▲ / ▼).
+
+### Visual Glyphs
+- Each discovery now shows its **symbol/glyph**, matching what you see on the zone map.
+- This makes it easier to quickly identify what kind of content was found.
+
+---
+
+## Changed
+
+### Cleaner Discoveries List
+- Discoveries are now **state-driven**, rebuilt from actual zone data.
+- When content is completed, it is removed from the list:
+  - Resource nodes disappear when depleted.
+  - Enemies disappear when defeated.
+  - Most POIs disappear after interaction.
+  - Locations remain visible once discovered.
+
+### Smarter Updates
+- The Discoveries list updates automatically when:
+  - New tiles are explored.
+  - Content is interacted with.
+  - The zone UI refreshes.
+
+---
+
+## Fixed
+
+- Discoveries no longer show outdated states like `(depleted)` or `(defeated)` for content that’s already gone.
+- Fixed UI inconsistencies where sorting controls could break or not display correctly.
+- Resolved duplicate internal logic that could cause Discoveries to behave inconsistently.
+
+---
+
+## Notes
+
+- No save files were changed.
+- No zone generation or balance changes were made.
+- Tutorial zones remain handcrafted and unaffected by procedural rules.
+
+This update lays the foundation for upcoming improvements like **clicking discoveries to move/interact**, enhanced POI behavior, and deeper zone interaction tools.
+
+Happy exploring! 🌲🗺️
+
+---
+
 # ProgressCrawl — Patch 0.0.70f
 ## World Generation & Zone System Cleanup
 

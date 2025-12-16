@@ -670,15 +670,41 @@
 
 /* === Discoveries === */
 #zone-discoveries-list {
-  list-style-type: disc;
-  padding-left: 18px;
+  list-style: none;
+  padding-left: 0;
   max-height: 500px;
   overflow-y: auto;
 }
 
-#zone-discoveries-list li {
+#zone-discoveries-list li.zone-discovery-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 4px;
   font-size: 0.8rem;
+}
+
+.zone-discovery-glyph {
+  width: 1.2em;
+  display: inline-block;
+  text-align: center;
+  font-weight: 600;
+}
+
+.zone-discovery-text {
+  flex: 1 1 auto;
+}
+
+.zone-discoveries-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 10px 0;
+}
+
+.zone-discoveries-sort-label {
+  font-size: 0.8rem;
+  opacity: 0.9;
 }
 
 /* === Finish Zone Buttons === */
