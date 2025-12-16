@@ -4,25 +4,16 @@ This document is meant as a handoff / technical summary for the next GPT assista
 
 ---
 ### TODOs written down AFTER 0.0.70e (prioritize these first).
-
-1. **Add resource nodes, entities, POIs and Locations to Discoveries-list.**
-   - Add interact/move to function. When content is clicked in Discoveries, move player to the tile and then open up the window for harvest/kill etc.
   
-2. **Zone Items and Loot-Button items are not unified and grade system is not implemented**
+1. **Zone Items and Loot-Button items are not unified and grade system is not implemented**
    - Currently items are separated from zone system and loot button. Zone items are not generated from items.js and they have no properties for future expansion.
    - Question: Do we remove items.js, or generate ALL items from items.js instead?
    - Item grades are not generating/randomizing in zones. All items have F0 as grade. The idea is that all resource nodes, entities, POIs etc
      will roll a random grade upon creation/generation, and the items looted from the node, entity, POI etc will derive from that grade generation.
      Higher difficulty in zone = higher chance to generate higher grade (F0-S9).
    - In the future, player will be able to "improve" the grade when harvesting/looting entity etc based on skills, tool handling etc.
-  
-3. **Stone Cluster glyph/symbol is too big. Can we reduce its size or do we have to change the symbol completely?**
 
-4. **When playing on phone: For some reason the player icon is not centered in the tile. This is NOT an important QoL change, and I don't want it to mess up anything for PC**
-
-5. **Make so the character have to walk next to the tile before harvesting/killing/interacting with anything. If character is not near a tile when we interact, move him and then trigger loot or whatever.**
-
-6. **Tilemap is not square, but rectangular. Can we make it more square so each tile/symbol is square? **
+2. **Tilemap is not square, but rectangular. Can we make it more square so each tile/symbol is square? **
 
 
 ### TODOs writtend down BEFORE 0.0.70e

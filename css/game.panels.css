@@ -682,6 +682,17 @@
   gap: 8px;
   margin-bottom: 4px;
   font-size: 0.8rem;
+
+  cursor: pointer;
+  user-select: none;
+}
+
+#zone-discoveries-list li.zone-discovery-entry:hover {
+  text-decoration: underline;
+}
+
+#zone-discoveries-list li.zone-discovery-entry:active {
+  opacity: 0.8;
 }
 
 .zone-discovery-glyph {

@@ -1,7 +1,7 @@
 // scripts/config.js
 // Central place for tweakable settings.
 const GAME_CONFIG = {
-  version: "0.0.70g-stable",
+  version: "0.0.70h-dev",
 
   loot: {
     // Progress bar behavior
