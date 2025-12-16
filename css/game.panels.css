@@ -682,6 +682,9 @@
   gap: 8px;
   margin-bottom: 4px;
   font-size: 0.8rem;
+
+  cursor: pointer;
+  user-select: none;
 }
 
 .zone-discovery-glyph {
