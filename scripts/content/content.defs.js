@@ -64,7 +64,7 @@
     tags: { eras: ["primitive"], biomes: ["temperate_forest"], difficulty: [1, 2, 3] },
     stateDefaults: { depleted: false, chargesLeft: 1 },
     blocksMovement: false,
-    lootTableId: "tree_basic",
+    lootTableId: "oak_tree",
   });
 
   PC.content.register("resourceNodes", {
