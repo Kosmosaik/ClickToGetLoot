@@ -27,7 +27,7 @@
   PC.content.LOOT_TABLES.tree_basic = {
     rolls: 2,
     entries: [
-      { item: "Wood", w: 80, qty: [1, 3] },
+      { item: "Oak Log", w: 80, qty: [1, 3] },
       { item: "Sap", w: 20, qty: [1, 1] },
     ],
   };
@@ -35,7 +35,7 @@
   PC.content.LOOT_TABLES.stone_basic = {
     rolls: 2,
     entries: [
-      { item: "Stone", w: 85, qty: [1, 3] },
+      { item: "Small Stone", w: 85, qty: [1, 3] },
       { item: "Flint", w: 15, qty: [1, 1] },
     ],
   };
