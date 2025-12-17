@@ -134,7 +134,6 @@
   ctx.locations = {
     countRange: [0, 1],
     entries: [
-      { defId: "ruined_clearing", w: 70 },
       { defId: "cave_entrance", w: 30 },
     ],
   };
