@@ -141,6 +141,7 @@ const GAME_CONFIG = {
     defaultView: "category",  // "category" | "all"
 
     categoryOrder: [
+      "Consumables",
       "Material",
       "Crafting Component",
       "Resource",
