@@ -151,16 +151,6 @@
 
   // Locations (bigger landmarks; still tile-anchored for now)
   PC.content.register("locations", {
-    id: "ruined_clearing",
-    kind: "location",
-    name: "Ruined Clearing",
-    glyph: "○",
-    tags: { eras: ["primitive"], biomes: ["temperate_forest"], difficulty: [1, 2, 3] },
-    stateDefaults: { discovered: false },
-    blocksMovement: false,
-  });
-
-  PC.content.register("locations", {
     id: "cave_entrance",
     kind: "location",
     name: "Cave Entrance",
