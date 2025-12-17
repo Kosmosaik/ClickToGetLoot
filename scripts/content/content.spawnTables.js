@@ -116,10 +116,10 @@
     baseTiles: 100,
     minCount: 1,
     maxCount: 10,
-    countRange: [2, 5],
+    countRange: [1, 4],
     entries: [
       { defId: "rabbit", w: 85 },
-      { defId: "wolf", w: 15 },
+      { defId: "wolf", w: 10 },
     ],
   };
 
