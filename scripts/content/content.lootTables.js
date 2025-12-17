@@ -61,11 +61,11 @@
     rolls: 2,
     entries: [
       { item: "Contaminated Water", w: 100, qty: [1, 2] },
-      { item: "Bandage", w: 50, qty: [1, 2] },
-      { item: "Purified Water", w: 20, qty: [1, 2] },
-      { item: "Digging Stick", w: 10, qty: [1, 2] },
-      { item: "Primitive Pickaxe", w: 10, qty: [1, 2] },
-      { item: "Crude Knife", w: 10, qty: [1, 2] },
+      { item: "Bandage", w: 50, qty: [1, 1] },
+      { item: "Purified Water", w: 20, qty: [1, 1] },
+      { item: "Digging Stick", w: 10, qty: [1, 1] },
+      { item: "Primitive Pickaxe", w: 10, qty: [1, 1] },
+      { item: "Crude Knife", w: 10, qty: [1, 1] },
     ],
   };
 
