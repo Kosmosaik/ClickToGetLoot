@@ -286,7 +286,7 @@ const ItemCatalog = [
 // ========== CONSUMABLES ==========
   {
     name: "Bandage",
-    category: "Resource",
+    category: "Consumable",
     description: "A basic bandage used to treat wounds.",
     rarity: "Uncommon",
     usage: "Healing, first aid",
