@@ -19,6 +19,8 @@ This roadmap is flexible and will evolve as development continues.
 - Eat / Drink System
 - Add defense values and other stats to armor/equipment.
 - Add all variables, properties/values etc on all items/equipment/character stats in preparation for crafting/gathering and exploring updates. Armor/PDEF, crafting modifier attributes/stats and more.
+- Skinning / Butcher and maybe more. Separate resources looted from entities by introducing different skills to get different resources. Skinning = Animal Skin, Butchering = Meat, Bones, Tendons or whatever.
+  Add these skills as Skills in skill window and separate combat skills from other skills (categorization). 
 ## Level / Experience System
 - Add Level stat and experience points.
 - Make a temporary easy exp formula for exp to next level etc (Maybe increase EXP required by 12% per level or something).
@@ -26,6 +28,8 @@ This roadmap is flexible and will evolve as development continues.
 - Add a text field to input how much exp to give character per click
 - Add a "Give level" button for testing purposes
 - Give character 3 attribute points to distribute on level up.
+## Skill Leveling System
+- Add exp for Skinning, Gathering, Butchering and whatever skills we have implemented.
 
 ---
 
