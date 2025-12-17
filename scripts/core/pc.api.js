@@ -77,13 +77,23 @@ console.log("pc.api.js loaded");
     return best;
   };
 
-    // QoL: Item unification — resolve zone loot item strings through items.js (ItemCatalog).
-  // This ensures zone loot produces the same "item instance shape" as the loot button.
+  // QoL: Item unification — resolve loot references through items.js (ItemCatalog).
+  // Supports stable IDs so display names can be renamed safely later.
+  PC.api.items.getTemplateById = PC.api.items.getTemplateById || function getTemplateById(itemId) {
+    const id = String(itemId || "").trim();
+    if (!id) return null;
+    if (typeof ItemCatalog === "undefined" || !Array.isArray(ItemCatalog)) return null;
+
+    for (let i = 0; i < ItemCatalog.length; i++) {
+      const it = ItemCatalog[i];
+      if (it && it.id === id) return it;
+    }
+    return null;
+  };
+
   PC.api.items.getTemplateByName = PC.api.items.getTemplateByName || function getTemplateByName(name) {
     const n = String(name || "").trim();
     if (!n) return null;
-
-    // items.js defines ItemCatalog in global scope (non-module). Use it directly.
     if (typeof ItemCatalog === "undefined" || !Array.isArray(ItemCatalog)) return null;
 
     for (let i = 0; i < ItemCatalog.length; i++) {
@@ -93,18 +103,44 @@ console.log("pc.api.js loaded");
     return null;
   };
 
-  PC.api.items.makeInventoryInstanceFromName =
-    PC.api.items.makeInventoryInstanceFromName ||
-    function makeInventoryInstanceFromName(name, quality) {
-      const template = PC.api.items.getTemplateByName(name);
+  // Preferred: resolve by itemId; fallback: resolve by name.
+  PC.api.items.getTemplate = PC.api.items.getTemplate || function getTemplate(ref) {
+    if (!ref) return null;
 
+    // If a caller passes { itemId, item }, support that too.
+    if (typeof ref === "object") {
+      if (ref.itemId) return PC.api.items.getTemplateById(ref.itemId) || (ref.item ? PC.api.items.getTemplateByName(ref.item) : null);
+      if (ref.item) return PC.api.items.getTemplateByName(ref.item);
+      return null;
+    }
+
+    // If it's a string, try ID first (stable), then name (legacy).
+    const s = String(ref).trim();
+    return PC.api.items.getTemplateById(s) || PC.api.items.getTemplateByName(s);
+  };
+
+  // Build a canonical inventory instance using ItemCatalog.
+  // `ref` can be:
+  // - itemId string (preferred)
+  // - name string (legacy)
+  // - { itemId, item } object
+  PC.api.items.makeInventoryInstance =
+    PC.api.items.makeInventoryInstance ||
+    function makeInventoryInstance(ref, quality) {
       const q = (typeof quality === "string" && quality.length >= 2) ? quality : "F0";
+      const template = PC.api.items.getTemplate(ref);
 
-      // If template is missing, still create a usable instance (but warn).
+      // Derive best-effort id/name for fallback cases.
+      const refObj = (ref && typeof ref === "object") ? ref : null;
+      const fallbackName = refObj ? (refObj.item || refObj.name || "Unknown") : String(ref || "Unknown");
+      const fallbackId = refObj ? (refObj.itemId || "") : "";
+
+      // Missing template: create usable instance but warn (dev signal).
       if (!template) {
-        console.warn(`[Item Unification] Missing ItemCatalog entry for: "${name}"`);
+        console.warn(`[Item Unification] Missing ItemCatalog entry for:`, ref);
         return {
-          name: String(name || "Unknown"),
+          itemId: fallbackId || null,
+          name: String(fallbackName),
           category: "Unknown",
           description: "",
           rarity: "Common",
@@ -117,7 +153,7 @@ console.log("pc.api.js loaded");
         };
       }
 
-      // If the item has statRanges, roll stats using existing global helpers (loot button uses these too).
+      // Roll stats if applicable (same mechanics as loot button).
       let stats = {};
       try {
         if (template.statRanges && typeof rollStats === "function" && typeof qualityMultiplier === "function") {
@@ -125,11 +161,11 @@ console.log("pc.api.js loaded");
           stats = rollStats(template.statRanges, mult);
         }
       } catch {
-        // Keep stats empty if anything goes wrong; no hard failure.
         stats = {};
       }
 
       return {
+        itemId: template.id || null,
         name: template.name,
         category: template.category,
         description: template.description || "",
@@ -138,11 +174,17 @@ console.log("pc.api.js loaded");
         stats,
         slot: template.slot || null,
 
-        // Pass through combat metadata if present (same as loot button)
         weaponType: template.weaponType || null,
         skillReq: typeof template.skillReq === "number" ? template.skillReq : null,
         attrPerPower: typeof template.attrPerPower === "number" ? template.attrPerPower : null,
       };
+    };
+
+  // Back-compat wrapper used by older callers.
+  PC.api.items.makeInventoryInstanceFromName =
+    PC.api.items.makeInventoryInstanceFromName ||
+    function makeInventoryInstanceFromName(name, quality) {
+      return PC.api.items.makeInventoryInstance({ item: name }, quality);
     };
 
   // Zone actions (wire to existing functions if present)
