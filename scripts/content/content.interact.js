@@ -104,9 +104,10 @@
     return Array.from(merged.entries()).map(([item, qty]) => ({ item, qty }));
   }
 
-  // Minimal mapping to inventory item instances.
-  // Inventory expects: name, category, rarity, quality, stats, description.
-  // QoL: quality now derives from the interacted instance's quality.
+  // Item unification:
+  // - Resolve row.item via ItemCatalog (items.js)
+  // - Build inventory instances through PC.api.items.makeInventoryInstanceFromName
+  // - Preserve grade separation (quality stays per-instance and is passed through)
   function giveLootToInventory(lootRows, sourceInst) {
     if (!Array.isArray(lootRows) || lootRows.length === 0) return;
     if (typeof window.addToInventory !== "function") {
@@ -119,21 +120,30 @@
         ? sourceInst.quality
         : "F0";
 
+    const mk =
+      (PC.api && PC.api.items && typeof PC.api.items.makeInventoryInstanceFromName === "function")
+        ? PC.api.items.makeInventoryInstanceFromName
+        : null;
+
     for (const row of lootRows) {
       const qty = Math.max(1, Number(row.qty || 1));
       for (let i = 0; i < qty; i++) {
-        window.addToInventory({
-          name: row.item,
-          category: "Zone Loot",
-          description: "",
-          rarity: "F",
-          quality: q,
-          stats: {},
-          slot: null,
-          weaponType: null,
-          skillReq: null,
-          attrPerPower: null,
-        });
+        const inst = mk
+          ? mk(row.item, q)
+          : {
+              name: row.item,
+              category: "Zone Loot",
+              description: "",
+              rarity: "Common",
+              quality: q,
+              stats: {},
+              slot: null,
+              weaponType: null,
+              skillReq: null,
+              attrPerPower: null,
+            };
+
+        window.addToInventory(inst);
       }
     }
   }
