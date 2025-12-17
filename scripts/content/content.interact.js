@@ -90,18 +90,36 @@
     const out = [];
     for (let i = 0; i < rolls; i++) {
       const pick = pickWeighted ? pickWeighted(rng, tbl.entries) : tbl.entries[0];
-      if (!pick || !pick.item) continue;
+      if (!pick) continue;
+
       const q = Array.isArray(pick.qty) ? pick.qty : [1, 1];
       const qty = rng.nextInt(q[0], q[1]);
-      out.push({ item: String(pick.item), qty });
+
+      // Support both:
+      // - pick.itemId (preferred)
+      // - pick.item (legacy)
+      const itemId = pick.itemId ? String(pick.itemId) : null;
+      const item = pick.item ? String(pick.item) : null;
+
+      if (!itemId && !item) continue;
+
+      out.push({ itemId, item, qty });
     }
 
-    // Combine duplicates (Wood+Wood => Wood x2)
+    // Combine duplicates:
+    // - Prefer merging by itemId if present, else by item name
     const merged = new Map();
     for (const it of out) {
-      merged.set(it.item, (merged.get(it.item) || 0) + it.qty);
+      const key = it.itemId ? `id:${it.itemId}` : `nm:${it.item}`;
+      const prev = merged.get(key);
+      if (!prev) {
+        merged.set(key, { itemId: it.itemId || null, item: it.item || null, qty: it.qty });
+      } else {
+        prev.qty += it.qty;
+      }
     }
-    return Array.from(merged.entries()).map(([item, qty]) => ({ item, qty }));
+
+    return Array.from(merged.values());
   }
 
   // Item unification:
@@ -121,15 +139,15 @@
         : "F0";
 
     const mk =
-      (PC.api && PC.api.items && typeof PC.api.items.makeInventoryInstanceFromName === "function")
-        ? PC.api.items.makeInventoryInstanceFromName
+      (PC.api && PC.api.items && typeof PC.api.items.makeInventoryInstance === "function")
+        ? PC.api.items.makeInventoryInstance
         : null;
 
     for (const row of lootRows) {
       const qty = Math.max(1, Number(row.qty || 1));
       for (let i = 0; i < qty; i++) {
         const inst = mk
-          ? mk(row.item, q)
+          ? mk({ itemId: row.itemId, item: row.item }, q)
           : {
               name: row.item,
               category: "Zone Loot",
