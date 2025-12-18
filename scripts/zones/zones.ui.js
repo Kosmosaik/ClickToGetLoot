@@ -409,29 +409,6 @@ function renderZoneDiscoveries(zone) {
   const content = zone.content || {};
   zoneDiscoveriesListEl.innerHTML = "";
 
-    // Collect discovered locked gates (treat as POI-like interactable)
-  for (let yy = 0; yy < zone.height; yy++) {
-    for (let xx = 0; xx < zone.width; xx++) {
-      const t = zone.tiles?.[yy]?.[xx];
-      if (!isLockedGateTile(t)) continue;
-
-      // Gate must be discovered to appear in Discoveries
-      if (!isLockedGateDiscovered(zone, xx, yy)) continue;
-
-      // Represent as a discovery entry (kind = "gates")
-      entries.push({
-        kind: "gates",
-        id: `gate:${xx},${yy}`,
-        x: xx,
-        y: yy,
-        name: "Locked Gate",
-        glyph: "L",
-        label: "",
-        d2: distSq(xx, yy),
-      });
-    }
-  }
-
   // Determine player position (for distance sorting)
   let playerX = null;
   let playerY = null;
@@ -460,6 +437,29 @@ function renderZoneDiscoveries(zone) {
 
   const entries = [];
 
+  // Collect discovered locked gates (treat as POI-like interactable)
+  // NOTE: This block MUST live after `entries` is initialized (and after `distSq` exists).
+  for (let yy = 0; yy < zone.height; yy++) {
+    for (let xx = 0; xx < zone.width; xx++) {
+      const t = zone.tiles?.[yy]?.[xx];
+      if (!isLockedGateTile(t)) continue;
+
+      // Gate must be discovered to appear in Discoveries
+      if (!isLockedGateDiscovered(zone, xx, yy)) continue;
+
+      entries.push({
+        kind: "gates",
+        id: `gate:${xx},${yy}`,
+        x: xx,
+        y: yy,
+        name: "Locked Gate",
+        glyph: "L",
+        label: "",
+        d2: distSq(xx, yy),
+      });
+    }
+  }
+  
   function collect(kind, inst) {
     if (!inst) return;
 
