@@ -602,9 +602,9 @@
 /* === Controls (buttons) === */
 #zone-actions button {
   margin-right: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 0px;
   padding: 4px 8px;
-  font-size: 0.85rem;
+  font-size: 0.80rem;
   background: #222;
   border: 1px solid #444;
   color: #eee;
