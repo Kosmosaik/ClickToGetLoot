@@ -12,8 +12,8 @@ const zoneStatsEl = document.getElementById("zone-exploration-stats");
 const zoneGridEl = document.getElementById("zone-grid-view");
 
 const zoneExploreNextBtn = document.getElementById("zone-explore-next");
-const zoneExploreAutoBtn = document.getElementById("zone-explore-auto");
-const zoneExploreStopBtn = document.getElementById("zone-explore-stop");
+const zoneExploreAutoBtn = document.getElementById("zone-explore-auto"); // now a toggle (auto/stop)
+const zoneLeaveZoneBtn = document.getElementById("zone-leave-zone");
 
 const zoneMessagesListEl = document.getElementById("zone-messages-list");
 const zoneDiscoveriesListEl = document.getElementById("zone-discoveries-list");
@@ -21,10 +21,6 @@ const zoneDiscoveriesSortBarEl = document.getElementById("zone-discoveries-sort-
 
 // UI-only (not saved)
 let zoneDiscoveriesSort = { key: "distance", dir: "asc" };
-
-const zoneFinishMenuEl = document.getElementById("zone-finish-menu");
-const zoneFinishStayBtn = document.getElementById("zone-finish-stay");
-const zoneFinishLeaveBtn = document.getElementById("zone-finish-leave");
 
 function getZone() {
   return STATE().currentZone;
@@ -424,24 +420,17 @@ function renderZoneUI() {
 
   // No zone at all
   if (!zone) {
-    if (zoneNameEl) {
-      zoneNameEl.textContent = "Zone: (none)";
-    }
-    if (zoneStatusEl) {
-      zoneStatusEl.textContent = "Status: Not in a zone";
-    }
-    if (zoneStatsEl) {
-      zoneStatsEl.textContent = "Explored: 0% (0 / 0 tiles)";
-    }
-    if (zoneGridEl) {
-      zoneGridEl.textContent = "(No active zone)";
-    }
-    if (zoneFinishMenuEl) {
-      zoneFinishMenuEl.style.display = "none";
-    }
+    if (zoneNameEl) zoneNameEl.textContent = "Zone: (none)";
+    if (zoneStatusEl) zoneStatusEl.textContent = "Status: Not in a zone";
+    if (zoneStatsEl) zoneStatsEl.textContent = "Explored: 0% (0 / 0 tiles)";
+    if (zoneGridEl) zoneGridEl.textContent = "(No active zone)";
+
     if (zoneExploreNextBtn) zoneExploreNextBtn.disabled = true;
     if (zoneExploreAutoBtn) zoneExploreAutoBtn.disabled = true;
-    if (zoneExploreStopBtn) zoneExploreStopBtn.disabled = true;
+    if (zoneLeaveZoneBtn) zoneLeaveZoneBtn.disabled = true;
+
+    // Ensure toggle label resets when leaving a zone
+    if (zoneExploreAutoBtn) zoneExploreAutoBtn.textContent = "Explore Auto";
 
     // QoL: Clear discoveries when not in a zone
     if (typeof renderZoneDiscoveries === "function") {
@@ -479,12 +468,7 @@ function renderZoneUI() {
     zoneGridEl.innerHTML = buildZoneGridString(zone);
   }
 
-  // Finish menu: always visible while in a zone
-  if (zoneFinishMenuEl) {
-    zoneFinishMenuEl.style.display = "block";
-  }
-
-  // Button states
+  // Can we start exploring?
   const canExplore =
     inZone() &&
     !MOV().zoneMovementActive &&
@@ -495,14 +479,25 @@ function renderZoneUI() {
   const anyExploreInProgress =
     EXP().zoneExplorationActive || EXP().zoneManualExplorationActive;
 
+  // Explore Next: only when idle + canExplore
   if (zoneExploreNextBtn) {
     zoneExploreNextBtn.disabled = !canExplore || anyExploreInProgress;
   }
+
+  // Explore Auto: toggle button (start/stop)
   if (zoneExploreAutoBtn) {
-    zoneExploreAutoBtn.disabled = !canExplore || anyExploreInProgress;
+    const autoActive = !!EXP().zoneExplorationActive;
+
+    zoneExploreAutoBtn.textContent = autoActive ? "Stop Exploring" : "Explore Auto";
+
+    // If auto is running, we always allow stopping.
+    // If auto is NOT running, we require canExplore + idle.
+    zoneExploreAutoBtn.disabled = autoActive ? false : (!canExplore || anyExploreInProgress);
   }
-  if (zoneExploreStopBtn) {
-    zoneExploreStopBtn.disabled = !EXP().zoneExplorationActive;
+
+  // Leave Zone: available while in a zone (even if completed)
+  if (zoneLeaveZoneBtn) {
+    zoneLeaveZoneBtn.disabled = !inZone();
   }
 
   // QoL: Discoveries derived from explored tiles + active content
@@ -577,26 +572,31 @@ if (zoneExploreNextBtn) {
 }
 
 
-// Explore Auto (start tick-based exploring)
+// Explore Auto (toggle start/stop)
 if (zoneExploreAutoBtn) {
   zoneExploreAutoBtn.addEventListener("click", () => {
     if (!getZone() || !inZone()) return;
-    if (EXP().zoneExplorationActive) return; // already exploring
-    if (typeof startZoneExplorationTicks === "function") {
-      PC.api.zone.startAutoExplore();
-    }
-    renderZoneUI();
-  });
-}
 
-// Stop Exploring (stop tick-based exploring)
-if (zoneExploreStopBtn) {
-  zoneExploreStopBtn.addEventListener("click", () => {
-    if (!EXP().zoneExplorationActive) return;
-    if (typeof stopZoneExplorationTicks === "function") {
-      PC.api.zone.stopAutoExplore();
+    // If currently running -> stop
+    if (EXP().zoneExplorationActive) {
+      if (window.PC?.api?.zone && typeof PC.api.zone.stopAutoExplore === "function") {
+        PC.api.zone.stopAutoExplore();
+      } else if (typeof stopZoneExplorationTicks === "function") {
+        stopZoneExplorationTicks();
+      }
+      addZoneMessage("You stop to catch your breath and look around.");
+      renderZoneUI();
+      return;
     }
-    addZoneMessage("You stop to catch your breath and look around.");
+
+    // Otherwise start
+    if (typeof startZoneExplorationTicks === "function" || (window.PC?.api?.zone && typeof PC.api.zone.startAutoExplore === "function")) {
+      if (window.PC?.api?.zone && typeof PC.api.zone.startAutoExplore === "function") {
+        PC.api.zone.startAutoExplore();
+      } else {
+        startZoneExplorationTicks();
+      }
+    }
     renderZoneUI();
   });
 }
@@ -677,26 +677,19 @@ if (zoneGridEl) {
   });
 }
 
-// Finish menu: STAY
-if (zoneFinishStayBtn) {
-  zoneFinishStayBtn.addEventListener("click", () => {
-    console.log("Player chose to STAY in the zone.");
-    // No special behavior yet; they just remain in the completed zone.
-  });
-}
-
-// Finish menu: LEAVE ZONE
-if (zoneFinishLeaveBtn) {
-  zoneFinishLeaveBtn.addEventListener("click", () => {
+// Leave Zone (now in main Controls row)
+if (zoneLeaveZoneBtn) {
+  zoneLeaveZoneBtn.addEventListener("click", () => {
     console.log("Player chose to LEAVE the zone.");
 
     // 1) Stop any ongoing auto exploration
-    if (typeof stopZoneExplorationTicks === "function") {
+    if (window.PC?.api?.zone && typeof PC.api.zone.stopAutoExplore === "function") {
+      PC.api.zone.stopAutoExplore();
+    } else if (typeof stopZoneExplorationTicks === "function") {
       stopZoneExplorationTicks();
     }
 
-    // 2) Mark the world map tile for this zone as VISITED and update currentX/currentY
-    //    (only if we have both worldMap and currentZone and the helper exists)
+    // 2) Mark the world map tile for this zone as VISITED
     if (STATE().worldMap && getZone() && typeof markWorldTileVisited === "function") {
       markWorldTileVisited(STATE().worldMap, getZone().id);
     }
@@ -705,14 +698,13 @@ if (zoneFinishLeaveBtn) {
     STATE().isInZone = false;
     STATE().currentZone = null;
 
-    // 4) Add a message (while the zone panel is still visible)
+    // 4) Add a message
     addZoneMessage("You leave the area behind.");
 
-    // 5) Switch to the world map view if available
+    // 5) Switch to world map view
     if (typeof switchToWorldMapView === "function") {
       switchToWorldMapView();
     } else {
-      // Fallback: at least refresh the zone UI if something is missing
       renderZoneUI();
     }
   });
