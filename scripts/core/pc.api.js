@@ -302,6 +302,90 @@ PC.api.zone.moveToAndInteractAt = (x, y) => {
 
   if (typeof window.renderZoneUI === "function") window.renderZoneUI();
 };
+// QoL — Move next to a LOCKED gate tile, then open gate UI.
+// Used by BOTH:
+// - clicking the gate on the zone map
+// - clicking the gate in the Discoveries list
+PC.api.zone.moveToAndOpenGateAt = (x, y) => {
+  const st = PC.api.state();
+  const zone = st ? st.currentZone : null;
+  if (!st || !zone || !st.isInZone) return;
+
+  // Don’t interrupt exploration or existing movement.
+  if (PC.api.exp().zoneExplorationActive || PC.api.exp().zoneManualExplorationActive) {
+    if (typeof window.addZoneMessage === "function") {
+      window.addZoneMessage("You can’t interact with the gate while exploring.");
+    }
+    return;
+  }
+  if (PC.api.mov().zoneMovementActive) return;
+
+  const tx = Number(x);
+  const ty = Number(y);
+  if (!Number.isFinite(tx) || !Number.isFinite(ty)) return;
+
+  const tile = zone.tiles?.[ty]?.[tx];
+  if (!tile) return;
+  if (tile.kind !== "locked" || tile.lockedRegionId == null) return;
+
+  // Find player position from tile.hasPlayer
+  let px = null;
+  let py = null;
+  for (let yy = 0; yy < zone.height; yy++) {
+    const row = zone.tiles[yy];
+    if (!row) continue;
+    for (let xx = 0; xx < zone.width; xx++) {
+      const t = row[xx];
+      if (t && t.hasPlayer) {
+        px = xx;
+        py = yy;
+        break;
+      }
+    }
+    if (px != null) break;
+  }
+
+  // If we already stand adjacent, open immediately.
+  if (px != null && py != null) {
+    const manhattan = Math.abs(px - tx) + Math.abs(py - ty);
+    if (manhattan === 1) {
+      if (typeof window.openLockedGateModalAt === "function") {
+        window.openLockedGateModalAt(tx, ty);
+      }
+      if (typeof window.renderZoneUI === "function") window.renderZoneUI();
+      return;
+    }
+  }
+
+  // Use existing "prepared tile" stance pathing if available.
+  if (typeof window.findPathToPreparedTile !== "function" || typeof window.startZoneMovement !== "function") {
+    if (typeof window.addZoneMessage === "function") {
+      window.addZoneMessage("You can’t reach that right now.");
+    }
+    return;
+  }
+
+  zone.preparedTargetX = tx;
+  zone.preparedTargetY = ty;
+
+  const path = window.findPathToPreparedTile(zone);
+
+  if (!Array.isArray(path) || path.length === 0) {
+    if (typeof window.addZoneMessage === "function") {
+      window.addZoneMessage("No path to that target.");
+    }
+    return;
+  }
+
+  window.startZoneMovement(path, () => {
+    if (typeof window.openLockedGateModalAt === "function") {
+      window.openLockedGateModalAt(tx, ty);
+    }
+    if (typeof window.renderZoneUI === "function") window.renderZoneUI();
+  });
+
+  if (typeof window.renderZoneUI === "function") window.renderZoneUI();
+};
 
   // World actions
   PC.api.world.enterZone = (x, y) => {
