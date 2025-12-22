@@ -333,32 +333,31 @@ window.openLockedGateModalAt = function openLockedGateModalAt(x, y) {
           const success = Math.random() < 0.5;
 
           if (success) {
-            // Unlock region
+            // Unlock region (runtime)
             if (typeof unlockZoneLockedRegion === "function") {
               unlockZoneLockedRegion(zone, tile.lockedRegionId);
             }
-
-            // Persist explored tiles so it won't reset on reload
-            // (mark the gate tile explored, like your previous behavior)
+            
+            // Persist unlock into zoneDeltas
             try {
-              tile.explored = true;
-              if (window.PC?.content && typeof PC.content.markTileExplored === "function") {
-                PC.content.markTileExplored(zone.id, tx, ty);
+              const st = STATE();
+              const zid = zone.id;
+              const rid = tile.lockedRegionId;
+            
+              if (!st.zoneDeltas) st.zoneDeltas = {};
+              if (!st.zoneDeltas[zid]) st.zoneDeltas[zid] = {};
+              if (!st.zoneDeltas[zid].unlockedRegions) {
+                st.zoneDeltas[zid].unlockedRegions = {};
               }
-            } catch {}
-
+            
+              st.zoneDeltas[zid].unlockedRegions[rid] = true;
+            } catch (e) {
+              console.warn("Failed to persist unlocked region", e);
+            }
+            
             if (typeof requestSaveCurrentGame === "function") {
               requestSaveCurrentGame();
             }
-
-            if (typeof addZoneMessage === "function") {
-              addZoneMessage("You successfully pick the lock.");
-            }
-
-            if (typeof window.hideChoiceModal === "function") window.hideChoiceModal();
-            if (typeof renderZoneUI === "function") renderZoneUI();
-            return;
-          }
 
           // Failure -> trap
           applyTrapDamage(20);
