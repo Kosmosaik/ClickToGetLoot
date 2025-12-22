@@ -233,16 +233,21 @@
 #skills-panel {
   position: fixed;
   top: 70px;
-  right: 10px;           /* stick to right edge */
+
+  /* Pop from the left (stacked with other panels) */
+  left: 10px;
+  right: auto;
+
   display: none;
   background: #111;
   border: 1px solid #555;
   padding: 10px;
   border-radius: 8px;
-  width: 220px;
+
+  width: 320px;
   max-height: 70vh;
   overflow: auto;
-  z-index: 1000;         /* make sure it's above inventory/equipment */
+  z-index: 1000;
 }
 
 #skills-panel h2 {
