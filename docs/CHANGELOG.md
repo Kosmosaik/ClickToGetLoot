@@ -1,3 +1,28 @@
+# v0.0.71-dev — QoL Update (Phase D)
+
+## Added
+- Locked gates can now be interacted with directly, both on the map and from the Discoveries list.
+- Lockpicking is now a timed action with a visible progress bar.
+- Gates have a chance to trigger traps on failed lockpicking attempts, dealing damage and showing a warning message.
+- Discoveries list now includes locked gates once they are discovered.
+
+## Changed
+- Top UI has been simplified:
+  - Character summary has been removed.
+  - Menu buttons (Inventory, Equipment, Skills) are now the primary top controls.
+- General UI spacing and layout improvements for a cleaner, less cluttered experience.
+
+## Fixed
+- Gate unlocks and newly accessible subareas are now saved correctly and persist between reloads and zone transitions.
+- Player HP changes from traps are now saved properly.
+- Multiple UI and interaction issues that could temporarily break exploration flow.
+- Several edge-case errors related to discoveries rendering and zone interaction timing.
+
+## Removed
+- Redundant UI elements that added vertical clutter without gameplay value.
+
+---
+
 ## [0.0.70i] — Item Unification & Stable Identity (QoL)
 
 ### Added
