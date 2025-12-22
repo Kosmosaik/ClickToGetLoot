@@ -236,6 +236,39 @@ function unlockAdjacentWorldTiles(worldMap, x, y) {
   centerTile.neighborsUnlocked = true;
 }
 
+// ---------------------------------------------------------------------------
+// Phase C — World Map logical coordinates (tutorial = 0,0)
+// Internal storage uses array coords (x,y) where y increases downward.
+// Logical coords are relative to startX/startY and use "north = +Y".
+// ---------------------------------------------------------------------------
+
+// Convert internal world array coords -> logical coords (tutorial becomes 0,0)
+function worldToLogical(wm, x, y) {
+  if (!wm) return { x: x, y: y };
+  const sx = (typeof wm.startX === "number") ? wm.startX : 0;
+  const sy = (typeof wm.startY === "number") ? wm.startY : 0;
+
+  // X: east = +1 (standard)
+  const lx = x - sx;
+
+  // Y: north = +1 (invert internal y)
+  const ly = sy - y;
+
+  return { x: lx, y: ly };
+}
+
+// Convert logical coords -> internal world array coords
+function logicalToWorld(wm, lx, ly) {
+  if (!wm) return { x: lx, y: ly };
+  const sx = (typeof wm.startX === "number") ? wm.startX : 0;
+  const sy = (typeof wm.startY === "number") ? wm.startY : 0;
+
+  const x = sx + lx;
+  const y = sy - ly;
+
+  return { x, y };
+}
+
 // Small debug helper so we can inspect via DevTools console
 window.WorldMapDebug = {
   WORLD_FOG_STATE,
@@ -245,4 +278,7 @@ window.WorldMapDebug = {
   findWorldTileByZoneId,
   markWorldTileVisited,
   unlockAdjacentWorldTiles,
+  worldToLogical,
+  logicalToWorld,
 };
+
