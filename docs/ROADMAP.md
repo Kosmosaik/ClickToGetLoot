@@ -10,10 +10,12 @@ This roadmap is flexible and will evolve as development continues.
 ## v0.0.71 -> 0.0.74 - Polish, Expand & Improve existing systems + Level System
 
 ### Planned:
-- Add more POIs and other interactables
-- Add more items (especially for the Starting / Tutorial Zone)
+- Add more Biomes and content (resource nodes, pois, entities etc) & expand existing biome (Temperate Forest).
+- Add a "Left Hand / Right Hand" system that acts like an early inventory system where the player can only carry
+  a limited amount of items until the player has found or crafted a backpack/bag of some sort that unlocks the real inventory.
 - Interact / Use system: Combine items and do basic tasks that's not really a separate crafting system task:
-  (Right click a branch -> Make Lean-To Shelter (blueprint)), (Right Click Campfire -> Add Items -> Raw Meat to cook or wood to make fire), (Right click cooked meat -> Eat, or Drink if water container etc). These small interactions will complete predefined tasks/quests later.
+  (Right click a branch -> Make Lean-To Shelter (blueprint)), (Right Click Campfire -> Add Items -> Raw Meat to cook or wood to make fire), (Right click cooked meat -> Eat, or Drink if water container etc).
+  These small interactions will complete predefined tasks/quests later.
 - Blueprint system for Lean-To Shelter and upcoming camps/constructions. Adds a blueprint to tile/tiles in the zone. When clicking on blueprint you'll see a small window with required items to complete the shelter.
 - Hunger & Thirst System
 - Eat / Drink System
