@@ -55,3 +55,7 @@ if (btnBackToStart) {
     setScreen("start");
   });
 }
+
+// Ensure initial screen state is applied even if another script fails before bootstrap runs.
+setScreen("start");
+
