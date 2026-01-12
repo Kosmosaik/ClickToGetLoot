@@ -31,12 +31,13 @@ This document is based on the current agreed design:
 ## 2) Where Grade Lives
 
 ### 2.1 Spawn-time: Grade belongs to the **source instance**
-When zone content is generated, each spawned instance (entity/node/poi/location) gets a baseline grade.
+When zone content is generated, each spawned instance (entity/node/poi/location) gets a baseline grade (a minimum and maximum grade range).
 
 Examples:
-- A spawned Rabbit instance has `grade = F4`.
-- A spawned Oak Tree node has `grade = E1`.
-- A Stash POI has `grade = D0` (optional depending on design).
+- A spawned Rabbit instance has `starting grade = F4, maximum grade = F9`.
+- A spawned Oak Tree node has `starting grade = E1, maximum grade = E7`.
+- A Stash POI has `starting grade = D0, maximum grade = D9`
+- This is randomized but based on weights depending on zone difficulty. Lesser difficulty = lower tier, but with a tiny chance of either rolling a high starting grade or just increase the range by increasing maximum range.
 
 **Important:** Grade should be deterministic per instance if the game is using deterministic zone seeding.
 
